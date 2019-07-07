@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "hello-world",
-    "slug": "reagent-expo",
+    "name": "Finance Clash",
+    "slug": "finance-clash",
     "privacy": "public",
     "entryPoint":"./app/index.js",
     "sdkVersion": "33.0.0",

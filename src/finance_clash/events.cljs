@@ -3,11 +3,6 @@
    [re-frame.core :as rf :refer [reg-event-fx reg-event-db reg-fx]]
    ["react-navigation" :as rnav]))
 
-(rf/reg-event-db
- :toggle-drawer
- (fn [db _]
-   (update-in db [:ui-states :drawer-open?] (fnil not 0))))
-
 (reg-event-db
  :set-navigation
  (fn [db [_ nav]]
@@ -29,9 +24,9 @@
 
 (reg-event-fx
  :set-active-screen
- (fn [{db :db} [_ active-screen]]
-   {:db (assoc db :active-screen active-screen)
-    :active-screen [(db :navigator) active-screen]}))
+ (fn [{db :db} [_ screen-id]]
+   {:db (assoc db :active-screen screen-id)
+    :active-screen [(db :navigator) screen-id]}))
 
 (reg-fx
  :navigation-drawer-action
@@ -48,3 +43,9 @@
  (fn [{db :db} [_ action]]
    {:db db
     :navigation-drawer-action [(db :navigator) action]}))
+
+(reg-event-fx
+ :toggle-drawer
+ (fn [{db :db} [_ action]]
+   {:db db
+    :navigation-drawer-action [(db :navigator) :toggle]}))

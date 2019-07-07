@@ -13,11 +13,12 @@
    ["react-navigation" :as rnav]))
 
 (defonce splash-img (js/require "../assets/shadow-cljs.png"))
+(defonce background-img (js/require "../assets/background.jpeg"))
 
 (def styles
   ^js (-> {:container
            {:flex 1
-            :backgroundColor "#000"
+            ;; :backgroundColor "#000"
             :alignItems "center"
             :justifyContent "center"
             :padding 12}
@@ -47,7 +48,7 @@
 
 (defn app-bar []
   [:> rnp/Appbar.Header
-   [:> rnp/Appbar.BackAction {:on-press #(rf/dispatch [:set-active-screen "Card1"])}]
+   #_[:> rnp/Appbar.BackAction {:on-press #(rf/dispatch [:set-active-screen "Card1"])}]
    [:> rnp/Appbar.Action
     {:icon "menu"
      :onPress
@@ -55,34 +56,21 @@
        (rf/dispatch [:set-drawer-state :toggle]))}]
    [:> rnp/Appbar.Content {:title "Examples"}]])
 
-(defn drawer []
-  (let [drawer-open? (rf/subscribe [:drawer-open?])]
-    (fn []
-      [:<>
-       (when @drawer-open?
-         [:> rn/View
-          [:> rn/Text {:style {:color "white"}} "Hellooooo"]
-          [:> rnp/Drawer.Section {:style {:backgroundColor "blue"}}
-           [:> rnp/Drawer.Item
-            {:label "What?!" :icon "inbox" :key 0 :style {:backgroundColor "blue"}
-             :onPress #(rf/dispatch [:toggle-drawer])}]]])])))
-
 (defonce count-click (reagent/atom 0))
 
 (def some-long-content
   "The Abandoned Ship is a wrecked ship located on Route 108 in  Hoenn, originally being a ship named the S.S. Cactus. The second  part of the ship can only be accessed by using Dive and contains the Scanner.")
 
 (defn header []
-  [:> rn/View {:style {:flex 1}}
+  [:> rn/View
    [:> rn/StatusBar {:backgroundColor :red :hidden false}]
-   [app-bar]
-   [drawer]])
+   [app-bar]])
 
 (defn card-screen-1 []
   [:> rn/ScrollView {:style {:flex 1 :backgroundColor "#000"}}
    [header]
    [:> ion-icons {:name "ios-eye" :size 32 :color "white"}]
-   [:> rne/Icon {:name "account-circle" :size 32 :color "white"}]
+   #_[:> rne/Icon {:name "account-circle" :size 32 :color "white"}]
    [card {:card-title "Card ???" :card-subtitle "Subtitle"
           :content "Hello" :title "What?!"}]])
 
@@ -100,9 +88,12 @@
            :content "helll!" :title "Yep!"}]]])
 
 (defn home []
-  [:> rn/View {:style (.-container styles)}
+  [:> rn/ImageBackground
+   {:source background-img :style {:width "100%" :height "100%"}}
+   [header]
+   [:> rn/View {:style (.-container styles)}
     [:> rn/Text {:style (.-title styles)} "Finance Clash"]
-    [:> rn/Image {:source splash-img :style {:width 200 :height 200}}]
+    [:> rn/Image {:source splash-img :style {:width 150 :height 150}}]
     [:> rn/View {:style {:padding 12}}
      [:> rnp/Button
       {:mode :contained
@@ -112,7 +103,7 @@
          (.alert rn/Alert "Sure" "Message! What?!?"
                  (clj->js [{:text "Cancel"}, {:text "OK"}]),
                  {:cancelable true}))}
-      (str "Button Sure: " @count-click)]]])
+      (str "Button Sure: " @count-click)]]]])
 
 (defn tab-icon [name]
   (fn [m]
@@ -153,7 +144,7 @@
 
 
 (def routes-alternative
-  {:Home2 {:navigationOptions
+  {"settings/home" {:navigationOptions
           {:tabBarLabel
            (fn [m]
              (let [{:keys [focused tintColor]} (js->clj m :keywordize-keys true)]
@@ -166,29 +157,29 @@
           :screen
           (reagent/reactify-component
            (fn []
-             (rf/dispatch [:register-active-screen "Home2"])
+             (rf/dispatch [:register-active-screen "settings/home"])
              [home]))}
-   :Card3 {:navigationOptions
-           {:title "Card 1"
+   "settings/alert" {:navigationOptions
+           {:title "Alert"
             :tabBarIcon (tab-icon "ios-alert")}
            :screen
            (reagent/reactify-component
             (fn []
-              (rf/dispatch [:register-active-screen "Card3"])
+              (rf/dispatch [:register-active-screen "settings/alert"])
               [card-screen-1]))}
-   :Card4 {:navigationOptions
-           {:title "Card 2"
+   "settings/apps" {:navigationOptions
+           {:title "Apps"
             :tabBarIcon (tab-icon "ios-apps")}
            :screen
            (reagent/reactify-component
             (fn []
-              (rf/dispatch [:register-active-screen "Card4"])
+              (rf/dispatch [:register-active-screen "settings/apps"])
               [card-screen-2]))}})
 
 (comment
   (rf/dispatch [:set-active-screen "Home"])
   (def navigator @(rf/subscribe [:navigator]))
-  (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card4"}))
+  (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "settings/card"}))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card3"}))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Home"}))
 

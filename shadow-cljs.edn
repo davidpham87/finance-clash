@@ -27,6 +27,10 @@
    :init-fn finance-clash.app/init
    :output-dir "app"
    :modules {:main finance-clash.app/init}
+   :release {:compiler-options
+             {:infer-externs :auto
+              :closure-defines {}
+              :optimizations :simple}}
    :devtools {:autoload true
               :preloads [shadow.expo.keep-awake
                          devtools.preload

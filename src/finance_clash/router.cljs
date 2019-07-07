@@ -1,7 +1,9 @@
 (ns finance-clash.router
   (:require
    ["react-navigation" :as rnav]
+   ["@expo/vector-icons" :as evi :rename {Ionicons ion-icons}]
    [re-frame.core :as rf]
+   [reagent.core :as reagent]
    [finance-clash.views :refer [routes routes-alternative]]))
 
 
@@ -20,11 +22,19 @@
        (clj->js {:initialRouteName active-screen})
        (clj->js {})))))
 
-(def drawer (rnav/createDrawerNavigator
-             (clj->js
-              {:General {:screen tab-navigator}
-               :Notification {:screen tab-navigator-2}})))
+(defn icon [name]
+  (fn [m]
+    (reagent/as-element [:> ion-icons {:name name :size 32 :color (.-tintColor m)}])))
+
+(def drawer
+  (rnav/createDrawerNavigator
+   (clj->js
+    {:General
+     {:screen tab-navigator
+      :navigationOptions
+       {:drawerIcon (icon "ios-stats")}}
+     :Notification
+     {:screen tab-navigator-2
+      :navigationOptions {:drawerIcon (icon "ios-notifications")}}})))
 
 (def app-container (rnav/createAppContainer drawer))
-
-

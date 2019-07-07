@@ -1,5 +1,6 @@
 node_modules/**/*
 .expo/*
+.expo-shared/*
 npm-debug.*
 *.jks
 *.p12
@@ -12,3 +13,4 @@ pom.xml
 .idea/
 *.iml
 app/
+web-build/

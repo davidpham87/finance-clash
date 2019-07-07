@@ -5,6 +5,7 @@
     ["react" :as react]
     ["react-navigation" :as rnav]
 
+    [goog.object :as gobj]
     [reagent.core :as reagent]
     [re-frame.core :as rf]
     [shadow.expo :as expo]
@@ -27,17 +28,11 @@
         (rf/dispatch [:set-active-screen @active-screen]))
       [:> app-container {:ref #(rf/dispatch [:set-navigation %])}])))
 
-
-
-(comment
-  #_(enable-re-frisk-remote! {:host "192.168.1.1:8095"
-                            :enable-re-frisk? false
-                            :enable-re-frame-10x? true}))
-
 (defn start
   {:dev/after-load true}
   []
   (expo/render-root (reagent/as-element [root])))
 
 (defn init []
+  (gobj/set js/console "disableYellowBox" true)
   (start))

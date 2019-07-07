@@ -2,12 +2,14 @@
   (:require [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
- :drawer-open?
- (fn [db _] (get-in db [:ui-states :drawer-open?] false)))
-
-(reg-sub
  :navigator
  (fn [db _] (:navigator db)))
+
+(reg-sub
+ :navigator-state
+ :<- [:navigator]
+ (fn [navigator _]
+   (-> (.-state navigator) (js->clj :keywordize-keys true))))
 
 (reg-sub
  :active-screen

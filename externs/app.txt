@@ -3,3 +3,44 @@
 render
 props
 state
+
+container
+title
+styles
+
+# React Native
+react-native
+ImageBackground
+ScrollView
+StatusBar
+StyleSheet
+StyleSheet.create
+Text
+View
+
+# react navigator
+DrawerActions
+NavigationActions
+closeDrawer
+dispatch
+focused
+navigate
+openDrawer
+tintColor
+toggleDrawer
+
+# React Native Paper
+Appbar
+Appbar.Action
+Appbar.Content
+Appbar.Header
+Avatar
+Avatar.Icon
+Button
+Card
+Card.Actions
+Card.Content
+Card.Cover
+Card.Title
+Children
+Paragraph
