@@ -5,7 +5,12 @@
   "src/test"]
 
  :dependencies
- [[reagent "0.8.1"]]
+ [[cider/cider-nrepl "0.21.0"]
+  [reagent "0.8.1"]
+  [re-frame "0.10.6"]
+  [com.andrewmcveigh/cljs-time "0.5.2"]]
+
+ :nrepl {:port 3333}
 
  :builds
  {:app
