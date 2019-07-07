@@ -1,4 +1,4 @@
-(ns test.views
+(ns finance-clash.views
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as rf]
@@ -101,8 +101,7 @@
 
 (defn home []
   [:> rn/View {:style (.-container styles)}
-    [:> rn/Text {:style (.-title styles)}
-     "Hello World!! \nThis is crazy fast!! Really\nLet's check!!!"]
+    [:> rn/Text {:style (.-title styles)} "Finance Clash"]
     [:> rn/Image {:source splash-img :style {:width 200 :height 200}}]
     [:> rn/View {:style {:padding 12}}
      [:> rnp/Button
@@ -187,6 +186,7 @@
               [card-screen-2]))}})
 
 (comment
+  (rf/dispatch [:set-active-screen "Home"])
   (def navigator @(rf/subscribe [:navigator]))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card4"}))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card3"}))

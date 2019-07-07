@@ -1,4 +1,4 @@
-(ns test.subs
+(ns finance-clash.subs
   (:require [re-frame.core :refer [reg-sub]]))
 
 (reg-sub

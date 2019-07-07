@@ -1,7 +1,8 @@
-(ns test.router
-  (:require ["react-navigation" :as rnav]
-            [re-frame.core :as rf]
-            [test.views :refer [routes routes-alternative]]))
+(ns finance-clash.router
+  (:require
+   ["react-navigation" :as rnav]
+   [re-frame.core :as rf]
+   [finance-clash.views :refer [routes routes-alternative]]))
 
 
 (let [active-screen @(rf/subscribe [:active-screen])]
