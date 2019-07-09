@@ -4,6 +4,10 @@
    ["react-navigation" :as rnav]))
 
 (reg-event-db
+ :initialize-db
+ (fn [_ _] {}))
+
+(reg-event-db
  :set-navigation
  (fn [db [_ nav]]
    (assoc db :navigator nav)))

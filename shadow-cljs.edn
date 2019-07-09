@@ -26,7 +26,7 @@
   {:target :react-native
    :init-fn finance-clash.app/init
    :output-dir "app"
-   :modules {:main finance-clash.app/init}
+   ;; :modules {:main finance-clash.app/init}
    :release {:compiler-options
              {:infer-externs :auto
               :closure-defines {}
@@ -34,5 +34,4 @@
    :devtools {:autoload true
               :preloads [shadow.expo.keep-awake
                          devtools.preload
-                         re-frisk.preload
                          day8.re-frame-10x.preload]}}}}

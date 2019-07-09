@@ -10,11 +10,12 @@
     [re-frame.core :as rf]
     [shadow.expo :as expo]
     [clojure.string :as str]
-    #_[re-frisk-remote.core :refer [enable-re-frisk-remote!]]
 
     [finance-clash.events]
     [finance-clash.subs]
-    [finance-clash.router :refer [app-container]]))
+    [finance-clash.portfolio.views :refer (home)]
+    [finance-clash.questions.views]
+    [finance-clash.views :refer [app-container]]))
 
 ;; must use defonce and must refresh full app so metro can fill these in
 ;; at live-reload time `require` does not exist and will cause errors
@@ -25,14 +26,16 @@
         active-screen (rf/subscribe [:active-screen])]
     (fn []
       (when (and @navigator @active-screen)
-        (rf/dispatch [:set-active-screen @active-screen]))
-      [:> app-container {:ref #(rf/dispatch [:set-navigation %])}])))
+        (rf/dispatch [:set-active-screen @active-screen])))
+    [:> app-container {:ref #(rf/dispatch [:set-navigation %])}]))
 
 (defn start
-  {:dev/after-load true}
   []
+  (gobj/set js/console "disableYellowBox" true)
+  (rf/dispatch-sync [:initialize-db])
   (expo/render-root (reagent/as-element [root])))
 
-(defn init []
-  (gobj/set js/console "disableYellowBox" true)
-  (start))
+(defn init {:dev/after-load true} []
+  (.log js/console "Reload")
+  (expo/render-root (reagent/as-element [root])))
+

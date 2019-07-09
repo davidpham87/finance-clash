@@ -6,6 +6,6 @@ module.exports = async (env, argv) => {
     config.mode = 'none';
     config.optimization.minimize = false;
   }
-  config.mode = 'development';
+  // config.mode = 'development';
   return config;
 }
