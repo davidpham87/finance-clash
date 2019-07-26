@@ -8,8 +8,9 @@
 (reg-sub
  :navigator-state
  :<- [:navigator]
- (fn [navigator _]
-   (-> (.-state navigator) (js->clj :keywordize-keys true))))
+ (fn [navigator [_ ->clj?]]
+   (cond-> (.-state navigator)
+       ->clj?  (js->clj :keywordize-keys true))))
 
 (reg-sub
  :active-screen

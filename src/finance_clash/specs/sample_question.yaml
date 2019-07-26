@@ -1,0 +1,21 @@
+---
+
+- question: How can an investor protect its stock position from a falling equity market?
+  responses:
+  - Eat, pray and love.
+  - Enter long future positions on the CAC 40.
+  - Sell targeted call options.
+  - Buy the appropriate put options.
+  correct-response: 4
+  duration: 30
+  difficulty: easy
+
+- question: What describes best the ECB?
+  responses:
+  - Eat, count and burn.
+  - It stands for the European Commission on Bankruptcy.
+  - An organization run by Christine Lagarde.
+  - It is located in Berlin.
+  correct-response: 3
+  duration: 30
+  difficulty: easy

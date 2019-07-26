@@ -11,6 +11,7 @@
    ["react-native-elements" :as rne]
    ["react" :as react]
    ["react-native-paper" :as rnp]
+   ["react-navigation-material-bottom-tabs" :refer (createMaterialBottomTabNavigator)]
    ["react-navigation" :as rnav]))
 
 (defonce background-img (js/require "../assets/portfolio.jpg"))
@@ -71,44 +72,46 @@
 
 (defn ->ion-icon [name]
   (fn [m]
-    (reagent/as-element [:> ion-icons {:name name :size 32 :color (.-tintColor m)}])))
+    (reagent/as-element [:> ion-icons {:name name :size 20 :color (.-tintColor m)}])))
 
 (def routes
-  {::portfolio {:navigationOptions
-          {:tabBarLabel
-           (fn [m]
-             (let [{:keys [focused tintColor]} (js->clj m :keywordize-keys true)]
-               (reagent/as-element
-                [:> rn/Text
-                 {:style {:margin-bottom 1 :font-size 12 :textAlign "center"
-                          :color tintColor}} "Portfolio"])))
-           :tabBarIcon (->ion-icon "ios-apps")}
-          :screen
-          (reagent/reactify-component
-           (fn []
-             (rf/dispatch [:register-active-screen ::home])
-             [home]))}
-   ::investment {:navigationOptions
-           {:title "Investment"
-            :tabBarIcon (->ion-icon "ios-chatboxes")}
-           :screen
-           (reagent/reactify-component
-            (fn []
-              (rf/dispatch [:register-active-screen ::investment])
-              [home]))}
-   ::ranking {:navigationOptions
-           {:title "Ranking"
-            :tabBarIcon (->ion-icon "ios-eye")}
-           :screen
-           (reagent/reactify-component
-            (fn []
-              (rf/dispatch [:register-active-screen ::ranking])
-              [ranks]))}})
+  {::portfolio
+   {:navigationOptions
+    {:tabBarLabel
+     (reagent/as-element
+      [(fn [m]
+        (let [{:keys [focused tintColor]} (js->clj m :keywordize-keys true)]
+          (reagent/as-element
+           [:> rn/Text
+            {:style {:margin-bottom 1 :font-size 12 :textAlign "center"
+                     :color tintColor}} "Portfolio"])))])
+     :tabBarIcon (->ion-icon "ios-apps")}
+    :screen
+    (reagent/reactify-component
+     (fn [] (rf/dispatch [:register-active-screen ::home])
+       [home]))}
+   ::investment
+   {:navigationOptions
+    {:title "Investment"
+     :tabBarIcon (->ion-icon "ios-chatboxes")}
+    :screen
+    (reagent/reactify-component
+     (fn [] (rf/dispatch [:register-active-screen ::investment])
+       [home]))}
+   ::ranking
+   {:navigationOptions
+    {:title "Ranking"
+     :tabBarIcon (->ion-icon "ios-eye")}
+    :screen
+    (reagent/reactify-component
+     (fn []
+       (rf/dispatch [:register-active-screen ::ranking])
+       [ranks]))}})
 
 
 (def tab-navigator
   (let [active-screen @(rf/subscribe [:active-screen])]
-    (rnav/createBottomTabNavigator
+    (createMaterialBottomTabNavigator
      (clj->js routes {:keyword-fn str})
      (if (routes (keyword active-screen))
        (clj->js {:initialRouteName active-screen})

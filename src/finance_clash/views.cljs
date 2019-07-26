@@ -21,11 +21,11 @@
   (rnav/createDrawerNavigator
    (clj->js
     {:Portfolio
-     {:screen portfolio-navigator
+     {:getScreen (fn [] portfolio-navigator)
       :navigationOptions
       {:drawerIcon (->ion-icon "ios-stats")}}
-     :Question
-     {:screen questions-navigator
+     :Questions
+     {:getScreen (fn [] questions-navigator)
       :navigationOptions
       {:drawerIcon (->material-icon "question-answer")}}})))
 

@@ -29,6 +29,7 @@
 (reg-event-fx
  :set-active-screen
  (fn [{db :db} [_ screen-id]]
+   (.log js/console (clj->js screen-id))
    {:db (assoc db :active-screen screen-id)
     :active-screen [(db :navigator) screen-id]}))
 

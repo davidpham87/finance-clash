@@ -10,6 +10,7 @@
    ["react-native" :as rn]
    ["react" :as react]
    ["react-native-paper" :as rnp]
+   ["react-navigation-material-bottom-tabs" :refer (createMaterialBottomTabNavigator)]
    ["react-navigation" :as rnav]))
 
 (defonce splash-img (js/require "../assets/shadow-cljs.png"))
@@ -22,7 +23,7 @@
 (defn card [m]
   (let [pic-number (reagent/atom (rand-int 1000))]
     (fn [{:keys [card-title card-subtitle title content cover]}]
-      [:> rnp/Card {:style {:margin 10} :justifyContent :center}
+      [:> rnp/Card {:style {:margin 10 :justifyContent :center}}
        [:> rnp/Card.Title {:title card-title :subtitle card-subtitle
                            :left #(reagent/as-element [:> rnp/Avatar.Icon {:size 48 :icon "folder"}])}]
        [:> rnp/Card.Cover
@@ -48,9 +49,9 @@
 (defn card-screen-2 []
   [:> rn/ImageBackground {:source ranking-img :style {:width "100%" :height "100%"}}
    [:> rn/ScrollView {:style {:flex 1}}
-   [header]
+    [header]
    [:<>
-    [card {:card-title "Hello!!" :card-subtitle "Yeah!!!"
+    [card {:card-title "Hello World!" :card-subtitle "NO!!!"
            :content some-long-content :title "Yep!"}]
     [card {:card-title "2" :card-subtitle "Yeah!!!"
            :content "helll!" :title "Yep this!"}]
@@ -59,21 +60,15 @@
     [card {:card-title "4" :card-subtitle "Yeah!!!"
            :content "helll!" :title "Yep!"}]]]])
 
+
 (defn ->ion-icon [name]
   (fn [m]
-    (reagent/as-element [:> ion-icons {:name name :size 32 :color (.-tintColor m)}])))
+    (reagent/as-element [:> ion-icons {:name name :size 20 :color (.-tintColor m)}])))
 
 (def routes
   {::summary
    {:navigationOptions
-    {:tabBarLabel
-     (fn [m]
-       (let [{:keys [focused tintColor]} (js->clj m :keywordize-keys true)]
-         (reagent/as-element
-          [:> rn/Text
-           {:style {:margin-bottom 1 :font-size 12 :textAlign "center"
-                    :color tintColor}}
-           "Summary"])))
+    {:title "Summary"
      :tabBarIcon (->ion-icon "ios-eye")}
     :screen
     (reagent/reactify-component
@@ -93,7 +88,7 @@
 
 (def tab-navigator
   (let [active-screen @(rf/subscribe [:active-screen])]
-    (rnav/createBottomTabNavigator
+    (createMaterialBottomTabNavigator
      (clj->js routes {:keyword-fn str})
      (if (routes (keyword active-screen))
        (clj->js {:initialRouteName active-screen})
