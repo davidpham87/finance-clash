@@ -1,0 +1,93 @@
+---
+# 002 - MSIAI - Les états financiers
+
+- question: Quels documents sont compris dans les états financiers?
+  responses:
+  - Le tableau de flux de trésorerie, le carnet de commandes, le compte de résultat.
+  - Le bilan, le tableau de flux de trésorerie, le compte de résultat.
+  - Le compte de résultat, le bilan, la liste des produits et services.
+  - La liste des produits et services, le carnet de commandes, le bilan.
+  correct-response: 2
+  duration: 45
+  difficulty: easy
+
+- question: Quels documents sont compris dans les états financiers?
+  responses:
+  - Le tableau de flux de trésorerie, le carnet de commandes, le compte de résultat.
+  - Le compte de résultat, le bilan, la liste des produits et services.
+  - La liste des produits et services, le carnet de commandes, le bilan.
+  - Le bilan, le tableau de flux de trésorerie, le compte de résultat.
+  correct-response: 4
+  duration: 25
+  difficulty: medium
+
+
+
+
+- question: Comment s'appelle le document regroupant les états financiers?
+  responses:
+  - Le rapport de guidance.
+  - Le rapport annuel.
+  - Le rapport de conduite.
+  - Le bilan.
+  correct-response: 2
+  duration: 20
+  difficulty: easy
+
+- question: Comment s'appelle le document regroupant les états financiers?
+  responses:
+  - Le compte de résultat.
+  - Le bilan.
+  - Le rapport de conduite.
+  - Le rapport annuel.
+  correct-response: 4
+  duration: 12
+  difficulty: medium
+
+
+
+
+
+- question: Combien de formes peut prendre l'opinion du commissaire aux comptes?
+  responses:
+  - 2.
+  - 3.
+  - 4.
+  - 5.
+  correct-response: 2
+  duration: 15
+  difficulty: easy
+
+- question: Combien de formes peut prendre l'opinion du commissaire aux comptes?
+  responses:
+  - 5.
+  - 4.
+  - 3.
+  - 2.
+  correct-response: 3
+  duration: 9
+  difficulty: medium
+
+
+
+
+
+- question: Quelles institutions font parties des 'big 4'?
+  responses:
+  - S&P et Deloitte.
+  - PWC et Moodys.
+  - Deloitte et PWC.
+  - E&Y et S&P.
+  correct-response: 3
+  duration: 20
+  difficulty: easy
+
+- question: Quelles institutions font parties des 'big 4'?
+  responses:
+  - KPMG et Fitch.
+  - PWC et E&Y.
+  - Deloitte et Moody's.
+  - E&Y et S&P.
+  correct-response: 2
+  duration: 10
+  difficulty: medium

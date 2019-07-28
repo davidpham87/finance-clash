@@ -5,6 +5,7 @@
    [shadow.expo :as expo]
    [clojure.string :as str]
    [finance-clash.shared.header :refer [header]]
+   [finance-clash.questions.events :as events]
    ["expo" :as ex]
    ["@expo/vector-icons" :as evi :rename {Ionicons ion-icons}]
    ["react-native" :as rn]
@@ -37,6 +38,25 @@
         [:> rnp/Button {:mode :contained
                         :onPress #(reset! pic-number (rand-int 1000))} "OK"]]])))
 
+(def sample-question-spec [2 3 4])
+
+(defn question-card [m]
+  (let [pic-number (reagent/atom (rand-int 1000))]
+    (fn [{:keys [card-title card-subtitle title content cover]}]
+      [:> rnp/Card {:style {:margin 10 :justifyContent :center}}
+       [:> rnp/Card.Title {:title card-title :subtitle card-subtitle
+                           :left #(reagent/as-element [:> rnp/Avatar.Icon {:size 48 :icon "folder"}])}]
+       [:> rnp/Card.Cover
+        {:flex 1
+         :source {:uri (clojure.core/str "https://picsum.photos/" @pic-number)}}]
+       [:> rnp/Card.Content {:style {:margin 0}}
+        (when title [:> rnp/Title title])
+        [:> rnp/Paragraph content]]
+       [:> rnp/Card.Actions
+        [:> rnp/Button "Cancel this!"]
+        [:> rnp/Button {:mode :contained
+                        :onPress #(reset! pic-number (rand-int 1000))} "OK"]]])))
+
 
 (defn card-screen-1 []
   [:> rn/ImageBackground {:source daily-questions-img
@@ -51,15 +71,14 @@
    [:> rn/ScrollView {:style {:flex 1}}
     [header]
    [:<>
-    [card {:card-title "Hello World!" :card-subtitle "NO!!!"
+    [card {:card-title "Hello" :card-subtitle "No!!!"
            :content some-long-content :title "Yep!"}]
-    [card {:card-title "2" :card-subtitle "Yeah!!!"
-           :content "helll!" :title "Yep this!"}]
+    [card {:card-title "2" :card-subtitle "No!!!!"
+           :content "What!" :title "Yep this!"}]
     [card {:card-title "3" :card-subtitle "Yeah!!!"
-           :content "helll!" :title "Yep!"}]
-    [card {:card-title "4" :card-subtitle "Yeah!!!"
-           :content "helll!" :title "Yep!"}]]]])
-
+           :content "Helll!" :title "Yep!"}]
+    [card {:card-title "Heaven" :card-subtitle "Yeah!!!"
+           :content "Heaven!" :title "Yep!"}]]]])
 
 (defn ->ion-icon [name]
   (fn [m]
@@ -82,14 +101,16 @@
     :screen
     (reagent/reactify-component
      (fn []
-       (rf/dispatch [:register-active-screen ::question])
+       (rf/dispatch [:register-active-screen ::questions])
        [card-screen-2]))}})
 
 
-(def tab-navigator
+(defn tab-navigator []
   (let [active-screen @(rf/subscribe [:active-screen])]
-    (createMaterialBottomTabNavigator
-     (clj->js routes {:keyword-fn str})
+    (#_createMaterialBottomTabNavigator
+     rnav/createBottomTabNavigator
+     (clj->js (reduce-kv #(assoc %1 (str %2) %3) {} routes))
      (if (routes (keyword active-screen))
-       (clj->js {:initialRouteName active-screen})
+       (clj->js {:initialRouteName (str active-screen)})
        (clj->js {})))))
+

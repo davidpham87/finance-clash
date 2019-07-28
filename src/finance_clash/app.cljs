@@ -9,6 +9,7 @@
     [goog.object :as gobj]
     [reagent.core :as reagent]
     [re-frame.core :as rf]
+    [day8.re-frame.http-fx]
     [shadow.expo :as expo]
     [clojure.string :as str]
     [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
@@ -19,24 +20,23 @@
     [finance-clash.subs]
     [finance-clash.portfolio.views :refer (home)]
     [finance-clash.questions.views]
-    [finance-clash.views :refer [app-container]]))
+    [finance-clash.views :refer [app-container]]
+    [finance-clash.shared.bottom-nav :refer (active-screen)]))
 
 ;; must use defonce and must refresh full app so metro can fill these in
 ;; at live-reload time `require` does not exist and will cause errors
 ;; must use path relative to :output-dir
 
-(enable-re-frisk-remote!
+#_(enable-re-frisk-remote!
  {:enable-re-frisk? false
   :enable-re-frame-10x? true})
 
-(def navigator (rf/subscribe [:navigator]))
+(defonce navigator (rf/subscribe [:navigator]))
 
 (defn root []
   (let [navigator (rf/subscribe [:navigator])
         active-screen (rf/subscribe [:active-screen])]
     (fn []
-      (when (and @navigator @active-screen)
-        (rf/dispatch [:set-active-screen @active-screen]))
       [:> app-container {:ref #(rf/dispatch [:set-navigation %])}])))
 
 (defn start
@@ -49,5 +49,14 @@
 (defn init {:dev/after-load true} []
   (gobj/set js/console "disableYellowBox" true)
   (.log js/console "Reload")
-  (expo/render-root (reagent/as-element [root])))
+  (expo/render-root (reagent/as-element [root]))
+  (let [navigator (rf/subscribe [:navigator])
+        active-screen (rf/subscribe [:active-screen])]
+    (.log js/console
+          "Navigator"
+          @navigator
+          "Activescreen"
+          (str @active-screen))
+    (when (and @navigator @active-screen)
+      (rf/dispatch [:set-active-screen @active-screen]))))
 

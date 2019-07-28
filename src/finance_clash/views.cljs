@@ -14,26 +14,34 @@
 
 (defn ->material-icon [name]
   (fn [m]
-    (reagent/as-element [:> material-icons {:name name :size 32 :color (.-tintColor m)}])))
+    (reagent/as-element [:> material-icons {:name name :size 32
+                                            :color (.-tintColor m)}])))
 
+(defn drawer []
+  (let [active-screen (rf/subscribe [:active-screen])
+        choice (when @active-screen
+                 (-> @active-screen namespace
+                     (clojure.string/split #"\.") butlast last))]
+    (rnav/createDrawerNavigator
+     (clj->js
+      {:portfolio
+       {:getScreen portfolio-navigator
+        :navigationOptions
+        {:drawerLabel "Portfolio"
+         :drawerIcon (->ion-icon "ios-stats")}}
+       :questions
+       {:getScreen questions-navigator
+        :navigationOptions
+        {:drawerLabel "Questions"
+         :drawerIcon (->material-icon "question-answer")}}})
+     (clj->js (if choice {:initialRouteName choice} {})))))
 
-(def drawer
-  (rnav/createDrawerNavigator
-   (clj->js
-    {:Portfolio
-     {:getScreen (fn [] portfolio-navigator)
-      :navigationOptions
-      {:drawerIcon (->ion-icon "ios-stats")}}
-     :Questions
-     {:getScreen (fn [] questions-navigator)
-      :navigationOptions
-      {:drawerIcon (->material-icon "question-answer")}}})))
-
-(def app-container (rnav/createAppContainer drawer))
+(def app-container (rnav/createAppContainer (drawer)))
 
 (comment
   (rf/dispatch [:set-active-screen "settings/card"])
   (def navigator @(rf/subscribe [:navigator]))
+  @(rf/subscribe [:active-screen])
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "settings/home"}))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card3"}))
   (.dispatch navigator (.navigate rnav/NavigationActions #js {:routeName "Card1"}))

@@ -6,6 +6,20 @@
    ["react-native-paper" :as rnp]
    ["react-navigation" :as rnav]))
 
+(defn indices [navigator]
+  (loop [nav navigator
+         idx []]
+    (let [i (.. nav -index)]
+      (if-not i
+        {:indices idx :screen (.-key nav)}
+        (recur (nth (.. nav -routes) i) (conj idx i))))))
+
+(defn active-screen [navigator]
+  (when navigator
+    (let [nav (.. navigator -state -nav)
+          {:keys [indices screen]} (indices nav)]
+      screen)))
+
 (defn get-color [route descriptors]
   (-> (gobj/get descriptors (.-key route))
       .-options
@@ -21,8 +35,10 @@
     (.renderIcon (js->clj {:route route :focused focused :tintColor color}))))
 
 (defn bottom-navigation-view
-  [{:keys [active-color routes inactive-color navigation-state descriptor bar-style]} :as m]
-  (let [this (reagnet/current-component)
+  [{:keys [active-color routes inactive-color navigation-state
+           descriptor bar-style]
+    :as m}]
+  (let [this (reagent/current-component)
         props (reagent/props this)
         descriptors (.-descriptors props) ]
     [:> rnp/BottomNavigation
@@ -30,15 +46,6 @@
       :inactiveColor inactive-color
       :renderIcon render-icon
       :navigationState navigation-state
-      :barStyle [bar-style extra-style]
+      :barStyle [bar-style] ;; extra-style
       :getColor (fn [{route :route}] (get-color route descriptors))}]))
 
-;;       <BottomNavigation
-;;         activeColor={activeTintColor}
-;;         inactiveColor={inactiveTintColor}
-;;         {...rest}
-;;         renderIcon={this._renderIcon}
-;;         barStyle={[barStyle, extraStyle]}
-;;         navigationState={navigation.state}
-;;         getColor={this._getColor}
-;;       />

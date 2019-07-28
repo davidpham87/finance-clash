@@ -88,7 +88,8 @@
      :tabBarIcon (->ion-icon "ios-apps")}
     :screen
     (reagent/reactify-component
-     (fn [] (rf/dispatch [:register-active-screen ::home])
+     (fn []
+       (rf/dispatch [:register-active-screen ::portfolio])
        [home]))}
    ::investment
    {:navigationOptions
@@ -109,10 +110,15 @@
        [ranks]))}})
 
 
-(def tab-navigator
+(defn tab-navigator []
   (let [active-screen @(rf/subscribe [:active-screen])]
-    (createMaterialBottomTabNavigator
-     (clj->js routes {:keyword-fn str})
+    (rnav/createBottomTabNavigator #_createMaterialBottomTabNavigator
+     (clj->js (reduce-kv #(assoc %1 (str %2) %3) {} routes))
      (if (routes (keyword active-screen))
-       (clj->js {:initialRouteName active-screen})
+       (clj->js {:initialRouteName (str active-screen)})
        (clj->js {})))))
+
+(comment
+  (rf/dispatch [:set-active-screen ::investment])
+  @(rf/subscribe [:active-screen])
+  (.log js/console @(rf/subscribe [:navigator])))

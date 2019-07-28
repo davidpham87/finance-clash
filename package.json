@@ -13,7 +13,7 @@
     "expo": "^33.0.7",
     "expo-cli": "^3.0.4",
     "highlight.js": "^9.15.8",
-    "react": "16.8.6",
+    "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-flip-move": "^3.0.3",
     "react-highlight.js": "^1.0.7",
@@ -27,7 +27,8 @@
     "react-navigation-material-bottom-tabs": "^1.0.0",
     "sharp": "^0.22.1",
     "sharp-cli": "^1.10.0",
-    "websocket": "^1.0.29"
+    "websocket": "^1.0.29",
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0",

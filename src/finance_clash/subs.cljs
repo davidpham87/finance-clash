@@ -1,5 +1,6 @@
 (ns finance-clash.subs
-  (:require [re-frame.core :refer [reg-sub]]))
+  (:require [re-frame.core :refer [reg-sub]]
+            [finance-clash.shared.bottom-nav :refer (active-screen)]))
 
 (reg-sub
  :navigator
@@ -14,4 +15,7 @@
 
 (reg-sub
  :active-screen
- (fn [db _] (:active-screen db)))
+ (fn [db]
+   (:active-screen db)))
+
+

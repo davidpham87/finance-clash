@@ -1,6 +1,7 @@
 (ns finance-clash.events
   (:require
    [re-frame.core :as rf :refer [reg-event-fx reg-event-db reg-fx]]
+   [re-frame.db]
    ["react-navigation" :as rnav]))
 
 (reg-event-db
@@ -15,6 +16,7 @@
 (reg-fx
  :active-screen
  (fn [[navigator screen]]
+   (.log js/console "Active-sccren FX: " screen)
    (when navigator
      (.dispatch navigator
                 (.navigate rnav/NavigationActions
@@ -29,9 +31,14 @@
 (reg-event-fx
  :set-active-screen
  (fn [{db :db} [_ screen-id]]
-   (.log js/console (clj->js screen-id))
    {:db (assoc db :active-screen screen-id)
-    :active-screen [(db :navigator) screen-id]}))
+    :active-screen [(db :navigator) (str screen-id)]}))
+
+
+(reg-event-db
+ :track-active-screen
+ (fn [db [_ screen]]
+   (assoc db :active-screen screen)))
 
 (reg-fx
  :navigation-drawer-action
@@ -54,3 +61,15 @@
  (fn [{db :db} [_ action]]
    {:db db
     :navigation-drawer-action [(db :navigator) :toggle]}))
+
+(comment
+ (def fetch (.-fetch js/window))
+ (register-handler
+  :load-data
+  (fn [db _]
+    (.then
+     (fetch
+      "[https://api.github.com/repositories](https://api.github.com/repositories)")
+     #((.warn js/console
+              (.stringify (.-JSON js/window) %1)
+              (dispatch :process-data %1)))))))
