@@ -1,6 +1,6 @@
 ;; shadow-cljs configuration
 {:source-paths
- ["src"]
+ ["src/cljs"]
 
  :dependencies
  [[cider/cider-nrepl "0.21.0"]
