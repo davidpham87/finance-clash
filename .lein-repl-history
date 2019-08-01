@@ -5,3 +5,11 @@
 (start)
 (exit)
 (start)
+(exit)
+(in-ns 'finance-clash.questions
+)
+(exit)
+(load "finance-clash.questions")
+(load "questions")
+(load "finance-clash.questions")
+(load "questions")

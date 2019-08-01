@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Quel objectif n'est pas couvert par le cours?",
+    "responses": [
+      "Compréhension des documents de synthèse.",
+      "Acquisition de notions en finance d'entreprise.",
+      "Vision générale de l'environnement bancaire.",
+      "Développement des connaissances commericales."
+    ],
+    "correct-response": 4,
+    "duration": 20,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Quelle affirmation est fausse?",
+    "responses": [
+      "Ne pas hésiter à poser des questions pendant le cours.",
+      "Vincent n'a jamais étudié à l'INSA.",
+      "La gestion des risques financiers n'est pas couverte pendant le cours.",
+      "Vincent travaille dans une banque."
+    ],
+    "correct-response": 2,
+    "duration": 20,
+    "difficulty": "easy"
+  }
+]

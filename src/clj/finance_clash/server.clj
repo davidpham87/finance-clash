@@ -5,7 +5,8 @@
             [muuntaja.core :as m]
             [reitit.ring.coercion :as coercion]
             [reitit.ring :as ring]
-            [finance-clash.specs]))
+            [finance-clash.specs]
+            [finance-clash.questions]))
 
 (def routes
   ["/plain"
@@ -19,8 +20,11 @@
 (def app
   (ring/ring-handler
     (ring/router
-     [routes
-      finance-clash.specs/routes]
+     [["/" {:get (fn [request] {:body "Hello from finance-clash server"})}]
+      ["/echo" {:get (fn [request] {:body "echo"})}]
+      routes
+      finance-clash.specs/routes
+      finance-clash.questions/routes]
      {:data {:muuntaja m/instance
       	     :middleware
              [params/wrap-params
@@ -47,5 +51,3 @@
 (comment
   (use '[clojure.tools.namespace.repl :only (refresh)])
   (start))
-
-
