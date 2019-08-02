@@ -1,4 +1,4 @@
-(defproject finance-clash "0.1.0-SNAPSHOT"
+(defproject finance-clash "0.1.0"
   :description "finance-clash backend"
   :dependencies [[cider/cider-nrepl "0.21.0"]
                  [org.clojure/clojure "1.10.0"]
