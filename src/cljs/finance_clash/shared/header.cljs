@@ -16,14 +16,14 @@
    #_[:> rnp/Appbar.BackAction {:on-press #(rf/dispatch [:set-active-screen "Card1"])}]
    [:> rnp/Appbar.Action
     {:icon "menu"
-     :onPress
-     (fn []
-       (rf/dispatch [:set-drawer-state :toggle]))}]
+     :onPress (fn [] (rf/dispatch [:set-drawer-state :toggle]))}]
    [:> rnp/Appbar.Content {:title "Finance Clash"}]])
 
 (defn header []
   [:> rn/View
-   [:> rn/StatusBar {:backgroundColor :red :hidden false}]
+   [:> rn/StatusBar
+    {:backgroundColor :red :hidden false
+     :translucent true}]
    [app-bar]])
 
 

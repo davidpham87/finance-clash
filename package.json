@@ -27,8 +27,7 @@
     "react-navigation-material-bottom-tabs": "^1.0.0",
     "sharp": "^0.22.1",
     "sharp-cli": "^1.10.0",
-    "websocket": "^1.0.29",
-    "xmlhttprequest": "^1.8.0"
+    "websocket": "^1.0.29"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0",

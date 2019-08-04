@@ -109,10 +109,10 @@
        (rf/dispatch [:register-active-screen ::ranking])
        [ranks]))}})
 
-
-(defn tab-navigator []
-  (let [active-screen @(rf/subscribe [:active-screen])]
-    (rnav/createBottomTabNavigator #_createMaterialBottomTabNavigator
+(let [active-screen @(rf/subscribe [:active-screen])]
+  (defn tab-navigator []
+    (rnav/createBottomTabNavigator
+     #_createMaterialBottomTabNavigator
      (clj->js (reduce-kv #(assoc %1 (str %2) %3) {} routes))
      (if (routes (keyword active-screen))
        (clj->js {:initialRouteName (str active-screen)})

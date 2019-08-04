@@ -9,10 +9,12 @@
     [goog.object :as gobj]
     [reagent.core :as reagent]
     [re-frame.core :as rf]
-    [day8.re-frame.http-fx]
+
     [shadow.expo :as expo]
     [clojure.string :as str]
-    [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
+
+    ;; [day8.re-frame.http-fx]
+    #_[re-frisk-remote.core :refer [enable-re-frisk-remote!]]
 
     [finance-clash.specs.questions]
 
@@ -41,10 +43,12 @@
 
 (defn start
   []
+  (println "Why is this?")
   (gobj/set js/console "disableYellowBox" true)
   (useScreens)
   (rf/dispatch-sync [:initialize-db])
   (expo/render-root (reagent/as-element [root])))
+
 
 (defn init {:dev/after-load true} []
   (gobj/set js/console "disableYellowBox" true)

@@ -1,6 +1,7 @@
 (ns finance-clash.server
   (:require [ring.adapter.jetty :as jetty]
             [ring.middleware.params :as params]
+            [ring.middleware.cors :refer [wrap-cors]]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [muuntaja.core :as m]
             [reitit.ring.coercion :as coercion]
@@ -18,7 +19,8 @@
                       :body {:total (+ x y)}})}]])
 
 (def app
-  (ring/ring-handler
+  (wrap-cors
+   (ring/ring-handler
     (ring/router
      [["/" {:get (fn [request] {:body "Hello from finance-clash server"})}]
       ["/echo" {:get (fn [request] {:body "echo"})}]
@@ -32,7 +34,11 @@
               coercion/coerce-exceptions-middleware
               coercion/coerce-request-middleware
               coercion/coerce-response-middleware]}})
-    (ring/create-default-handler)))
+    (ring/create-default-handler))
+
+   :access-control-allow-origin #"http://192.168.1.111:19006"
+   :access-control-allow-headers #{:accept :content-type}
+   :access-control-allow-methods #{:get :put :post}))
 
 (defonce server (atom nil))
 

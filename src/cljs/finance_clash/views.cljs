@@ -22,15 +22,19 @@
         choice (when @active-screen
                  (-> @active-screen namespace
                      (clojure.string/split #"\.") butlast last))]
+    (.log js/console "Drawer choice: " choice)
+    (.log js/console "Drawer active-screen: " active-screen)
     (rnav/createDrawerNavigator
      (clj->js
       {:portfolio
-       {:getScreen portfolio-navigator
+       {;; :getScreen portfolio-navigator
+        :screen (portfolio-navigator)
         :navigationOptions
         {:drawerLabel "Portfolio"
          :drawerIcon (->ion-icon "ios-stats")}}
        :questions
-       {:getScreen questions-navigator
+       {;; :getScreen questions-navigator
+        :screen (questions-navigator)
         :navigationOptions
         {:drawerLabel "Questions"
          :drawerIcon (->material-icon "question-answer")}}})
