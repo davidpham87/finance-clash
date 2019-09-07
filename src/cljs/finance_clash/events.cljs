@@ -62,6 +62,17 @@
    {:db db
     :navigation-drawer-action [(db :navigator) :toggle]}))
 
+(reg-event-db
+ :register-platform
+ (fn [db [_ plateform]]
+   (assoc-in db [:expo :platform] plateform)))
+
+(reg-event-db
+ :record-window-dimensions
+ (fn [db [_ {:keys [width height] :as m}]]
+   (assoc db :window-dimensions m)))
+
+
 (comment
  (def fetch (.-fetch js/window))
  (register-handler

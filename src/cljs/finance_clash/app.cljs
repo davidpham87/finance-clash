@@ -14,8 +14,7 @@
     [clojure.string :as str]
 
     ;; [day8.re-frame.http-fx]
-    #_[re-frisk-remote.core :refer [enable-re-frisk-remote!]]
-
+    [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
     [finance-clash.specs.questions]
 
     [finance-clash.events]
@@ -29,11 +28,16 @@
 ;; at live-reload time `require` does not exist and will cause errors
 ;; must use path relative to :output-dir
 
-#_(enable-re-frisk-remote!
- {:enable-re-frisk? false
+(enable-re-frisk-remote!
+ {:enable-re-frisk? true
   :enable-re-frame-10x? true})
 
 (defonce navigator (rf/subscribe [:navigator]))
+
+#_(defn window-event-listeners []
+  (.addEventListener
+   js/window events/EventType.RESIZE
+   #(rf/dispatch [:record-window-size (.-innerWidth js/window) (.-innerHeight js/window)])))
 
 (defn root []
   (let [navigator (rf/subscribe [:navigator])
@@ -41,11 +45,13 @@
     (fn []
       [:> app-container {:ref #(rf/dispatch [:set-navigation %])}])))
 
+
 (defn start
   []
   (println "Why is this?")
   (gobj/set js/console "disableYellowBox" true)
   (useScreens)
+  (rf/dispatch [:register-platform (-> (.-OS rn/Platform) keyword)])
   (rf/dispatch-sync [:initialize-db])
   (expo/render-root (reagent/as-element [root])))
 
@@ -63,4 +69,3 @@
           (str @active-screen))
     (when (and @navigator @active-screen)
       (rf/dispatch [:set-active-screen @active-screen]))))
-

@@ -13,3 +13,4 @@
 (load "questions")
 (load "finance-clash.questions")
 (load "questions")
+(exit)

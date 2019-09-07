@@ -7,6 +7,8 @@
    [finance-clash.shared.header :refer [header]]
    [finance-clash.questions.events :as events]
    [finance-clash.questions.subs :as sub]
+   [cljs-time.core :as ct]
+   [cognitect.transit :as t]
    ["expo" :as ex]
    ["@expo/vector-icons" :as evi :rename {Ionicons ion-icons}]
    ["react-native" :as rn]
@@ -18,10 +20,14 @@
 (defonce splash-img (js/require "../assets/shadow-cljs.png"))
 (defonce daily-questions-img (js/require "../assets/daily_questions.jpg"))
 (defonce ranking-img (js/require "../assets/ranks.jpg"))
-(defonce data (js/require "../assets/questions/1_intro.json"))
+(defonce data
+  {:0 (js/require "../assets/questions/0_key_notions.json")
+   :3 (js/require "../assets/questions/3_le_bilan.json")})
 
 (def some-long-content
-  "The Abandoned Ship is a wrecked ship located on Route 108 in  Hoenn, originally being a ship named the S.S. Cactus. The second  part of the ship can only be accessed by using Dive and contains the Scanner.")
+  "The Abandoned Ship is a wrecked ship located on Route 108 in Hoenn,
+  originally being a ship named the S.S. Cactus. The second part of the ship can
+  only be accessed by using Dive and contains the Scanner.")
 
 (defn card [m]
   (let [pic-number (reagent/atom (rand-int 1000))]
@@ -40,83 +46,79 @@
         [:> rnp/Button {:mode :contained
                         :onPress #(reset! pic-number (rand-int 1000))} "OK"]]])))
 
+
 (def sample-question-spec [2 3 4])
 
 (defn title [text]
   [:> rn/Text {:style {:margin 20 :font-weight :bold :font-size 20
                        :color :white}} text])
 
-(defn quiz-button [children]
-  [:> rn/TouchableOpacity
-   {:style {:background-color "rgba(255, 0, 0, 0.8)"
-            :font-color :white
-            :justifyContent :center
-            :alignItems :center
-            :border-radius 30
-            :min-height "10%"}}
-   [:> rn/Text {:style {:color :white
-                        :text-align :center
-                        :padding 10}}
-    children]])
+(defn quiz-button
+  [{:keys [response selected? selected-answer id]
+    :or {selected? false}}]
+  (fn [{:keys [response selected? selected-answer id]
+          :or {selected? false}}]
+      [:> rn/TouchableOpacity
+       {:style {:background-color
+                (if-not selected? #_(and @selected-internal? selected?)
+                  "rgba(255, 0, 0, 0.8)"
+                  "rgba(80, 0, 0, 0.8)")
+                :justifyContent :center
+                :alignItems :center
+                :border-radius 30
+                :min-height "10%"}
+        :on-press
+        (fn []
+          (reset! selected-answer id))}
+       [:> rn/Text {:style {:color :white
+                            :text-align :center
+                            :padding 10}}
+        response]]))
+
+
+(defn timer [duration]
+  (let [timer (reagent/atom duration)]
+    (rf/dispatch [::events/log-question-action 0 :start (js/Date.)])
+    (fn [duration]
+      (if (pos? @timer)
+        (js/setTimeout #(swap! timer dec) 1000)
+        (rf/dispatch [::events/log-question-action 0 :end (js/Date.)]))
+      [:> rn/Text {:style {:color :white}}
+       (str "Remaining time: " (max @timer 0))])))
 
 (defn question-card [m]
-  (let [timer (reagent/atom (:duration m))]
+  (let [selected-answer (reagent/atom nil)]
     (fn [{:keys [question responses correct-response duration difficulty]}]
-      (when (pos? @timer)
-        (js/setTimeout #(swap! timer dec) 1000))
-    [:> rn/View {:style {:height "87%"}}
+    [:> rn/View {:style {:height "99%"}}
      [title question]
      [:> rnp/Card.Content {:style {:margin 0 :opacity 1 :flex 1
                                    :justifyContent :space-around}}
-      (for [idx (range (count responses))
-            :let [response (nth responses idx)]]
-        ^{:key idx}
-        [quiz-button response])]
+      (doall
+       (for [idx (range (count responses))
+             :let [response (nth responses idx)]]
+         ^{:key idx}
+         [quiz-button {:selected? (= @selected-answer idx) :response response
+                       :id idx
+                       :selected-answer selected-answer}]))]
 
      [:> rnp/Card.Actions {:style {:justifyContent :space-between}}
       [:> rn/View {:style {:justify-content :space-between
                            :flex 1
                            :flex-direction :row}}
        [:> rnp/Button {:mode :outlined :disabled true}
-        [:> rn/Text {:style {:color :white}} (str "Remaining time: " @timer)]]
+        [timer duration]]
        [:> rnp/Button {:mode :contained :on-press
-                       #(.log js/console "Hello")}
-        "Validate"]]]]
-     #_[:> rnp/Card {:style {:margin 10 :justifyContent :center
-                             :backgroud-color "rgba(0,0,0)"
-                             :opacity 0.5
-                             :height "87%"}}
-     #_[:> #_rnp/Card.Title
-      rn/Text
-      {:title (reagent/as-element [:> rnp/Paragraph question])
-       :subtitle difficulty :style {:opacity 1.0}}
-      question]
-     [title question]
-
-     [:> rnp/Card.Content {:style {:margin 0 :opacity 1 :flex 1
-                                   :justifyContent :space-around}}
-      (for [idx (range (count responses))
-            :let [response (nth responses idx)]]
-        ^{:key idx}
-        [:> #_rnp/Paragraph
-         rn/Button
-         {:title response
-          :style {:text-align :center :opacity 1}}])]
-
-     [:> rnp/Card.Actions {:style {:alignSelf :flex-end}}
-      [:> rnp/Button {:mode :contained :on-press
-                      #(.log js/console "Hello")}
-       "Validate"]]])))
+                       #(js/alert (str "Hello" (when @selected-answer (str ": " (inc @selected-answer)))))}
+        (str "Validate" (when @selected-answer (str ": " (inc @selected-answer))))]]]])))
 
 (defn question-quiz []
   (let [questions (js->clj data :keywordize-keys true)
         #_@(rf/subscribe [::sub/questions 1])]
     [:> rn/ImageBackground {:source daily-questions-img
                             :style {:width "100%" :height "100%"}}
+     [header]
      [:> rn/View {:style {:flex 1 :justifyContent :space-around}}
-      [header]
-
-      (let [question-spec (nth questions 1)]
+      (let [question-spec (rand-nth (rand-nth (vals questions)))]
         [question-card question-spec])]]))
 
 (defn card-screen-1 []
@@ -154,7 +156,7 @@
     (reagent/reactify-component
      (fn []
        (let [active-screen @(rf/subscribe [:active-screen])]
-         (.log js/console
+         #_(.log js/console
                "Activescreen in Summary"
                (str active-screen))
          (when-not (= active-screen ::summary)
@@ -180,3 +182,11 @@
        (clj->js {:initialRouteName (str active-screen)})
        (clj->js {})))))
 
+
+
+(comment
+  (t/read (t/reader :json) (t/write (t/writer :json) (js/Date.)))
+  (def x (t/read (t/reader :json) (t/write (t/writer :json) (js/Date.))))
+  
+
+  )

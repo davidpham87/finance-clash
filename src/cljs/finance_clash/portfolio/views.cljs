@@ -46,7 +46,7 @@
        :onPress
        (fn []
          (swap! count-click inc)
-         (.alert rn/Alert "Sure" "Message! What?!?"
+         #_(.alert rn/Alert "Sure" "Message! What?!?"
                  (clj->js [{:text "Cancel"}, {:text "OK"}]),
                  {:cancelable true}))}
       (str "Button Sure: " @count-click)]]]])

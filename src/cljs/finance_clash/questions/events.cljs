@@ -38,6 +38,11 @@
  (fn [{:keys [db]} [_ _ error]]
    {:db (assoc db [:errors] error)}))
 
+(reg-event-db
+ ::log-question-action
+ (fn [db [_ question-id action time]]
+   (assoc-in db [:questions question-id action] time)))
+
 (comment
   (rf/dispatch [::request-question-specs 1])
   (defonce question (js/require "../assets/questions/1_Intro.yaml"))
