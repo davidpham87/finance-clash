@@ -1,5 +1,20 @@
 {:paths ["src/clj"]
- :deps {cider/cider-nrepl {:mvn/version "0.21.1"}
+ :deps {cider/cider-nrepl {:mvn/version "0.22.0"}
+        nrepl/nrepl {:mvn/version "0.6.0"}
         org.clojure/clojure {:mvn/version "1.10.0"}
         ring/ring-jetty-adapter {:mvn/version "1.7.1"}
-        metosin/reitit {:mvn/version "0.3.9"}}}
+        metosin/reitit {:mvn/version "0.3.9"}}
+ :aliases
+ {:rebl
+  {:extra-deps
+   {cider/cider-nrepl {:mvn/version "0.22.0"}
+    nrepl/nrepl {:mvn/version "0.6.0"}
+    org.clojure/clojure {:mvn/version "1.10.0"}
+    org.clojure/core.async {:mvn/version "0.4.490"}
+    com.cognitect/rebl {:local/root "/home/david/.m2/repository/com/cognitect/rebl/0.9.220/REBL-0.9.220.jar"}
+    org.openjfx/javafx-fxml     {:mvn/version "11.0.1"}
+    org.openjfx/javafx-controls {:mvn/version "11.0.1"}
+    org.openjfx/javafx-swing    {:mvn/version "11.0.1"}
+    org.openjfx/javafx-base     {:mvn/version "11.0.1"}
+    org.openjfx/javafx-web      {:mvn/version "11.0.1"}}
+   :main-opts  ["-m" "cognitect.rebl"]}}}

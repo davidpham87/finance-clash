@@ -9,6 +9,18 @@ $ shadow-cljs release app
 ;; no idea what to do for expo
 ```
 
+# REBL
+
+```
+clj -R:rebl -m cognitect.rebl
+```
+
+
+``` clojure
+(require '[nrepl.server :refer [start-server stop-server]])
+(defonce server (start-server :port 3334))
+```
+
 ## Notes
 
 The `:app` build will create an `app/index.js`. In `release` mode that is the
