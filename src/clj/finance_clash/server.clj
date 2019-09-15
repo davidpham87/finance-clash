@@ -6,8 +6,12 @@
             [muuntaja.core :as m]
             [reitit.ring.coercion :as coercion]
             [reitit.ring :as ring]
+            [next.jdbc :as jdbc]
+            [next.jdbc.result-set :as rs]
+            [finance-clash.db]
             [finance-clash.specs]
-            [finance-clash.questions]))
+            [finance-clash.user]
+            [finance-clash.quizz]))
 
 (def routes
   ["/plain"
@@ -22,11 +26,12 @@
   (wrap-cors
    (ring/ring-handler
     (ring/router
-     [["/" {:get (fn [request] {:body "Hello from finance-clash server"})}]
+     [["/" {:get (fn [request] {:body "Hello from finance-clash server 2"})}]
       ["/echo" {:get (fn [request] {:body "echo"})}]
       routes
       finance-clash.specs/routes
-      finance-clash.questions/routes]
+      finance-clash.quizz/routes
+      finance-clash.user/routes]
      {:data {:muuntaja m/instance
       	     :middleware
              [params/wrap-params
@@ -52,6 +57,7 @@
 
 (defn restart []
   (.stop @server)
+  (println "Hello")
   (.start @server))
 
 (comment
