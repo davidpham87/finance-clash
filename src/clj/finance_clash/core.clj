@@ -67,6 +67,29 @@ create table quizz_series (
   weight integer default 1
 )"])
 
+  (jdbc/execute! ds ["
+drop table budget;"])
+
+  (jdbc/execute! ds ["
+create table budget (
+  user varchar(32),
+  wealth double,
+  update_at text DEFAULT (datetime('now', 'utc'))
+)"])
+
+  (jdbc/execute! ds [" drop table budget_history;"])
+
+  (jdbc/execute! ds ["
+create table budget_history (
+  user varchar(32),
+  exchange_value double,
+  update_at text DEFAULT (datetime('now', 'utc'))
+)"])
+
+
+
+
+
 
 
 
