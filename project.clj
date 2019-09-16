@@ -4,6 +4,7 @@
   [[cider/cider-nrepl "0.22.3"]
    [cider/piggieback "0.4.1"]
    [clj-http "3.10.0"]
+   [clojure.java-time "0.3.2"]
    [honeysql "0.9.8"]
    [metosin/muuntaja-yaml "0.6.4"]
    [metosin/reitit "0.3.9" :excluesions [metosin/jsonista]]

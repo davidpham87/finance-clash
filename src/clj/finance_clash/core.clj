@@ -6,6 +6,7 @@
    [honeysql.helpers :as hsql]
    [finance-clash.db]))
 
+#_(clojure.use '[next.jdbc :as jdbc])
 (def ds (jdbc/get-datasource finance-clash.db/db))
 
 (defn init! []
@@ -31,17 +32,41 @@ create table questions (
   number integer,
   correct_response integer,
   duration integer,
-  availability boolean,
   difficulty varchar(20)
 )"])
 
   (jdbc/execute! ds ["
-create table quizz (
+drop table quizz_attempt
+"])
+
+  (jdbc/execute! ds ["
+drop table quizz
+"])
+
+
+  (jdbc/execute! ds ["
+create table quizz_attempt (
+  series varchar(32),
   question varchar(10),
   user varchar(32),
   attempt integer default 0,
   success boolean default false
 ) "])
+
+  (jdbc/execute! ds ["
+create table quizz (
+  series varchar(32),
+  question varchar(10),
+  importance integer default 1
+)"])
+
+  (jdbc/execute! ds ["
+create table quizz_series (
+  series varchar(32),
+  release_date text,
+  weight integer default 1
+)"])
+
 
 
 
