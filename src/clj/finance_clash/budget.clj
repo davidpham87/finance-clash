@@ -16,11 +16,24 @@
             [reitit.coercion.spec]
             [spec-tools.spec :as spec]))
 
+(def question-price {:easy 3 :medium 7 :hard 10})
+(def question-value-raw {:easy 10 :medium 21 :hard 30})
+(def bonus-value {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
+
+(s/def ::user-id spec/string?)
+(s/def ::diffculty spec/string?)
+
 (defn budget-tx
   "budget transaction query"
-  [user-id value]
-  (-> {:insert-into :budget_history}
-      {:values [{:user user-id :exchange_value value}]}))
+  ([user-id]
+   (-> {:select [:*] :from [:budget_history] :where [:= :user user-id]}
+       sql/format
+       execute-query!))
+  ([user-id value]
+   (-> {:insert-into :budget_history}
+       {:values [{:user user-id :exchange_value value}]}
+       sql/format
+       execute-query!)))
 
 (defn budget
   ([user-id]
@@ -28,6 +41,7 @@
        sql/format
        execute-query!))
   ([user-id v]
+   (budget-tx user-id v)
    (-> (hsql/update :budget)
        (hsql/sset {:wealth (sql/call :+ :wealth v)
                    :update_at (sql/call :now)})
@@ -40,3 +54,20 @@
 
 (defn earn [user-id v]
   (budget user-id v))
+
+(defn question-value
+  [difficulty {:keys [priority? bonus-period?] :as modifiers}]
+  (* (get question-value (keyword difficulty) 0)
+     (bonus priority? 1)
+     (if priority? (bonus :priority) 1)
+     (if bonus-period? (bonus :bonus-period) (bonus :malus-period))))
+
+(def routes-buy-question
+  ["/quizz/buy-question"
+   {:coercion reitit.coercion.spec/coercion
+    :parameters {:body (s/keys :req-un [::user-id ::diffculty])}
+    :handler
+    (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
+      (let [x (question-price (keyword difficulty))] (buy user-id x)))}])
+
+(def routes routes-buy-question)

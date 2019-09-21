@@ -10,6 +10,7 @@
             [next.jdbc.result-set :as rs]
             [finance-clash.db]
             [finance-clash.specs]
+            [finance-clash.budget]
             [finance-clash.user]
             [finance-clash.quizz]))
 
@@ -31,7 +32,8 @@
       routes
       finance-clash.specs/routes
       finance-clash.quizz/routes
-      finance-clash.user/routes]
+      finance-clash.user/routes
+      finance-clash.budget/routes]
      {:data {:muuntaja m/instance
       	     :middleware
              [params/wrap-params

@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [java-time :as jt]
             [finance-clash.db :refer (execute-query!)]
+            [finance-clash.budget :as budget]
             [honeysql.core :as sql]
             [honeysql.helpers :as hsql
              :refer (select where from insert-into)]
@@ -89,23 +90,6 @@
 
 (defn get-all-ids []
   (-> (select :id)
-      (from :questions)
-      (sql/format)
-      (execute-query!)))
-
-(defn init-chapters
-  "Fill chapters table."
-  []
-  (-> {:insert-into :chapters
-       :values (for [i (range 26)] {:chapter i})}
-      (sql/format)
-      (execute-query!)))
-
-;; questions
-(s/def ::chapter spec/int?)
-(s/def ::question spec/int?)
-
-(s/def ::user-id spec/string?)
 (s/def ::selected-response spec/int?)
 (s/def ::series spec/string?)
 (s/def ::weight spec/int?)
@@ -159,9 +143,15 @@
              {:keys [user-id selected-answer series]} (:body params)
              {:keys [chapter question]} (:path params)
              id (str chapter "_" question)
+             tx (quizz-tx question-id user-id series)
              success? (correct-answer? id user-id selected-answer)]
          #_(println user-id selected-answer id success? series)
          (attempt! id user-id series success?)
+         ;; check if success was false, must provide a value to zero? or error will be thrown
+         (when (and success?
+                    (-> tx first :success (or 1) zero?)))
+         ;; TODO(dph): implement earn-question-value
+           #_(budget/earn-question-value user-id question-di))
          {:status 200
           :body {:is_correct_response success?}}))}}])
 

@@ -5,6 +5,7 @@
             [clojure.string :as str]
             [clojure.data.json :as json]
             [finance-clash.db :refer (execute-query!)]
+            [finance-clash.budget :as budget]
             [honeysql.core :as sql]
             [honeysql.helpers :as hsql :refer (select where from)]
             [muuntaja.core :as mc]
@@ -62,6 +63,8 @@
                     :body {:username username-input}})
                  {:status 422
                   :body {:message "Missing username"}})))}}
+    ["/wealth" {:get {:handler (fn [{{user-id :id} :path-params}]
+                                 (budget/budget user-id))}}]
     ["/answered-questions"
      {:get {:parameters {:query (s/keys :req-un [::series])}
             :handler
