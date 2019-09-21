@@ -90,6 +90,24 @@
 
 (defn get-all-ids []
   (-> (select :id)
+      (from :questions)
+      (sql/format)
+      (execute-query!)))
+
+(defn init-chapters
+  "Fill chapters table."
+  []
+  (-> {:insert-into :chapters
+       :values (for [i (range 26)] {:chapter i})}
+      (sql/format)
+      (execute-query!)))
+
+;; questions
+(s/def ::chapter spec/int?)
+(s/def ::question spec/int?)
+
+(s/def ::user-id spec/string?)
+
 (s/def ::selected-response spec/int?)
 (s/def ::series spec/string?)
 (s/def ::weight spec/int?)
@@ -143,15 +161,16 @@
              {:keys [user-id selected-answer series]} (:body params)
              {:keys [chapter question]} (:path params)
              id (str chapter "_" question)
-             tx (quizz-tx question-id user-id series)
+             tx (quizz-tx id user-id series)
              success? (correct-answer? id user-id selected-answer)]
          #_(println user-id selected-answer id success? series)
          (attempt! id user-id series success?)
-         ;; check if success was false, must provide a value to zero? or error will be thrown
+         ;; check if success was false, must provide a value to zero? or error
+         ;; will be thrown
          (when (and success?
-                    (-> tx first :success (or 1) zero?)))
+                    (-> tx first :success (or 1) zero?))
+           #_(budget/earn-question-value user-id question-id))
          ;; TODO(dph): implement earn-question-value
-           #_(budget/earn-question-value user-id question-di))
          {:status 200
           :body {:is_correct_response success?}}))}}])
 
@@ -196,7 +215,7 @@
          new-priority
          (-> (hsql/update :chapters) (hsql/sset {:priority v})
              (where [:in :series ids]) sql/format)]
-     (execute-query! reset-priory)
+     (execute-query! reset-priority)
      (execute-query! new-priority)
      (zipmap ids (repeat true)))))
 
@@ -242,13 +261,13 @@
   ["/series"
    {:coercion reitit.coercion.spec/coercion
     :post {:summary "Create a new series"
-           :parameters {:path (s/keys :req-un [::available ::priority])}
+           :parameters {:body (s/keys :req-un [::available ::priority])}
            :handler
-           (fn [{{{:keys [available priority]} :path} :parameters}]
+           (fn [{{{:keys [available priority]} :body} :parameters}]
              (available? available true)
              (priority? priority true)
              (-> (hsql/insert-into :quizz_series)
-                 (hsql/values [{:release_date (jt/now)}])
+                 (hsql/values [{:release_date (jt/local-date-time)}])
                  sql/format
                  execute-query!)
              {:status 200 :body {:series 0}})}}
@@ -258,21 +277,22 @@
            :handler
            (fn [m]
              (let [available-ids (available?)
-                   priority-ids (filter :priorty available)
+                   priority-ids (filter :priorty available-ids)
                    questions (get-series-questions (mapv :id available-ids)
                                                    (mapv :id priority-ids))]
                {:status 200 :body questions}))}}]
    routes-latest])
 
 (def routes
-  [["/quizz/:chapter/:question"
-    {:coercion reitit.coercion.spec/coercion
-     :parameters {:path (s/keys :req-un [::chapter ::question])}}
-    routes-answer]
-   routes-series])
+  ["/quizz/:chapter/:question"
+   {:coercion reitit.coercion.spec/coercion
+    :parameters {:path (s/keys :req-un [::chapter ::question])}}
+   routes-answer])
 
 (comment
-  (-> (client/get "http://localhost:3000") :body)
+
+
+  (-> (client/get "http://localhost:3000/user/1") :body)
   (->> (client/get "http://localhost:3000/series/0/available")
        :body
        (mc/decode mi "application/json"))
@@ -292,13 +312,22 @@
       (json/read-str :key-fn keyword))
 
   (-> (client/post
+       "http://localhost:3000/series"
+       {:content-type :json
+        :body (json/write-str
+               {:available [1 2 3 4 5 6 7 8 9 10]
+                :priority [8 9 10]})})
+      :body
+      (json/read-str :key-fn keyword))
+
+  (-> (client/post
        "http://localhost:3000/question/0/1/answer"
        {:content-type :json
         :body (json/write-str {:user-id "1" :selected-answer 2})})
       :body
       (json/read-str :key-fn keyword))
 
-  (-> (client/get "http://localhost:3001/echo") :body)
+  (-> (client/get "http://localhost:3000/echo") :body)
 
   (doseq [chapter (range (count question-files))]
     (convert-question chapter))

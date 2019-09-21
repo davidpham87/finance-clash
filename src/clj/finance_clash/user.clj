@@ -33,7 +33,7 @@
 ;; Get/set username from id
 ;; authentificate? no password
 (s/def ::username (s/and string? seq))
-(s/def ::series spec/int)
+(s/def ::series spec/integer?)
 
 (defn answered-questions [user-id series]
   (-> {:select [:question]
@@ -43,29 +43,32 @@
       execute-query!))
 
 (def user
-  ["/user" {:coercion reitit.coercion.spec/coercion}
-   ["/:id"
-    {:get {:summary "Get username"
-           :handler
-           (fn [{{id :id} :path-params}]
-             {:status 200
-              :body (username id)})}
-     :put {:summary "Set username"
-           :parameters {:body (s/keys :req-un [::username])}
-           :handler
-           (fn [m]
-             (let [id (get-in m [:path-params :id])
-                   username-input (get-in m [:parameters :body :username])]
-               (if username-input
-                 (do
-                   (username id username-input)
-                   {:status 200
-                    :body {:username username-input}})
-                 {:status 422
-                  :body {:message "Missing username"}})))}}
-    ["/wealth" {:get {:handler (fn [{{user-id :id} :path-params}]
-                                 (budget/budget user-id))}}]
-    ["/answered-questions"
+  [["/user" {:coercion reitit.coercion.spec/coercion
+             :get {:summary "User Hello message"
+                   :handler (fn [m] {:status 200 :body "Hello"})}}]
+   ["/user" {:coercion reitit.coercion.spec/coercion}
+    ["/:id"
+     {:get {:summary "Get username"
+            :handler
+            (fn [{{id :id} :path-params}]
+              {:status 200
+               :body (username id)})}
+      :put {:summary "Set username"
+            :parameters {:body (s/keys :req-un [::username])}
+            :handler
+            (fn [m]
+              (let [id (get-in m [:path-params :id])
+                    username-input (get-in m [:parameters :body :username])]
+                (if username-input
+                  (do
+                    (username id username-input)
+                    {:status 200
+                     :body {:username username-input}})
+                  {:status 422
+                   :body {:message "Missing username"}})))}}]
+    ["/:id/wealth" {:get {:handler (fn [{{user-id :id} :path-params}]
+                                       (budget/budget user-id))}}]
+    ["/:id/answered-questions"
      {:get {:parameters {:query (s/keys :req-un [::series])}
             :handler
             (fn [m]
@@ -74,12 +77,13 @@
                 {:status 200
                  :body (answered-questions user-id series)}))}}]]])
 
-(def routes [user])
+(def routes user)
 
 (comment
   (-> (client/get "http://localhost:3000") :body)
 
-  (-> (client/get "http://localhost:3001/echo") :body)
+  (-> (client/get "http://localhost:3000/echo") :body)
+  (-> (client/get "http://localhost:3000/spec") :body)
   (-> (client/get "http://localhost:3000/user/1")
       :body
       (json/read-str :key-fn keyword))

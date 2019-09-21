@@ -18,7 +18,7 @@
 
 (def question-price {:easy 3 :medium 7 :hard 10})
 (def question-value-raw {:easy 10 :medium 21 :hard 30})
-(def bonus-value {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
+(def question-bonus {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
 
 (s/def ::user-id spec/string?)
 (s/def ::diffculty spec/string?)
@@ -58,16 +58,16 @@
 (defn question-value
   [difficulty {:keys [priority? bonus-period?] :as modifiers}]
   (* (get question-value (keyword difficulty) 0)
-     (bonus priority? 1)
-     (if priority? (bonus :priority) 1)
-     (if bonus-period? (bonus :bonus-period) (bonus :malus-period))))
+     (question-bonus priority? 1)
+     (if priority? (question-bonus :priority) 1)
+     (if bonus-period? (question-bonus :bonus-period) (question-bonus :malus-period))))
 
 (def routes-buy-question
   ["/quizz/buy-question"
    {:coercion reitit.coercion.spec/coercion
     :parameters {:body (s/keys :req-un [::user-id ::diffculty])}
-    :handler
-    (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
-      (let [x (question-price (keyword difficulty))] (buy user-id x)))}])
+    :post {:handler
+           (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
+             (let [x (question-price (keyword difficulty))] (buy user-id x)))}}])
 
 (def routes routes-buy-question)

@@ -27,12 +27,25 @@
   (wrap-cors
    (ring/ring-handler
     (ring/router
-     [["/" {:get (fn [request] {:body "Hello from finance-clash server 2"})}]
+     [["/" {:get (fn [request]
+                   (clojure.pprint/pprint
+                    [["/" {:get (fn [request]
+                                  (clojure.pprint/pprint)
+                                  {:body "Hello from finance-clash server 1"})}]
+                     ["/echo" {:get (fn [request] {:body "echo"})}]
+                     routes
+                     finance-clash.specs/routes
+                     finance-clash.quizz/routes
+                     finance-clash.quizz/routes-series
+                     finance-clash.user/routes
+                     finance-clash.budget/routes])
+                   {:body "Hello from finance-clash server 3"})}]
       ["/echo" {:get (fn [request] {:body "echo"})}]
       routes
       finance-clash.specs/routes
-      finance-clash.quizz/routes
       finance-clash.user/routes
+      finance-clash.quizz/routes
+      finance-clash.quizz/routes-series
       finance-clash.budget/routes]
      {:data {:muuntaja m/instance
       	     :middleware
@@ -52,7 +65,15 @@
 (defn start []
   (let [jetty-server (jetty/run-jetty #'app {:port 3000, :join? false})]
     (reset! server jetty-server)
-    (println "server running in port 3000")))
+    (println "server running in port 3000")
+    (println
+     [["/" {:get (fn [request] {:body "Hello from finance-clash server 2"})}]
+      ["/echo" {:get (fn [request] {:body "echo"})}]
+      routes
+      finance-clash.specs/routes
+      finance-clash.quizz/routes
+      finance-clash.user/routes
+      finance-clash.budget/routes])))
 
 (defn stop []
   (.stop @server))
