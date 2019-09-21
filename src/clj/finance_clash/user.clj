@@ -32,6 +32,14 @@
 ;; Get/set username from id
 ;; authentificate? no password
 (s/def ::username (s/and string? seq))
+(s/def ::series spec/int)
+
+(defn answered-questions [user-id series]
+  (-> {:select [:question]
+       :from [:quizz_attempt]
+       :where [[:= :series series] [:= :user user-id] [:= :success true]]}
+      sql/format
+      execute-query!))
 
 (def user
   ["/user" {:coercion reitit.coercion.spec/coercion}
@@ -53,7 +61,15 @@
                    {:status 200
                     :body {:username username-input}})
                  {:status 422
-                  :body {:message "Missing username"}})))}}]])
+                  :body {:message "Missing username"}})))}}
+    ["/answered-questions"
+     {:get {:parameters {:query (s/keys :req-un [::series])}
+            :handler
+            (fn [m]
+              (let [user-id (get-in m [:path-params :id])
+                    series (get-in m [:parameters :query :series])]
+                {:status 200
+                 :body (answered-questions user-id series)}))}}]]])
 
 (def routes [user])
 

@@ -1,0 +1,55 @@
+---
+# 024 - MSIAI - Bourse à la crié
+
+- question: Est-ce que le Open outcry existe encore?
+  responses:
+  - Non, plus du tout.
+  - Oui, c'est le type de bourse le plus largement répandu.
+  - Oui, mais peu depuis l'essor des bourses électroniques.
+  - Cela n'a jamais existé.
+  correct-response: 3
+  duration: 30
+  difficulty: easy
+
+- question: Quel ordre est passé pour se prémunir de pertes trop importantes si le marché venait à chuter?
+  responses:
+  - Best price.
+  - Stop Loss.
+  - Limit order.
+  - Stop gain.
+  correct-response: 2
+  duration: 30
+  difficulty: easy
+
+
+- question: Les signes de main des traders servent?
+  responses:
+  - A négocier et passer les ordres.
+  - A se faire du vent.
+  - A rien.
+  - A faire parler d'eux.
+  correct-response: 1
+  duration: 30
+  difficulty: easy
+
+
+- question: Comment s'appelle l'exercice entre banques visant à vérifier toutes les positions?
+  responses:
+  - La réconciliation.
+  - La vérification.
+  - La collatéralisation.
+  - L'alignement.
+  correct-response: 1
+  duration: 15
+  difficulty: medium
+
+
+- question: Est-ce que les métaux sont traités en bourse?
+  responses:
+  - Non.
+  - Oui, au CME.
+  - Oui, au NYSE.
+  - Oui, à Eurex.
+  correct-response: 1
+  duration: 10
+  difficulty: medium

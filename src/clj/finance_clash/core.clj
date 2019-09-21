@@ -36,6 +36,13 @@ create table questions (
 )"])
 
   (jdbc/execute! ds ["
+create table chapters (
+  chapter integer,
+  available boolean default false,
+  priority boolean default false
+) "])
+
+  (jdbc/execute! ds ["
 drop table quizz_attempt
 "])
 
@@ -46,7 +53,7 @@ drop table quizz
 
   (jdbc/execute! ds ["
 create table quizz_attempt (
-  series varchar(32),
+  series integer,
   question varchar(10),
   user varchar(32),
   attempt integer default 0,
@@ -55,16 +62,19 @@ create table quizz_attempt (
 
   (jdbc/execute! ds ["
 create table quizz (
-  series varchar(32),
-  question varchar(10),
-  importance integer default 1
+  series integer,
+  question varchar(10)
 )"])
+
+
+  (jdbc/execute! ds ["
+drop table quizz_series
+"])
 
   (jdbc/execute! ds ["
 create table quizz_series (
-  series varchar(32),
-  release_date text,
-  weight integer default 1
+  id integer primary key autoincrement,
+  release_date text
 )"])
 
   (jdbc/execute! ds ["
@@ -85,13 +95,6 @@ create table budget_history (
   exchange_value double,
   update_at text DEFAULT (datetime('now', 'utc'))
 )"])
-
-
-
-
-
-
-
 
   (jdbc/execute! ds ["
 insert into quizz(question, user, attempt, success)

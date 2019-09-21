@@ -11,30 +11,8 @@
   duration: 30
   difficulty: easy
 
-- question: Le bilan correspond à?
-  responses:
-  - Une photographie de la trésorerie.
-  - Une photographie des emplois et ressources.
-  - Une photographie des actifs et passifs.
-  - Une photographie des ressources.
-  correct-response: 3
-  duration: 15
-  difficulty: medium
 
-
-
-
-- question: Le bilan d'Airbus étudié en classe correspond à?
-  responses:
-  - Bilan comptable interne.
-  - Bilan fiscal.
-  - Bilan comptable officiel.
-  - Bilan aérien.
-  correct-response: 3
-  duration: 20
-  difficulty: easy
-
-- question: Le bilan d'Airbus étudié en classe correspond à?
+- question: Le bilan d'Airbus étudié en classe correspond au?
   responses:
   - Bilan comptable officiel.
   - Bilan comptable interne.
@@ -43,8 +21,6 @@
   correct-response: 1
   duration: 10
   difficulty: medium
-
-
 
 
 
@@ -58,6 +34,7 @@
   duration: 25
   difficulty: easy
 
+
 - question: Le pasif répond à quelle question?
   responses:
   - D'où viennent les pertes.
@@ -69,9 +46,6 @@
   difficulty: medium
 
 
-
-
-
 - question: Les dettes fournisseurs sont dans quel poste du bilan?
   responses:
   - Actifs courants.
@@ -79,8 +53,9 @@
   - Passifs courants.
   - Passifs non courants.
   correct-response: 3
-  duration: 13
+  duration: 15
   difficulty: medium
+
 
 - question: Les créances clients sont dans quel poste du bilan?
   responses:

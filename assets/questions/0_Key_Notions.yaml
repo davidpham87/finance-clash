@@ -3,10 +3,10 @@
 
 - question: J'effectue un placement de €10'000 à 2%, combien d'intérêts je toucherai dans 1 an?
   responses:
-  - €0.
   - €2.
-  - €4.
-  - €6.
+  - €20.
+  - €200.
+  - €400.
   correct-response: 2
   duration: 20
   difficulty: easy
@@ -14,10 +14,10 @@
 
 - question: J'effectue un placement de €10'000 à 2%, les intérêts sont composés, combien d'intérêts je toucherai sur les 2 prochaines années?
   responses:
-  - Moins de €4.
-  - €4.
-  - Plus de €4 mais moins que €6.
-  - €6 ou plus.
+  - Moins de €40.
+  - €40.
+  - Plus de €40 mais moins que €60.
+  - €60 ou plus.
   correct-response: 3
   duration: 20
   difficulty: medium
@@ -46,6 +46,8 @@
   duration: 20
   difficulty: medium
 
+
+
 - question: Quelle affirmation est correcte?
   responses:
   - La valeur actualisée nette doit toujours être nulle.
@@ -62,7 +64,7 @@
   responses:
   - Diminue avec la durée.
   - Augmente avec la durée.
-  - N'est pas fonctoin de la durée.
+  - N'est pas fonction de la durée.
   - Augmente avec les taux d'intérêts.
   correct-response: 1
   duration: 15
@@ -73,12 +75,13 @@
 - question: Which of the following is correct?
   responses:
   - To financially hedge a future revenue means to offset its potential gains.
-  - To financially hedge afuture revenue means to offset its potential gains or losses.
+  - To financially hedge a future revenue means to offset its potential gains or losses.
   - To financially hedge a future revenue means to offset its 'known in advance' gains.
-  - To financially hedge afuture revenue means to offset its 'known in advance' gains or losses.
+  - To financially hedge a future revenue means to offset its 'known in advance' gains or losses.
   correct-response: 2
   duration: 20
   difficulty: medium
+
 
 
 - question: Aibus hedges by selling forward USD vs EUR at an exchange rate of EUR/USD 1.15?

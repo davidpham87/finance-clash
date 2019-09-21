@@ -20,11 +20,23 @@
   "budget transaction query"
   [user-id value]
   (-> {:insert-into :budget_history}
-      {:values [{:user user-id :exchange_value value}]}
-      )
-
-  )
+      {:values [{:user user-id :exchange_value value}]}))
 
 (defn budget
-  ([user-id])
-  ([user-id v]))
+  ([user-id]
+   (-> {:select [:*] :from [:budget] :where [:= :user user-id]}
+       sql/format
+       execute-query!))
+  ([user-id v]
+   (-> (hsql/update :budget)
+       (hsql/sset {:wealth (sql/call :+ :wealth v)
+                   :update_at (sql/call :now)})
+       (where [:= :user user-id])
+       sql/format
+       execute-query!)))
+
+(defn buy [user-id v]
+  (budget user-id (- v)))
+
+(defn earn [user-id v]
+  (budget user-id v))

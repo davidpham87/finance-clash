@@ -1,3 +1,5 @@
+-- (setq sql-sqlite-program "sqlite3")
+
 .tables
 .show
 .headers on

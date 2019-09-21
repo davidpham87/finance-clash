@@ -1,0 +1,78 @@
+---
+# 014 - MSIAI - Diagnostique Financier
+
+- question: Lequel n'est pas un objectif fondamental de l'analyse financière?
+  responses:
+  - Apprécier la capacité bénéficiaire d'une entreprise.
+  - Evaluer le management d'une entreprise.
+  - Dresser les perspectives de progression d'une entreprise.
+  - Déterminer les risques financiers d'une entreprise.
+  correct-response: 2
+  duration: 30
+  difficulty: easy
+
+- question: L'analyse financière se fait principalement grâce à?
+  responses:
+  - L'analyse des feedbacks clients et fournisseurs.
+  - L'analyse de la santé du secteur d'activité.
+  - L'analyse de ratios financiers.
+  - L'analyse du pipe de commande.
+  correct-response: 3
+  duration: 25
+  difficulty: easy
+
+
+- question: Lequel des points en suite NE constitue PAS une limite à l'analyse financière?
+  responses:
+  - Une analyse financière est basée sur une étude du bilan et compte de résultat.
+  - Une comparaison implique un échantillonage et l'identification d'entreprises de même secteurs et taille.
+  - La diversification des activités constitue un frein à l'analyse.
+  - Une analyse financière est backward looking puisque basée sur des documents datant de plusieurs mois.
+  correct-response: 1
+  duration: 20
+  difficulty: medium
+
+
+- question: Le ratio de liquidité générale, permettant de mesurer l'aptitude de l'entreprise à payer son passif exigible à court terme avec son actif réalisable à court terme, intéresse?
+  responses:
+  - Les fournisseurs et institutions financières.
+  - Les investisseurs.
+  - Les gestionnaires.
+  - Les salariés.
+  correct-response: 1
+  duration: 20
+  difficulty: medium
+
+
+- question: Lequel des ratios en suite n'est pas un ratio de gestion?
+  responses:
+  - Rentabilité nette.
+  - Rotation de l'actif.
+  - Délai de règlement clients.
+  - Rotation des stocks.
+  correct-response: 1
+  duration: 15
+  difficulty: medium
+
+
+- question: De délai de règlement client, correspondant à la durée moyenne du crédit accordé aux clients en jours de CA, est calculé comme?
+  responses:
+  - Créances clients / VA x 250.
+  - Créances clients / VA x 365.
+  - Créances clients / CA x 365.
+  - Créances clients / CA x 250.
+  correct-response: 3
+  duration: 15
+  difficulty: medium
+
+
+
+- question: Si vous n'avez que 10 minutes pour regarder un rapport annuel, quel élément vaut-il mieux laisser de côté?
+  responses:
+  - La lettre d'introduction du CEO.
+  - La revue des commissaires aux comptes (audits).
+  - La rémunération des directeurs.
+  - Le bilan et son évolution.
+  correct-response: 3
+  duration: 25
+  difficulty: easy

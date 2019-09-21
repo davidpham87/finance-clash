@@ -25,7 +25,29 @@
   ["0_Key_Notions.yaml"
    "1_Intro.yaml"
    "2_Etats_Financiers.yaml"
-   "3_Le_Bilan.yaml"])
+   "3_Le_Bilan.yaml"
+   "4_Le_Compte_de_Resultat.yaml"
+   "5_Introduction_Finance.yaml"
+   "6_Le_Capital.yaml"
+   "7_Cycles_Exploitation_Inv_Financement.yaml"
+   "8_Comptabilite.yaml"
+   "9_SIG_et_CAF.yaml"
+   "10_Obligations.yaml"
+   "11_Regulatory_Requirements.yaml"
+   "12_Financial_Crisis.yaml"
+   "13_TVA.yaml"
+   "14_Diagnostic_Financier.yaml"
+   "15_Financial_Risks_and_Options.yaml"
+   "16_Couts_and_Comptabilite_Analytique.yaml"
+   "17_Microeconomie.yaml"
+   "18_Central_Banks.yaml"
+   "19_Tresorerie.yaml"
+   "20_empty.yaml"
+   "21_Rating_agencies.yaml"
+   "22_Credit_Talk.yaml"
+   "23_Libor_Fwd_Rates.yaml"
+   "24_Bourse.yaml"
+   "25_Liquidity_Talk.yaml"])
 
 (defn read-questions [chapter]
   (->> (get question-files chapter)
@@ -68,6 +90,14 @@
 (defn get-all-ids []
   (-> (select :id)
       (from :questions)
+      (sql/format)
+      (execute-query!)))
+
+(defn init-chapters
+  "Fill chapters table."
+  []
+  (-> {:insert-into :chapters
+       :values (for [i (range 26)] {:chapter i})}
       (sql/format)
       (execute-query!)))
 
@@ -139,63 +169,110 @@
 ;; Series are a set of question which can only be release after the release date.
 (s/def ::availability spec/boolean?)
 (s/def ::release-date spec/string?)
+(s/def ::available (s/coll-of spec/integer? :min-count 1 :distinct true))
+(s/def ::priority (s/coll-of spec/integer? :min-count 1 :distinct true))
 
-(defn availability
+(defn available?
   "Query availability of question given their ids (chapter_number)"
-  ([ids]
-   (let [release-dates
-         (-> (select :release_date) (from :quizz_series) (where [:in :series ids])
-             (sql/format) execute-query!)]
-     (zipmap ids release-dates)))
-  ([ids date weight new?]
-   (let [insert-query
-         (-> (hsql/insert-into :quizz_series)
-             (hsql/values (mapv #(assoc {:release-date date :weight weight}
-                                        :series %) ids)))
+  ([]
+   (let [available
+         (-> (select :*) (from :chapters) (sql/format) execute-query!)]
+     available))
+  ([ids] (available? ids true))
+  ([ids v]
+   (let [v (if (nil? v) true v)
+         reset-available?
+         (-> (hsql/update :chapters) (hsql/sset {:available (not v)})
+             (where [:not-in :series ids]) sql/format)
          update-query
-         (-> (hsql/update :quizz_series) (hsql/sset {:release_date date})
-             (where [:in :series ids]))
-         release-dates (execute-query! (sql/format (if new? insert-query update-query)))]
-     (zipmap ids release-dates))))
+         (-> (hsql/update :chapters) (hsql/sset {:available v})
+             (where [:in :series ids]) sql/format)]
+     (execute-query! reset-available?)
+     (execute-query! update-query)
+     (zipmap ids (repeat true)))))
 
-(defn availability-update-handler [m]
-  (let [method (:request-method m)
-        {:keys [release-date weight]} (get-in m [:parameters :body])
-        id (get-in m [:parameters :path :series])]
-    (println release-date id)
-    (availability [id] release-date (or weight 1) (= :post method))
-    (println method)
-    {:status 200
-     :body {:series id}}))
+(defn priority?
+  "Query priority of question given their ids (chapter_number)"
+  ([]
+   (let [priority
+         (-> (select :*) (from :chapters) (sql/format) execute-query!)]
+     priority))
+  ([ids] (priority? ids true))
+  ([ids v]
+   (let [v (if (nil? v) true v)
+         reset-priority
+         (-> (hsql/update :chapters) (hsql/sset {:priority (not v)})
+             (where [:not-in :series ids]) sql/format)
+         new-priority
+         (-> (hsql/update :chapters) (hsql/sset {:priority v})
+             (where [:in :series ids]) sql/format)]
+     (execute-query! reset-priory)
+     (execute-query! new-priority)
+     (zipmap ids (repeat true)))))
 
-(def routes-availability
-  ["/available"
-   {:get {:summary "Retrieve series availability for a given chapter and number."
+(defn get-questions [chapters-ids cols]
+  (-> {:select cols
+       :from [:questions]
+       :where [:in :chapter chapters-ids]}
+      sql/format))
+
+(defn latest-series []
+  (-> {:select [:series]
+       :from [:quizz_series]
+       :order-by [[:release_date :desc]]
+       :limit 1}
+      sql/format))
+
+;; TODO(dph): latest should returns all the questions? Yes, but later
+(def routes-latest
+  ["/latest"
+   {:get {:summary "Retrieve the latest series identifier."
           :handler
-          (fn [{{{:keys [series]} :path} :parameters}]
-            (let [release-date (get (availability [series]) series)]
-              {:status 200
-               :body {:series series :availability
-                      (not (pos?
-                           (compare (:release_date release-date)
-                                    (jt/format "yyyy-MM-dd" (jt/local-date)))))}}))}
-    :put {:summary "Update series availability for a given chapter and number."
-          :parameters {:body (s/keys :req-un [::release-date]
-                                     :opt-un [::weight])}
-          :handler availability-update-handler}
-    :post {:summary "Create series availability for a given chapter and number."
-           :parameters {:body (s/keys :req-un [::release-date]
-                                      :opt-un [::weight])}
-           :handler availability-update-handler}}])
+          (fn [m] {:status 200 :body {:series (latest-series)}})}}])
 
+(defn reorder-priority [ms priority-ids n]
+  (let [priority-ids (into #{} priority-ids)]
+    (-> (take n (filter #(priority-ids (:chapter %)) ms))
+        vec
+        (as-> qs (into qs (remove #(contains? (into #{} qs) %) ms))))))
+
+(defn get-series-questions [available-ids priority-ids]
+  (let [priority-filter (into #{} priority-ids)
+        questions
+        (->> (get-questions available-ids [:id :chapter :difficulty])
+             execute-query!
+             shuffle
+             (group-by :difficulty)
+             (reduce-kv #(assoc %1 %2
+                                (->> (reorder-priority %3 priority-ids 5)
+                                     (mapv :id))) {}))]
+    questions))
 
 (def routes-series
-  ["/series/:series"
+  ["/series"
    {:coercion reitit.coercion.spec/coercion
-    :parameters {:path (s/keys :req-un [::series])}
-    :get {:summary "Get series details"
-          :handler (fn [m] {:status 200 :body {:series 0}})}}
-   routes-availability])
+    :post {:summary "Create a new series"
+           :parameters {:path (s/keys :req-un [::available ::priority])}
+           :handler
+           (fn [{{{:keys [available priority]} :path} :parameters}]
+             (available? available true)
+             (priority? priority true)
+             (-> (hsql/insert-into :quizz_series)
+                 (hsql/values [{:release_date (jt/now)}])
+                 sql/format
+                 execute-query!)
+             {:status 200 :body {:series 0}})}}
+   ["/:series/questions"
+    {:parameters {:path (s/keys :req-un [::series])}
+     :get {:summary "Get series details questions"
+           :handler
+           (fn [m]
+             (let [available-ids (available?)
+                   priority-ids (filter :priorty available)
+                   questions (get-series-questions (mapv :id available-ids)
+                                                   (mapv :id priority-ids))]
+               {:status 200 :body questions}))}}]
+   routes-latest])
 
 (def routes
   [["/quizz/:chapter/:question"
@@ -232,9 +309,11 @@
       (json/read-str :key-fn keyword))
 
   (-> (client/get "http://localhost:3001/echo") :body)
-  (doseq [chapter (range 4)]
+
+  (doseq [chapter (range (count question-files))]
     (convert-question chapter))
-  (doseq [chapter (range 4)]
+
+  (doseq [chapter (range (count question-files))]
     (import-question->db chapter))
 
   (def chapter 0)
