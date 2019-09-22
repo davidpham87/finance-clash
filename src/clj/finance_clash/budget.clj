@@ -30,29 +30,53 @@
        sql/format
        execute-query!))
   ([user-id value]
-   (-> {:insert-into :budget_history}
-       {:values [{:user user-id :exchange_value value}]}
+   (-> {:insert-into :budget_history
+        :values [{:user user-id :exchange_value value
+                  :update_at (sql/call :datetime "now" "utc")}]}
        sql/format
        execute-query!)))
 
+(defn clear-budget-tx [user-id]
+  (-> {:delete-from  :budget_history
+       :where [:= :user user-id]}
+      sql/format
+      execute-query!))
+
+(defn budget-init [user-id v]
+  (-> {:insert-into :budget
+       :values [{:user user-id :wealth (or v 100)}]}
+      sql/format
+      execute-query!))
+
+(defn budget-reset [user-id v]
+  (-> (hsql/update :budget)
+      (hsql/sset {:wealth v
+                  :update_at (sql/call :datetime "now" "utc")})
+      (where [:= :user user-id])
+      sql/format
+      execute-query!))
+
 (defn budget
   ([user-id]
-   (-> {:select [:*] :from [:budget] :where [:= :user user-id]}
+   (-> {:select [:*] :from [:budget] :where [:= :user user-id] :limit 1}
        sql/format
        execute-query!))
   ([user-id v]
-   (budget-tx user-id v)
    (-> (hsql/update :budget)
        (hsql/sset {:wealth (sql/call :+ :wealth v)
-                   :update_at (sql/call :now)})
+                   :update_at (sql/call :datetime "now" "utc")})
        (where [:= :user user-id])
        sql/format
        execute-query!)))
 
+(defn wealth [user-id] (budget user-id))
+
 (defn buy [user-id v]
+  (budget-tx user-id (- v))
   (budget user-id (- v)))
 
 (defn earn [user-id v]
+  (budget-tx user-id v)
   (budget user-id v))
 
 (defn question-value
@@ -71,3 +95,10 @@
              (let [x (question-price (keyword difficulty))] (buy user-id x)))}}])
 
 (def routes routes-buy-question)
+
+(comment
+  (budget "1")
+  (wealth "1")
+  (earn "1" 500)
+  (buy "1" 200)
+  (budget-tx "1"))

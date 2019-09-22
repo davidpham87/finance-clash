@@ -82,7 +82,7 @@ drop table budget;"])
 
   (jdbc/execute! ds ["
 create table budget (
-  user varchar(32),
+  user varchar(32) primary key,
   wealth double,
   update_at text DEFAULT (datetime('now', 'utc'))
 )"])

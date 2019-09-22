@@ -45,7 +45,6 @@
       finance-clash.specs/routes
       finance-clash.user/routes
       finance-clash.quizz/routes
-      finance-clash.quizz/routes-series
       finance-clash.budget/routes]
      {:data {:muuntaja m/instance
       	     :middleware

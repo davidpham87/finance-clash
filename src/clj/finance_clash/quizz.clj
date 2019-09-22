@@ -259,18 +259,19 @@
 
 (def routes-series
   ["/series"
-   {:coercion reitit.coercion.spec/coercion
-    :post {:summary "Create a new series"
-           :parameters {:body (s/keys :req-un [::available ::priority])}
-           :handler
-           (fn [{{{:keys [available priority]} :body} :parameters}]
-             (available? available true)
-             (priority? priority true)
-             (-> (hsql/insert-into :quizz_series)
-                 (hsql/values [{:release_date (jt/local-date-time)}])
-                 sql/format
-                 execute-query!)
-             {:status 200 :body {:series 0}})}}
+   {:coercion reitit.coercion.spec/coercion}
+   [""
+    {:post {:summary "Create a new series"
+            :parameters {:body (s/keys :req-un [::available ::priority])}
+            :handler
+            (fn [{{{:keys [available priority]} :body} :parameters}]
+              (available? available true)
+              (priority? priority true)
+              (-> (hsql/insert-into :quizz_series)
+                  (hsql/values [{:release_date [sql/call :datetime "now" "utc"]}])
+                  sql/format
+                  execute-query!)
+              {:status 200 :body {:series 0}})}}]
    ["/:series/questions"
     {:parameters {:path (s/keys :req-un [::series])}
      :get {:summary "Get series details questions"
@@ -284,10 +285,11 @@
    routes-latest])
 
 (def routes
-  ["/quizz/:chapter/:question"
-   {:coercion reitit.coercion.spec/coercion
-    :parameters {:path (s/keys :req-un [::chapter ::question])}}
-   routes-answer])
+  [routes-series
+   ["/quizz/:chapter/:question"
+    {:coercion reitit.coercion.spec/coercion
+     :parameters {:path (s/keys :req-un [::chapter ::question])}}
+    routes-answer]])
 
 (comment
 
