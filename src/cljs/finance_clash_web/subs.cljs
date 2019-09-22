@@ -55,7 +55,12 @@
 
 (reg-sub
  :ui-states
- (fn [db _] (db :ui-states)))
+ (fn [db _] (get db :ui-states {})))
+
+(reg-sub
+ :drawer-open?
+ :<- [:ui-states]
+ (fn [m _] (get m :drawer-open? false)))
 
 (reg-sub
  :ui-states-panel

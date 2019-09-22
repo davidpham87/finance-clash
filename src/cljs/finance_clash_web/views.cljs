@@ -3,6 +3,7 @@
    [reagent.core :as reagent]
    [re-frame.core :as rf :refer (dispatch subscribe)]
    [finance-clash-web.components.mui-utils :refer (custom-theme)]
+   [finance-clash-web.components.app-bar :refer (app-bar)]
    [finance-clash-web.login.core :rename {root-panel login-panel}]
    [finance-clash-web.chapter-selection.core :rename {root-panel chapter-panel}]
    [finance-clash-web.quizz.core :rename {root-panel quizz-panel}]
@@ -13,7 +14,7 @@
   [:div {:style {:display "flex"}}
    [:> mui/CssBaseline]
    [:> mui/MuiThemeProvider {:theme custom-theme}
-    #_[:> app-bar]
+    [:> app-bar]
     #_[user-feedback-comp]
     #_[:div {:style {:display "flex"}}
      [:> drawer (clj->js {:user-role (<sub [:user-role])})]]

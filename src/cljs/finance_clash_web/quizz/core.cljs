@@ -18,10 +18,16 @@
 ;; TODO(dph): on timeout send a empty answer
 
 (def answer-button
-  (adapt-mui-component-style (clj->js {:label {:textTransform "none"}}) mui/Button))
+  (adapt-mui-component-style
+   (clj->js {:label {:textTransform "none"}
+             :root {:border-radius 3
+                    :color "black"
+                    :background-color (colors/colors-rgb :aquamarine-bright)
+                    "&:hover" {:color "white"
+                               :background-color (colors/colors-rgb :aquamarine-dark)}}}) mui/Button))
 
 (defn display-question [{:keys [question responses duration] :as question-map}]
-  [:> mui/Card
+  [:> mui/Card {:style {:max-width 360}}
    [:> mui/CardHeader {:title question}]
    [:> mui/CardContent
     [:div {:display :flex :flex-direction :column :width "100%"
@@ -33,7 +39,8 @@
          [:> answer-button
           {:onClick #(js/alert (str "You selected choice answer: " i))
            :variant :outlined
-           :style {:margin-top 10 :margin-bottom 10 :width "100%"}}
+           ;; :disabled true
+           :style {:margin-top 10 :margin-bottom 10 :width "100%" :min-height 60}}
           answer]]))]]])
 
 (defn display-question-comp [id]
@@ -47,25 +54,27 @@
   ([args v]
    [:> mui/Button (merge {:variant :contained :style {:margin 10}} args) v]))
 
+;; TODO(dph): include bonus
 (defn difficulty-selection []
   [:> mui/Card {:elevation 0 :style {:min-width 260 :width "50%"}}
    [:> mui/CardHeader {:title "Select Difficulty"}]
    [:> mui/CardContent
     [:div {:style {:display :flex :flex-direction :column}}
      [difficulty-button {:style {:color "white" :margin 10 :background-color
-                                 (colors/colors-rgb :aquamarine-dark)}} "Easy ($3)"]
+                                 (colors/colors-rgb :aquamarine-dark)}}
+      "Easy (-$3/+$10)"]
      [difficulty-button {:style {:margin 10 :background-color
                                  (colors/colors-rgb :citrine-bright)}}
-      "Medium ($7)"]
+      "Medium (-$7/+$21)"]
      [difficulty-button {:style {:color "white" :margin 10 :background-color
                                  (colors/colors-rgb :red-light-dark)}}
-      "Hard ($10)"]]]])
+      "Hard (-$10/+$30)"]]]])
 
 #_(defn content [classes]
     [difficulty-selection])
 
 (defn content [classes]
-  [display-question-comp "21_3"])
+  [display-question-comp "24_3"])
 
 (defn root [m]
   (let []
@@ -77,7 +86,7 @@
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
-         [:div {:style {:height "80%"
+         [:div {:style {:height "80%" :margin-top 60
                         :display :flex :justify-content :center :align-items :center}}
           [:> mui/Fade {:in true :timeout 1000}
            [content classes]]]]))))

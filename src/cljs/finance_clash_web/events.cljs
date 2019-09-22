@@ -19,7 +19,15 @@
  (fn [{:keys [local-store-user]} _]
    ;; take 2 vals from coeffects. Ignore event vector itself.
    {:db (assoc default-db :user local-store-user)
-    :dispatch (when (seq local-store-user) [:set-active-panel :welcome])}))
+    :dispatch-n
+    (into [(when (seq local-store-user) [:set-active-panel :welcome])]
+          (mapv #(vector ::retrieve-questions %) (range 26)))}))
+
+(reg-event-db
+ :toggle-drawer
+ (fn [db]
+   (let [path [:ui-states :drawer-open?]]
+     (update-in db path not))))
 
 (reg-event-db
  :record-window-size
@@ -55,8 +63,6 @@
  (fn [{db :db} [_ chapter]]
    (let [question-files (zipmap (range) (:question-files db))
          chapter-file (get question-files chapter)]
-     (println question-files)
-     (println chapter-file)
      (if chapter-file
        {:db db
         :http-xhrio {:method :get
