@@ -1,5 +1,7 @@
 (ns finance-clash-web.events
   (:require
+   [ajax.core :as ajax]
+   [day8.re-frame.http-fx]
    [finance-clash-web.db :refer [default-db set-user-ls remove-user-ls]]
    [re-frame.core :as rf :refer
     [reg-event-db reg-event-fx reg-fx inject-cofx trim-v after path debug]]))
@@ -38,3 +40,40 @@
  :clear-error
  (fn [{:keys [db]} [_ request-type]]
    {:db (assoc-in db [:errors request-type] [])}))
+
+(reg-event-fx
+ :api-request-error
+ (fn
+   [{:keys [db]} event-vector]
+   (let [request-type (second event-vector)
+         response (last event-vector)]
+     {:db (update-in db [:errors request-type]
+                     (fnil conj []) response)})))
+
+(reg-event-fx
+ ::retrieve-questions
+ (fn [{db :db} [_ chapter]]
+   (let [question-files (zipmap (range) (:question-files db))
+         chapter-file (get question-files chapter)]
+     (println question-files)
+     (println chapter-file)
+     (if chapter-file
+       {:db db
+        :http-xhrio {:method :get
+                     :format (ajax/json-request-format)
+                     :response-format (ajax/json-response-format {:keywords? true})
+                     :on-success [::success-retrieve-questions chapter]
+                     :on-failure [:api-error]
+                     :uri (str "questions/" chapter-file)}}
+       {:db db}))))
+
+(reg-event-fx
+ ::success-retrieve-questions
+ (fn [{db :db} [_ chapter result]]
+   (let [result (map-indexed (fn [i m] (assoc m :id (str chapter "_" i))) result)
+         result (mapv #(update % :responses
+                               (fn [v] (mapv vector (map inc (range)) v)))
+                      result)]
+     {:db (assoc-in db [:question-data (str chapter)] result)})))
+
+;; TODO(dph): request series and store it in series

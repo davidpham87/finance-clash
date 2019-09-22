@@ -1,0 +1,78 @@
+---
+# 011 - MSIAI - Basel II, Regulatory Requirements
+
+- question: How many pillars are there in Basel II regulation?
+  responses:
+  - 1.
+  - 2.
+  - 3.
+  - 4.
+  correct-response: 3
+  duration: 20
+  difficulty: easy
+
+- question: Which one is not part of the Basel Bank regulation Pillar 1?
+  responses:
+  - Credit and Counterparty Risk.
+  - Operational Risks.
+  - Liqudity Risk.
+  - Market Risk.
+  correct-response: 3
+  duration: 20
+  difficulty: medium
+
+
+- question: What is the main objective of Basel regulation?
+  responses:
+  - Put rules in place so that Bank do not fail.
+  - Put rules in place so that Bank do pay taxes.
+  - Put rules in place so that Bank are able to pay their dividends.
+  - Put rules in place so that Bank are able to pay their employees.
+  correct-response: 1
+  duration: 25
+  difficulty: easy
+
+
+- question: What is one issue regarding Credit Risk model in Basel II regulation?
+  responses:
+  - Some bonds (high rated) do not necessitate capital, and therefore Bank can buy as many as they want from these.
+  - In case of downgrade of an issuer or borrower, it is not taken into consideration by the methodology.
+  - Default are not considered in the model.
+  - It is so complicated it was not applied properly.
+  correct-response: 1
+  duration: 25
+  difficulty: medium
+
+
+- question: Each of the Basel pillar 1 risk generates capital requirements. The sum of these is called the regulatory capital. How is it compared to the real capital of the bank?
+  responses:
+  - The rule is that the real capital of the bank should always be higher than the regulatory capital.
+  - The rule is that the real capital of the bank should always be lower than the regulatory capital.
+  - Their is no link between the real and the regulatory capital, regulatory capital is only used for reporting.
+  - The rule is that the real capital of the bank should always be equal to the regulatory capital.
+  correct-response: 1
+  duration: 20
+  difficulty: medium
+
+
+- question: The Expected Losses are equal to?
+  responses:
+  - Expected Losses = Exposure x Probability of Default.
+  - Expected Losses = Exposure x Basel add-on.
+  - Expected Losses = Exposure x Probability of Default x (1 - Recovery rate).
+  - Expected Losses = Exposure x Probability of Default x (1 - Loss Given Default).
+  correct-response: 3
+  duration: 20
+  difficulty: medium
+
+
+
+- question: What is Value-at-Risk (VaR) for financial risk?
+  responses:
+  - It is the average loss above a certain confidence level.
+  - It is the maximum loss possible.
+  - It is the potential loss at a given confidence level.
+  - It is the average expected loss.
+  correct-response: 3
+  duration: 15
+  difficulty: hard

@@ -3,8 +3,9 @@
    [reagent.core :as reagent]
    [re-frame.core :as rf :refer (dispatch subscribe)]
    [finance-clash-web.components.mui-utils :refer (custom-theme)]
-   [finance-clash-web.login.core :refer (root-panel)]
-   [finance-clash-web.chapter-selection.core]
+   [finance-clash-web.login.core :rename {root-panel login-panel}]
+   [finance-clash-web.chapter-selection.core :rename {root-panel chapter-panel}]
+   [finance-clash-web.quizz.core :rename {root-panel quizz-panel}]
    ["@material-ui/core" :as mui]
    ["react" :as react]))
 
@@ -18,5 +19,5 @@
      [:> drawer (clj->js {:user-role (<sub [:user-role])})]]
     [:> react/Suspense
      {:fallback (reagent/as-element [:div {:style {:height "100vh"}} "Loading"])}
-     [root-panel]
+     [quizz-panel]
      #_[active-panel (<sub [:active-panel])]]]])

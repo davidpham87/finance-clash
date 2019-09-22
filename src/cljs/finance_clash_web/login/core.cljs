@@ -69,7 +69,7 @@
                (-> tab (or :sign-in) symbol str))
     :onChange tab-dispatcher
     :variant :fullWidth
-    :style {:width 480}}
+    :style {:width "100%"}}
 
    (when-not user-logged?
      [:> mui-tab
@@ -100,7 +100,7 @@
 (defn login-style [theme]
   (let [spacing (fn [x] ((.. theme -spacing) x))]
     #js {:paper #js {:color :white
-                     :marginTop (spacing 2)
+                     :marginTop (spacing 1)
                      :width 400
                      :display "flex"
                      :flexDirection "column"
@@ -456,10 +456,11 @@
          [:> mui/Fade {:in true :timeout 1000}
           [:> mui/Grid {:container true :justify "center"}
            [:> mui/Paper {:elevation 0
-                          :style {:margin-top "10vh"
+                          :style {:margin-top "0vh"
                                   :background-position :center
                                   :background-color "rgba(0,0,0,0)"
                                   :color "white"
+                                  :width 260
                                   :z-index 10}}
             [tabs-comp]
             [:> mui/Grid {:container true :justify "center"}

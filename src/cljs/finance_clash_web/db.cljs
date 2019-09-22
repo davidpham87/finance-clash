@@ -2,10 +2,39 @@
   (:require
    [re-frame.core :as rf :refer (reg-cofx)]))
 
+(def question-files
+  ["0_key_notions.json"
+   "1_intro.json"
+   "2_etats_financiers.json"
+   "3_le_bilan.json"
+   "4_le_compte_de_resultat.json"
+   "5_introduction_finance.json"
+   "6_le_capital.json"
+   "7_cycles_exploitation_inv_financement.json"
+   "8_comptabilite.json"
+   "9_sig_et_caf.json"
+   "10_obligations.json"
+   "11_regulatory_requirements.json"
+   "12_financial_crisis.json"
+   "13_tva.json"
+   "14_diagnostic_financier.json"
+   "15_financial_risks_and_options.json"
+   "16_couts_and_comptabilite_analytique.json"
+   "17_microeconomie.json"
+   "18_central_banks.json"
+   "19_tresorerie.json"
+   "20_empty.json"
+   "21_rating_agencies.json"
+   "22_credit_talk.json"
+   "23_libor_fwd_rates.json"
+   "24_bourse.json"
+   "25_liquidity_talk.json"])
+
 (def default-db
   {:active-panel :login
    :panel-props {} ;; hack to dispatch arguments to component in lazy mode
    :credentials {}
+   :question-files question-files
    :user {} ;; data for auth
    :user-input {}
    :loading {}
@@ -14,6 +43,8 @@
    :ui-states
    {:drawer-open? false
     :drawer-displayed-sublists #{}}})
+
+
 
 (def fcw-user-key "finance-clash-web-user")  ;; localstore key
 

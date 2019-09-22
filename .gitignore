@@ -14,3 +14,6 @@ pom.xml
 *.iml
 app/
 web-build/
+public/js/cljs-runtime/*
+
+  

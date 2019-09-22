@@ -1,10 +1,14 @@
 (ns finance-clash-web.chapter-selection.core
   (:require
+   [goog.object :as gobj]
    [clojure.string :as s]
    [reagent.core :as reagent]
-   [re-frame.core :as rf :refer (dispatch subscribe)]
-   [finance-clash-web.components.mui-utils :refer (custom-theme)]
-   [finance-clash-web.login.core :refer (root-panel)]
+   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db)]
+   [finance-clash-web.components.mui-utils :refer
+    [cs client-width custom-theme with-styles text-field input-component panel-style]]
+   [finance-clash-web.components.button :refer (submit-button)]
+   ["@material-ui/icons/Send" :default ic-send]
+   ["@material-ui/core/Grid" :default mui-grid]
    ["@material-ui/core" :as mui]))
 
 (def question-files
@@ -35,14 +39,73 @@
    "24_Bourse.yaml"
    "25_Liquidity_Talk.yaml"])
 
-
 (defn ->question-data
   [question]
   (let [x (-> question
-              (s/split #"\\.")
+              (s/split #"\.")
               first
               (s/split #"_" 2))
-        x (zipmap [:chapter :title] x)
-        _ (println x)
-        m (update (zipmap [:chapter :title] x) :title s/replace "_" " ")]
-    m))
+        m (update (zipmap [:chapter :title] x)
+                  :title #(clojure.string/replace % "_" " "))] m))
+
+(def question-data (mapv ->question-data question-files))
+
+(reg-event-db
+ ::register-series-chapter
+ (fn [db] db))
+
+(defn send-button []
+  [submit-button [::register-series-chapter]])
+
+(defn center [& children]
+  [:div {:style {:display :flex :justify-content :center}}
+   children])
+
+(defn chapters [ms]
+  [:div
+   (doall
+    (for [m ms]
+      ^{:key (:chapter m)}
+      [:div {:style {:display :flex :margin-top 10 :margin-bottom 10
+                     :justify-content :space-between :align-items :center}}
+       [:div (:chapter m) ": " (:title m)]
+       [:div {:style {:display :block}}
+        [:> mui/Tooltip {:title "Available" :position :top}
+         [:> mui/Checkbox]]
+        [:> mui/Tooltip {:title "Priority" :position :top}
+         [:> mui/Checkbox]]]]))])
+
+(defn content [classes]
+  [:<>
+   [:> mui/Grid {:item true :xs 12}
+    [:> mui/Card {:elevation 0}
+     [:> mui/CardHeader {:title "Module Selection"}]]]
+   [chapters question-data]
+   [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}} [center [send-button]]]])
+
+
+(defn root [m]
+  (let []
+    (fn [{:keys [classes] :as props}]
+      (let []
+        [:main {:class (cs (gobj/get classes "content"))
+                :style {:background-image "url(images/background.jpeg)"
+                        :background-position :center
+                        :color :white
+                        :z-index 0}}
+         [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
+         [:> mui/Fade {:in true :timeout 1000}
+          [:> mui/Grid {:container true :justify "center"}
+           [:> mui/Paper
+            {:elevation 1
+             :style {:margin 5
+                     :padding 5
+                     :background-position :center
+                     :background-color "rgba(255,255,255,1)"
+                     :color "black" :width "100%"
+                     :z-index 10}}
+            [:> mui/Grid {:container true :justify "center" :alignItems :flex-end}
+             [content classes]]]]]]))))
+
+(defn root-panel [props]
+  [:> (with-styles [panel-style] root) props])
