@@ -57,13 +57,13 @@
 
 - question: De délai de règlement client, correspondant à la durée moyenne du crédit accordé aux clients en jours de CA, est calculé comme?
   responses:
-  - Créances clients / VA x 250.
-  - Créances clients / VA x 365.
+  - Créances clients / CA / 250.
+  - Créances clients / CA / 365.
   - Créances clients / CA x 365.
   - Créances clients / CA x 250.
   correct-response: 3
-  duration: 15
-  difficulty: medium
+  duration: 10
+  difficulty: hard
 
 
 

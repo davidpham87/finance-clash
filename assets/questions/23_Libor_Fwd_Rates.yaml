@@ -40,5 +40,5 @@
   - The interest rates of the two currencies traded.
   - The time to value date of the forward.
   correct-response: 1
-  duration: 25
-  difficulty: medium
+  duration: 15
+  difficulty: hard

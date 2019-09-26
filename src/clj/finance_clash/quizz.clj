@@ -234,10 +234,10 @@
 
 ;; TODO(dph): latest should returns all the questions? Yes, but later
 (def routes-latest
-  ["/latest"
+  [["/latest"
    {:get {:summary "Retrieve the latest series identifier."
           :handler
-          (fn [m] {:status 200 :body {:series (latest-series)}})}}])
+          (fn [m] {:status 200 :body {:series (latest-series)}})}}]])
 
 (defn reorder-priority [ms priority-ids n]
   (let [priority-ids (into #{} priority-ids)]
@@ -295,7 +295,7 @@
 
 
   (-> (client/get "http://localhost:3000/user/1") :body)
-  (->> (client/get "http://localhost:3000/series/0/available")
+  (->> (client/get "http://localhost:3000/series/latest/questions")
        :body
        (mc/decode mi "application/json"))
 

@@ -40,8 +40,8 @@
   - La collatéralisation.
   - L'alignement.
   correct-response: 1
-  duration: 15
-  difficulty: medium
+  duration: 8
+  difficulty: hard
 
 
 - question: Est-ce que les métaux sont traités en bourse?

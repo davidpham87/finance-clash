@@ -18,8 +18,8 @@
   - Barings Bank.
   - Knight Capital.
   correct-response: 1
-  duration: 15
-  difficulty: medium
+  duration: 7
+  difficulty: hard
 
 
 - question: What is correct?
@@ -30,60 +30,4 @@
   - Defaults are usually triggered by lack of revenues.
   correct-response: 1
   duration: 20
-  difficulty: medium
-
-
-- question: The price of a fix bond will increase when?
-  responses:
-  - Interest rates decrease.
-  - Interest rates increase.
-  - There are liquidity issues on the market.
-  - The issuer gets his rating downgraded.
-  correct-response: 1
-  duration: 25
-  difficulty: medium
-
-
-- question: On which basis are priced bonds?
-  responses:
-  - Par = 100.
-  - Par = 1'000.
-  - Par = 10.
-  - Par = 100%.
-  correct-response: 1
-  duration: 15
-  difficulty: medium
-
-
-- question: Which of the following elements does NOT describe a bond??
-  responses:
-  - Maturity date
-  - Inflation rate.
-  - Interest rates.
-  - Issuer.
-  correct-response: 2
-  duration: 20
-  difficulty: medium
-
-
-
-- question: What is a yield curve?
-  responses:
-  - The yield points of different issuers having a same rating for different maturities.
-  - The curve built by the yields of bonds from issuers from same countries for different maturities.
-  - The curve built by the yield of bonds from a same issuer for different maturities.
-  - The yield points of all bonds existing with different credit ratings.
-  correct-response: 3
-  duration: 20
-  difficulty: hard
-
-
-- question: Up to which year do French bonds have a negative yield?
-  responses:
-  - 1 year.
-  - 5 years.
-  - 10 years.
-  - 15 years.
-  correct-response: 4
-  duration: 10
   difficulty: medium

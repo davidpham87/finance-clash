@@ -8,8 +8,8 @@
   - L'entreprise joue le rôle de percepteur pour l'état.
   - En France de taux de TVA standard est de 20%.
   correct-response: 2
-  duration: 20
-  difficulty: medium
+  duration: 40
+  difficulty: easy
 
 - question: En supposant qu'une entreprise commerciale achète des biens en France et les revende en France à un prix plus élevé, alors?
   responses:

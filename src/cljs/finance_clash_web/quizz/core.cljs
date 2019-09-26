@@ -3,7 +3,7 @@
    [goog.object :as gobj]
    [clojure.string :as s]
    [reagent.core :as reagent]
-   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db)]
+   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db reg-sub)]
    [finance-clash-web.components.colors :as colors]
    [finance-clash-web.quizz.subs :as subscriptions]
    [finance-clash-web.components.mui-utils :refer
@@ -16,6 +16,10 @@
 
 ;; TODO(dph): insert timer and send answer time by substraction
 ;; TODO(dph): on timeout send a empty answer
+(reg-event-db
+ ::select-question-phase ;; either :selection or :answering
+ (fn [db [_ phase]]
+   (assoc-in db [:ui-states :question-phase] phase)))
 
 (def answer-button
   (adapt-mui-component-style
@@ -56,28 +60,37 @@
 
 ;; TODO(dph): include bonus
 (defn difficulty-selection []
-  [:> mui/Card {:elevation 0 :style {:min-width 260 :width "50%"}}
-   [:> mui/CardHeader {:title "Select Difficulty"}]
-   [:> mui/CardContent
-    [:div {:style {:display :flex :flex-direction :column}}
-     [difficulty-button {:style {:color "white" :margin 10 :background-color
-                                 (colors/colors-rgb :aquamarine-dark)}}
-      "Easy (-$3/+$10)"]
-     [difficulty-button {:style {:margin 10 :background-color
-                                 (colors/colors-rgb :citrine-bright)}}
-      "Medium (-$7/+$21)"]
-     [difficulty-button {:style {:color "white" :margin 10 :background-color
-                                 (colors/colors-rgb :red-light-dark)}}
-      "Hard (-$10/+$30)"]]]])
+  (let [event [::select-question-phase :answering]]
+    [:> mui/Card {:elevation 0 :style {:min-width 260 :width "50%"}}
+     [:> mui/CardHeader {:title "Select Difficulty"}]
+     [:> mui/CardContent
+      [:div {:style {:display :flex :flex-direction :column}}
+       [difficulty-button
+        {:on-click #(dispatch event)
+         :style {:color "white" :margin 10 :background-color
+                 (colors/colors-rgb :aquamarine-dark)}}
+        "Easy (-$3 / +$10)"]
+       [difficulty-button
+        {:on-click #(dispatch event)
+         :style {:margin 10 :background-color (colors/colors-rgb :citrine-bright)}}
+        "Medium (-$7 / +$21)"]
+       [difficulty-button
+        {:on-click #(dispatch event)
+         :style {:color "white" :margin 10 :background-color
+                 (colors/colors-rgb :red-light-dark)}}
+        "Hard (-$10 / +$30)"]]]]))
 
-#_(defn content [classes]
-    [difficulty-selection])
+(defmulti content :phase :default :selection)
 
-(defn content [classes]
-  [display-question-comp "24_3"])
+(defmethod content :selection [m]
+  [difficulty-selection])
+
+(defmethod content :answering [m]
+  [display-question-comp "24_2"])
 
 (defn root [m]
-  (let []
+  (let [question-phase (subscribe [::subscriptions/question-phase])]
+    (dispatch [::select-question-phase :selection])
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))
@@ -86,10 +99,10 @@
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
-         [:div {:style {:height "80%" :margin-top 60
+         [:div {:style {:height "80%" :margin-top 40
                         :display :flex :justify-content :center :align-items :center}}
           [:> mui/Fade {:in true :timeout 1000}
-           [content classes]]]]))))
+           [content {:phase @question-phase}]]]]))))
 
 (defn root-panel [props]
   [:> (with-styles [panel-style] root) props])

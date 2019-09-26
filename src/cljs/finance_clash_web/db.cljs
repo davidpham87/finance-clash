@@ -1,5 +1,6 @@
 (ns finance-clash-web.db
   (:require
+   [cljs.reader]
    [re-frame.core :as rf :refer (reg-cofx)]))
 
 (def question-files

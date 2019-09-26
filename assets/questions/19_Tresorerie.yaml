@@ -62,8 +62,8 @@
   - Trésorerie = Fonds de roulement - Besoin en fonds de roulement.
   - Trésorerie = Fonds de roulement + Besoin en fonds de roulement.
   correct-response: 3
-  duration: 25
-  difficulty: medium
+  duration: 15
+  difficulty: hard
 
 
 

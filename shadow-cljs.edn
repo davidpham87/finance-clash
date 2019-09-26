@@ -67,7 +67,8 @@
    :release
    {:compiler-options
     {:infer-externs :auto
-     :optimizations :advanced}}
+     :optimizations :advanced
+     :externs ["externs/material-ui.ext.js"]}}
 
    :devtools
    {:autoload true

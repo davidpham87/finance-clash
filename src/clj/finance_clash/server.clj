@@ -47,7 +47,7 @@
       finance-clash.quizz/routes
       finance-clash.budget/routes]
      {:data {:muuntaja m/instance
-      	     :middleware
+             :middleware
              [params/wrap-params
               muuntaja/format-middleware
               coercion/coerce-exceptions-middleware
@@ -64,15 +64,7 @@
 (defn start []
   (let [jetty-server (jetty/run-jetty #'app {:port 3000, :join? false})]
     (reset! server jetty-server)
-    (println "server running in port 3000")
-    (println
-     [["/" {:get (fn [request] {:body "Hello from finance-clash server 2"})}]
-      ["/echo" {:get (fn [request] {:body "echo"})}]
-      routes
-      finance-clash.specs/routes
-      finance-clash.quizz/routes
-      finance-clash.user/routes
-      finance-clash.budget/routes])))
+    (println "server running in port 3000")))
 
 (defn stop []
   (.stop @server))

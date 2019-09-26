@@ -112,7 +112,7 @@
 (def custom-theme
   (createMuiTheme
    #js {:palette #js {:primary #js {:main (colors/colors-rgb :graphite)}
-                      :secondary #js {:main "#ffd400" :dark "#ca0"}
+                      :secondary #js {:main (colors/colors-rgb :coral-dark) :dark "#ca0"}
                       :type "light"
                       :background #js {:default (colors/colors-rgb :sand-bright)}}
         :typography #js

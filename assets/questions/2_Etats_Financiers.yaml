@@ -20,8 +20,8 @@
   - Le rapport de conduite.
   - Le bilan.
   correct-response: 2
-  duration: 20
-  difficulty: easy
+  duration: 10
+  difficulty: medium
 
 
 
@@ -43,5 +43,5 @@
   - Deloitte et Moody's.
   - E&Y et S&P.
   correct-response: 2
-  duration: 10
-  difficulty: medium
+  duration: 8
+  difficulty: hard

@@ -30,14 +30,21 @@
      (update-in db path not))))
 
 (reg-event-db
+ :close-drawer
+ (fn [db]
+   (let [path [:ui-states :drawer-open?]]
+     (assoc-in db path false))))
+
+(reg-event-db
  :record-window-size
  (fn [db [_ w h]]
    (assoc db :window-size {:width w :height h})))
 
-(reg-event-db
+(reg-event-fx
  :set-active-panel
- (fn [db [_ id]]
-   (assoc db :active-panel id)))
+ (fn [{db :db} [_ id]]
+   {:db (assoc db :active-panel id)
+    :dispatch [:close-drawer]}))
 
 (reg-event-db
  :set-panel-props
@@ -81,5 +88,22 @@
                                (fn [v] (mapv vector (map inc (range)) v)))
                       result)]
      {:db (assoc-in db [:question-data (str chapter)] result)})))
+
+(reg-event-fx
+ ::retrieve-series-question
+ (fn [{db :db} _]
+   {:db db
+    :http-xhrio {:method :get
+                 :format (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [::success-retrieve-series-question]
+                 :on-failure [:api-request-error]
+                 :uri (str "http://localhost:3000/series/latest/questions")}}))
+
+(reg-event-fx
+ ::success-retrieve-series-question
+ (fn [{db :db} [_ result]]
+   {:db (assoc db [:series] result)}))
+
 
 ;; TODO(dph): request series and store it in series

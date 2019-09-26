@@ -29,8 +29,8 @@
   - Prendre une position d'arbitrage sur ce sous-jacent sane le détenant.
   - Prendre une position d'arbitrage sur ce sous-jacent en le détenant également.
   correct-response: 1
-  duration: 15
-  difficulty: medium
+  duration: 12
+  difficulty: hard
 
 
 - question: Je suis persuadé que le cours de Airbus va augmenter. Une stratégie pourrait être?

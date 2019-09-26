@@ -40,8 +40,8 @@
   - Les chambres de compensation pour les Futures.
   - Les contrats ISDA/CSA avec des échanges de collatéraux.
   correct-response: 1
-  duration: 45
-  difficulty: medium
+  duration: 20
+  difficulty: hard
 
 
 - question: Si vous avez une hypothèque sur votre maison la banque peut se saisir en tout temps de votre bien immobilier?

@@ -83,8 +83,8 @@
   - L'élasticité-prix du produit B est plus important que celle du produit A.
   - L'élasticité-prix du produit A est plus important que celle du produit B.
   correct-response: 4
-  duration: 30
-  difficulty: medium
+  duration: 15
+  difficulty: hard
 
 
 - question: Il y a un échange possible entre 2 agents si l'un et l'autre ont?
@@ -116,5 +116,5 @@
   - Il y ait des régulations et normes publiques.
   - Il y ait des situations de monopole.
   correct-response: 1
-  duration: 25
-  difficulty: medium
+  duration: 40
+  difficulty: easy

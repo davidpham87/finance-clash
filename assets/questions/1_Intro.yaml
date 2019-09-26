@@ -8,15 +8,27 @@
   - Vision générale de l'environnement bancaire.
   - Développement des connaissances commerciales.
   correct-response: 4
-  duration: 30
-  difficulty: easy
+  duration: 15
+  difficulty: medium
 
-- question: Quelle affirmation est fausse?
+
+- question: Quelle affirmation concernant les cours est FAUSSE?
   responses:
   - Ne pas hésiter à poser des questions pendant le cours.
   - Vincent n'a jamais étudié à l'INSA.
-  - La gestion des risques financiers n'est pas couverte pendant le cours.
+  - La gestion des risques financiers est couverte pendant le cours.
   - Vincent travaille dans une banque.
   correct-response: 2
   duration: 20
   difficulty: easy
+
+
+- question: Quelle affirmation concernant les cours est FAUSSE?
+  responses:
+  - Le contenu du cours est d'environ 50% relatif à la gestion et 50% relatif à la finance.
+  - Beaucoup de travail maison est attendu pendant la période des cours.
+  - Vincent a plus de 10 ans d'expérience dans le milieu bancaire.
+  - Vincent n'a jamais travaillé aux USA.
+  correct-response: 2
+  duration: 10
+  difficulty: hard

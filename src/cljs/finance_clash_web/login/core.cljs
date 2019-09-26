@@ -110,7 +110,7 @@
                                    (spacing 3) "px "
                                    (spacing 3) "px")}
          :avatar #js {:margin (spacing 1)
-                      :backgroundColor (colors/colors-hex :secondary)
+                      :backgroundColor (colors/colors-hex :main)
                       :color :white}
          :form #js {:width "100%"
                     :marginTop (spacing 1)}
@@ -447,25 +447,30 @@
       ;; this complects the component quite a bit though. Is it a good choice?
       (let [tab-value (if @user-logged? :update-userprofile @tab)]
         [:main {:class (cs (gobj/get classes "content"))
-                :style {:background-image "url(images/background.jpeg)"
+                :style {:min-height "100vh"
+                        :background-image "url(images/background.jpeg)"
                         :background-position :center
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
          #_[evolution-system-image]
          [:> mui/Fade {:in true :timeout 1000}
-          [:> mui/Grid {:container true :justify "center"}
-           [:> mui/Paper {:elevation 0
-                          :style {:margin-top "0vh"
-                                  :background-position :center
-                                  :background-color "rgba(0,0,0,0)"
-                                  :color "white"
-                                  :width 260
-                                  :z-index 10}}
-            [tabs-comp]
-            [:> mui/Grid {:container true :justify "center"}
-             ^{:key tab-value}
-             [content tab-value classes]]]]]]))))
+          [:> mui/Grid {:container true :justify :center :alignItems :center
+                        :style {:height "80vh"}}
+           [:> mui/Grid {:item true}
+            [:> mui/Paper {:elevation 0
+                           :style {:margin-top "0vh"
+                                   :background-position :center
+                                   :background-color "rgba(0,0,0,0)"
+                                   :color "white"
+                                   :margin-left :auto
+                                   :margin-right :auto
+                                   :width "80%"
+                                   :z-index 10}}
+             [tabs-comp]
+             [:> mui/Grid {:container true :justify "center"}
+              ^{:key tab-value}
+              [content tab-value classes]]]]]]]))))
 
 (defn root-panel [props]
   (init-events)

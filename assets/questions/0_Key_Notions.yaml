@@ -31,8 +31,8 @@
   - Pour un même taux, des intérêts composés rapporteront plus que des intérêts simples.
   - Pour un même taux, des intérêts simples rapporteront plus que des intérêts composés.
   correct-response: 3
-  duration: 20
-  difficulty: medium
+  duration: 40
+  difficulty: easy
 
 
 

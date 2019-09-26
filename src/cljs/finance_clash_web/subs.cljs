@@ -1,7 +1,7 @@
 (ns finance-clash-web.subs
   (:require
    [re-frame.core :as rf :refer [reg-sub]]
-   #_[ocio.components.drawer :refer [panels-label]]
+   [finance-clash-web.components.drawer :refer [panels-label]]
    #_[ocio.components.snackbar-feedback :as snackbar-feedback]))
 
 (reg-sub
@@ -11,7 +11,10 @@
 (reg-sub
  :active-panel-label
  :<- [:active-panel]
- (fn [active-panel _] (get {} active-panel active-panel)))
+ (fn [active-panel _]
+   (println panels-label)
+   (get panels-label active-panel active-panel)))
+
 
 (reg-sub
  :panel-props-all
