@@ -110,7 +110,7 @@
                                    (spacing 3) "px "
                                    (spacing 3) "px")}
          :avatar #js {:margin (spacing 1)
-                      :backgroundColor (colors/colors-hex :main)
+                      :backgroundColor (colors/colors-hex :aquamarine)
                       :color :white}
          :form #js {:width "100%"
                     :marginTop (spacing 1)}
