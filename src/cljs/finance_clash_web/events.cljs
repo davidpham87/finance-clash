@@ -76,7 +76,7 @@
                      :format (ajax/json-request-format)
                      :response-format (ajax/json-response-format {:keywords? true})
                      :on-success [::success-retrieve-questions chapter]
-                     :on-failure [:api-error]
+                     :on-failure [:api-request-error]
                      :uri (str "questions/" chapter-file)}}
        {:db db}))))
 

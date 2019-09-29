@@ -68,7 +68,9 @@
        [difficulty-button
         {:on-click #(dispatch event)
          :style {:color "white" :margin 10 :background-color
-                 (colors/colors-rgb :aquamarine-dark)}}
+                 (colors/colors-rgb ;; :aquamarine-dark
+                                    :nucleus-blue-dark
+                                    )}}
         "Easy (-$3 / +$10)"]
        [difficulty-button
         {:on-click #(dispatch event)

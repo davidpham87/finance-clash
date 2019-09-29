@@ -1,15 +1,17 @@
 (ns finance-clash-web.chapter-selection.core
   (:require
-   [goog.object :as gobj]
+   ["@material-ui/core" :as mui]
+   ["@material-ui/core/Grid" :default mui-grid]
+   ["@material-ui/icons/Send" :default ic-send]
    [clojure.string :as s]
-   [reagent.core :as reagent]
-   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db)]
+   [finance-clash-web.components.button :refer (submit-button)]
    [finance-clash-web.components.mui-utils :refer
     [cs client-width custom-theme with-styles text-field input-component panel-style]]
-   [finance-clash-web.components.button :refer (submit-button)]
-   ["@material-ui/icons/Send" :default ic-send]
-   ["@material-ui/core/Grid" :default mui-grid]
-   ["@material-ui/core" :as mui]))
+   [finance-clash-web.chapter-selection.events :as events]
+   [finance-clash-web.chapter-selection.subs :as subscriptions]
+   [goog.object :as gobj]
+   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db)]
+   [reagent.core :as reagent]))
 
 (def question-files
   ["0_Key_Notions.yaml"
@@ -50,17 +52,17 @@
 
 (def question-data (mapv ->question-data question-files))
 
-(reg-event-db
- ::register-series-chapter
- (fn [db] db))
-
 (defn send-button []
-  [submit-button [::register-series-chapter]])
+  (let [available-ids @(subscribe [::subscriptions/chapter-available])
+        priority-ids @(subscribe [::subscriptions/chapter-priority])
+        ]
+    [submit-button [::register-series-chapter]]))
 
 (defn center [& children]
   [:div {:style {:display :flex :justify-content :center}}
    children])
 
+;; TODO (checked if database is checked)
 (defn chapters [ms]
   [:div
    (doall
@@ -71,9 +73,19 @@
        [:div (:chapter m) ": " (:title m)]
        [:div {:style {:display :block}}
         [:> mui/Tooltip {:title "Available" :position :top}
-         [:> mui/Checkbox]]
+         [:> mui/Checkbox
+          {:onChange
+           (fn [e]
+             (let [status (if (.. e -target -checked) :append :remove)]
+               (rf/dispatch [::events/update-available-chapters
+                             (:chapter m) status])))}]]
         [:> mui/Tooltip {:title "Priority" :position :top}
-         [:> mui/Checkbox]]]]))])
+         [:> mui/Checkbox
+          {:onChange
+           (fn [e]
+             (let [status (if (.. e -target -checked) :append :remove)]
+               (rf/dispatch [::events/update-priority-chapters
+                             (:chapter m) status])))}]]]]))])
 
 (defn content [classes]
   [:<>
@@ -81,7 +93,8 @@
     [:> mui/Card {:elevation 0}
      [:> mui/CardHeader {:title "Module Selection"}]]]
    [chapters question-data]
-   [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}} [center [send-button]]]])
+   [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}}
+    [center [send-button ]]]])
 
 
 (defn root [m]
