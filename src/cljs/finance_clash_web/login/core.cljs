@@ -448,12 +448,11 @@
       (let [tab-value (if @user-logged? :update-userprofile @tab)]
         [:main {:class (cs (gobj/get classes "content"))
                 :style {:min-height "100vh"
-                        :background-image "url(images/background.jpeg)"
+                        :background-image "url(images/daily_questions.jpg)"
                         :background-position :center
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
-         #_[evolution-system-image]
          [:> mui/Fade {:in true :timeout 1000}
           [:> mui/Grid {:container true :justify :center :alignItems :center
                         :style {:height "80vh"}}

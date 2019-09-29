@@ -54,8 +54,7 @@
               coercion/coerce-request-middleware
               coercion/coerce-response-middleware]}})
     (ring/create-default-handler))
-
-   :access-control-allow-origin #"http://192.168.1.111:19006"
+   :access-control-allow-origin [#"^(http(s)?://)?localhost:(\d){4}$"]
    :access-control-allow-headers #{:accept :content-type}
    :access-control-allow-methods #{:get :put :post}))
 

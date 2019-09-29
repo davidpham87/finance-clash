@@ -163,7 +163,6 @@
              id (str chapter "_" question)
              tx (quizz-tx id user-id series)
              success? (correct-answer? id user-id selected-answer)]
-         #_(println user-id selected-answer id success? series)
          (attempt! id user-id series success?)
          ;; check if success was false, must provide a value to zero? or error
          ;; will be thrown
@@ -185,17 +184,18 @@
   "Query availability of question given their ids (chapter_number)"
   ([]
    (let [available
-         (-> (select :*) (from :chapters) (sql/format) execute-query!)]
+         (-> (select :*) (from :chapters) (hsql/where [:= :available true])
+             (sql/format) execute-query!)]
      available))
   ([ids] (available? ids true))
   ([ids v]
    (let [v (if (nil? v) true v)
          reset-available?
          (-> (hsql/update :chapters) (hsql/sset {:available (not v)})
-             (where [:not-in :series ids]) sql/format)
+             (where [:not-in :chapter ids]) sql/format)
          update-query
          (-> (hsql/update :chapters) (hsql/sset {:available v})
-             (where [:in :series ids]) sql/format)]
+             (where [:in :chapter ids]) sql/format)]
      (execute-query! reset-available?)
      (execute-query! update-query)
      (zipmap ids (repeat true)))))
@@ -211,10 +211,10 @@
    (let [v (if (nil? v) true v)
          reset-priority
          (-> (hsql/update :chapters) (hsql/sset {:priority (not v)})
-             (where [:not-in :series ids]) sql/format)
+             (where [:not-in :chapter ids]) sql/format)
          new-priority
          (-> (hsql/update :chapters) (hsql/sset {:priority v})
-             (where [:in :series ids]) sql/format)]
+             (where [:in :chapter ids]) sql/format)]
      (execute-query! reset-priority)
      (execute-query! new-priority)
      (zipmap ids (repeat true)))))
@@ -226,18 +226,11 @@
       sql/format))
 
 (defn latest-series []
-  (-> {:select [:series]
+  (-> {:select [:*]
        :from [:quizz_series]
        :order-by [[:release_date :desc]]
        :limit 1}
       sql/format))
-
-;; TODO(dph): latest should returns all the questions? Yes, but later
-(def routes-latest
-  [["/latest"
-   {:get {:summary "Retrieve the latest series identifier."
-          :handler
-          (fn [m] {:status 200 :body {:series (latest-series)}})}}]])
 
 (defn reorder-priority [ms priority-ids n]
   (let [priority-ids (into #{} priority-ids)]
@@ -268,21 +261,26 @@
               (available? available true)
               (priority? priority true)
               (-> (hsql/insert-into :quizz_series)
-                  (hsql/values [{:release_date [sql/call :datetime "now" "utc"]}])
+                  (hsql/values [{:release_date (sql/call :datetime "now" "utc")}])
                   sql/format
                   execute-query!)
-              {:status 200 :body {:series 0}})}}]
+              {:status 200 :body {:series (-> (latest-series) execute-query!
+                                              first)}})}}]
    ["/:series/questions"
     {:parameters {:path (s/keys :req-un [::series])}
      :get {:summary "Get series details questions"
            :handler
            (fn [m]
              (let [available-ids (available?)
-                   priority-ids (filter :priorty available-ids)
-                   questions (get-series-questions (mapv :id available-ids)
-                                                   (mapv :id priority-ids))]
+                   priority-ids (filterv #(-> % (:priority 0) pos?) available-ids)
+                   questions (get-series-questions (mapv :chapter available-ids)
+                                                   (mapv :chapter priority-ids))]
                {:status 200 :body questions}))}}]
-   routes-latest])
+   ;; TODO(dph): latest should returns all the questions? Yes, but later
+   ["/latest"
+    {:get {:summary "Retrieve the latest series identifier."
+           :handler
+           (fn [m] {:status 200 :body {:series (execute-query! (latest-series))}})}}]])
 
 (def routes
   [routes-series

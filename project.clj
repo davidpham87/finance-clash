@@ -23,7 +23,7 @@
 
   :repl-options {:init-ns finance-clash.server}
   :ring {:handler finance-clash.server/app}
-  :plugins [[cider/cider-nrepl "0.21.1"]
+  :plugins [[cider/cider-nrepl "0.22.3"]
             [lein-re-frisk "0.5.8"]
             [lein-ring "0.12.5"]]
   :resource-paths ["assets"]

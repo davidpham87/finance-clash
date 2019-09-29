@@ -6,6 +6,11 @@
    [re-frame.core :as rf :refer
     [reg-event-db reg-event-fx reg-fx inject-cofx trim-v after path debug]]))
 
+(goog-define backend-url "http://localhost:3000")
+
+(defn endpoint [& params]
+  (clojure.string/join "/" (concat [backend-url] params)))
+
 (defn auth-header [db]
   "Get user token and format for API authorization"
   (let [token (get-in db [:user :token])]
@@ -66,6 +71,22 @@
                      (fnil conj []) response)})))
 
 (reg-event-fx
+ ::retrieve-latest-series-id
+ (fn [{db :db} _]
+   {:db db
+    :http-xhrio {:method :get
+                 :format (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [::success-retrieve-latest-series-id]
+                 :on-failure [:api-request-error]
+                 :uri (endpoint "series" "latest")}}))
+
+(reg-event-fx
+ ::success-retrieve-latest-series-id
+ (fn [{db :db} [_ result]]
+   {:db (assoc db :series-id (-> (first result) :id))}))
+
+(reg-event-fx
  ::retrieve-questions
  (fn [{db :db} [_ chapter]]
    (let [question-files (zipmap (range) (:question-files db))
@@ -98,12 +119,11 @@
                  :response-format (ajax/json-response-format {:keywords? true})
                  :on-success [::success-retrieve-series-question]
                  :on-failure [:api-request-error]
-                 :uri (str "http://localhost:3000/series/latest/questions")}}))
+                 :uri (endpoint "series" "latest" "questions")}}))
 
 (reg-event-fx
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
-   {:db (assoc db [:series] result)}))
-
+   {:db (assoc db :series-questions result)}))
 
 ;; TODO(dph): request series and store it in series

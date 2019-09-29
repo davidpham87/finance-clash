@@ -50,7 +50,6 @@ drop table quizz_attempt
 drop table quizz
 "])
 
-
   (jdbc/execute! ds ["
 create table quizz_attempt (
   series integer,

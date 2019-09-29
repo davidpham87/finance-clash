@@ -41,11 +41,13 @@
    :loading {}
    :errors {}
    :help-event [:set-panel :welcome]
+   :quizz-question {} ;; storing the displayed quizz question
+   :series-questions {:medium [] :hard [] :easy []}
+   :series-questions-seen #{}
+   :series-questions-answered #{}
    :ui-states
    {:drawer-open? false
     :drawer-displayed-sublists #{}}})
-
-
 
 (def fcw-user-key "finance-clash-web-user")  ;; localstore key
 
@@ -60,6 +62,15 @@
   []
   (.removeItem js/localStorage fcw-user-key))
 
+(defn set-ls
+  "Puts a key into localStorage"
+  [k v]
+  (.setItem js/localStorage k (clj->js v)))
+
+(defn remove-ls
+  [k]
+  (.removeItem js/localStorage k ))
+
 ;; -- cofx Registrations  -----------------------------------------------------
 ;;
 ;; To see it used, look in `events.cljs` at the event handler for `:initialise-db`.
@@ -73,4 +84,13 @@
    (assoc cofx :local-store-user
           (into (sorted-map)
                 (some->> (.getItem js/localStorage fcw-user-key)
+                         (cljs.reader/read-string))))))
+
+
+(reg-cofx
+ :local-store
+ (fn [cofx local-store-key]
+   (assoc cofx :local-store
+          (into (sorted-map)
+                (some->> (.getItem js/localStorage local-store-key)
                          (cljs.reader/read-string))))))

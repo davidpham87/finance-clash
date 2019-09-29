@@ -17,7 +17,7 @@
             [spec-tools.spec :as spec]))
 
 (def question-price {:easy 3 :medium 7 :hard 10})
-(def question-value-raw {:easy 10 :medium 21 :hard 30})
+(def question-value-raw {:easy 12 :medium 28 :hard 40})
 (def question-bonus {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
 
 (s/def ::user-id spec/string?)
@@ -71,20 +71,64 @@
 
 (defn wealth [user-id] (budget user-id))
 
-(defn buy [user-id v]
+(defn buy! [user-id v]
   (budget-tx user-id (- v))
   (budget user-id (- v)))
 
-(defn earn [user-id v]
+(defn earn! [user-id v]
   (budget-tx user-id v)
   (budget user-id v))
 
+;; Compute bonus
+
+(defn now []
+  (jt/with-clock (jt/system-clock "Europe/Paris")
+    (jt/offset-time)))
+
+(defn bonus-period?
+  "Bonus period is between 19 and 8 EU time."
+  [h] (or (< h 8) (> h 19)))
+
+(defn query-question [id]
+  (-> {:select [:difficulty]
+      :from [:questions]
+      :where [:= :id id]
+       :limit 1}
+      sql/format
+      execute-query!))
+
+(defn chapter-priority [id]
+  (-> {:select [:priority]
+       :from [:chapters]
+       :where [:= :chapter id]
+       :limit 1}
+      sql/format
+      execute-query!))
+
+(defn question-id->question-value
+  [question-id]
+  (let [answer-hour (-> (now) .getHour)
+        difficulty (-> (query-question question-id) first :difficulty keyword)
+        chapter (first (clojure.string/split question-id #"_"))
+        priority? (-> (chapter-priority chapter) first (:priority 0) pos?)]
+    (question-value difficulty
+                    {:priority? priority?
+                     :bonus-period? (bonus-period? answer-hour)})))
+
 (defn question-value
   [difficulty {:keys [priority? bonus-period?] :as modifiers}]
-  (* (get question-value (keyword difficulty) 0)
-     (question-bonus priority? 1)
-     (if priority? (question-bonus :priority) 1)
-     (if bonus-period? (question-bonus :bonus-period) (question-bonus :malus-period))))
+  (println difficulty modifiers)
+  (* (get question-value-raw (keyword difficulty) 0)
+     (if priority? (:priority? question-bonus) 1)
+     (if bonus-period?
+       (:bonus-period? question-bonus)
+       (:malus-period? question-bonus))))
+
+(defn earn-question-value! [user-id question-id]
+  (let [value (question-value question-id)]
+    (earn! user-id value)))
+
+;; Routes
 
 (def routes-buy-question
   ["/quizz/buy-question"
@@ -92,7 +136,7 @@
     :parameters {:body (s/keys :req-un [::user-id ::diffculty])}
     :post {:handler
            (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
-             (let [x (question-price (keyword difficulty))] (buy user-id x)))}}])
+             (let [x (question-price (keyword difficulty))] (buy! user-id x)))}}])
 
 (def routes routes-buy-question)
 
@@ -101,4 +145,6 @@
   (wealth "1")
   (earn "1" 500)
   (buy "1" 200)
-  (budget-tx "1"))
+  (budget-tx "1")
+  (question-id->question-value "0_0")
+  )
