@@ -37,7 +37,7 @@
 
 (defn answered-questions [user-id series]
   (-> {:select [:question]
-       :from [:quizz_attempt]
+       :from [:quiz_attempt]
        :where [:and [:= :series series] [:= :user user-id] [:= :success true]]}
       sql/format
       execute-query!))

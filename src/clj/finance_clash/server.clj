@@ -12,7 +12,7 @@
             [finance-clash.specs]
             [finance-clash.budget]
             [finance-clash.user]
-            [finance-clash.quizz]))
+            [finance-clash.quiz]))
 
 (def routes
   ["/plain"
@@ -35,8 +35,7 @@
                      ["/echo" {:get (fn [request] {:body "echo"})}]
                      routes
                      finance-clash.specs/routes
-                     finance-clash.quizz/routes
-                     finance-clash.quizz/routes-series
+                     finance-clash.quiz/routes
                      finance-clash.user/routes
                      finance-clash.budget/routes])
                    {:body "Hello from finance-clash server 3"})}]
@@ -44,7 +43,7 @@
       routes
       finance-clash.specs/routes
       finance-clash.user/routes
-      finance-clash.quizz/routes
+      finance-clash.quiz/routes
       finance-clash.budget/routes]
      {:data {:muuntaja m/instance
              :middleware

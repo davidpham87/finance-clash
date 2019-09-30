@@ -131,14 +131,14 @@
   "Path displayed for navigation"
   {:login "Login"
    :chapter-selection "Module Selection"
-   :quizz "Quizz"})
+   :quiz "Quiz"})
 
 (defn tabs-public [user-role drawer-open? classes]
   [:<>
    [mui-list-item-std [ic-home "Home"]
     {:dispatch-event [:set-active-panel :login]}]
    [mui-list-item-std [ic-explore "Questions"]
-    {:dispatch-event [:set-active-panel :quizz]}]
+    {:dispatch-event [:set-active-panel :quiz]}]
    [mui-list-item-std [ic-dashboard "Modules"]
     {:dispatch-event [:set-active-panel :chapter-selection]}]])
 

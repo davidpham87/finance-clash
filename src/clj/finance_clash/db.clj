@@ -21,7 +21,7 @@ create table user (
 )"])
 
     (jdbc/execute! ds ["
-create table quizz_attempts (
+create table quiz_attempts (
   user integer,
   question integer,
   chapter integer,

@@ -41,7 +41,7 @@
    :loading {}
    :errors {}
    :help-event [:set-panel :welcome]
-   :quizz-question {} ;; storing the displayed quizz question
+   :quiz-question {} ;; storing the displayed quiz question
    :series-questions {:medium [] :hard [] :easy []}
    :series-questions-seen #{}
    :series-questions-answered #{}

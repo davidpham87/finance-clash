@@ -105,6 +105,15 @@
       sql/format
       execute-query!))
 
+(defn question-value
+  [difficulty {:keys [priority? bonus-period?] :as modifiers}]
+  (println difficulty modifiers)
+  (* (get question-value-raw (keyword difficulty) 0)
+     (if priority? (:priority? question-bonus) 1)
+     (if bonus-period?
+       (:bonus-period? question-bonus)
+       (:malus-period? question-bonus))))
+
 (defn question-id->question-value
   [question-id]
   (let [answer-hour (-> (now) .getHour)
@@ -115,23 +124,14 @@
                     {:priority? priority?
                      :bonus-period? (bonus-period? answer-hour)})))
 
-(defn question-value
-  [difficulty {:keys [priority? bonus-period?] :as modifiers}]
-  (println difficulty modifiers)
-  (* (get question-value-raw (keyword difficulty) 0)
-     (if priority? (:priority? question-bonus) 1)
-     (if bonus-period?
-       (:bonus-period? question-bonus)
-       (:malus-period? question-bonus))))
-
 (defn earn-question-value! [user-id question-id]
-  (let [value (question-value question-id)]
+  (let [value (question-id->question-value question-id)]
     (earn! user-id value)))
 
 ;; Routes
 
 (def routes-buy-question
-  ["/quizz/buy-question"
+  ["/quiz/buy-question"
    {:coercion reitit.coercion.spec/coercion
     :parameters {:body (s/keys :req-un [::user-id ::diffculty])}
     :post {:handler

@@ -7,20 +7,19 @@
    [finance-clash-web.components.drawer :refer (drawer)]
    [finance-clash-web.login.core :rename {root-panel login-panel}]
    [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
-   [finance-clash-web.quizz.core :rename {root-panel quizz-panel}]
+   [finance-clash-web.quiz.core :rename {root-panel quiz-panel}]
    ["@material-ui/core" :as mui]
    ["react" :as react]))
 
 (defmulti active-panel identity :default :login)
 (defmethod active-panel :login [args]
-  (.log js/console args)
   [login-panel])
 
 (defmethod active-panel :chapter-selection [_]
   [chapter-selection-panel])
 
-(defmethod active-panel :quizz [_]
-  [quizz-panel])
+(defmethod active-panel :quiz [_]
+  [quiz-panel])
 
 (defn app []
   [:div {:style {:display "flex"}}

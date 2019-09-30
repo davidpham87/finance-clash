@@ -98,6 +98,7 @@
         (reaction {:available @(subscribe [::subscriptions/chapter-available])
                    :priority @(subscribe [::subscriptions/chapter-priority])})]
     (fn [ms]
+      (.log js/console @checked-chapters)
       [chapters ms @checked-chapters])))
 
 (defn content [classes]
@@ -112,6 +113,7 @@
 
 (defn root [m]
   (let []
+    (dispatch [::events/query-chapters])
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))

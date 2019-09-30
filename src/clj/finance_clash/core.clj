@@ -51,7 +51,7 @@ drop table quizz
 "])
 
   (jdbc/execute! ds ["
-create table quizz_attempt (
+create table quiz_attempt (
   series integer,
   question varchar(10),
   user varchar(32),
@@ -60,18 +60,18 @@ create table quizz_attempt (
 ) "])
 
   (jdbc/execute! ds ["
-create table quizz (
+create table quiz (
   series integer,
   question varchar(10)
 )"])
 
 
   (jdbc/execute! ds ["
-drop table quizz_series
+drop table quiz_series
 "])
 
   (jdbc/execute! ds ["
-create table quizz_series (
+create table quiz_series (
   id integer primary key autoincrement,
   release_date text
 )"])
@@ -96,11 +96,11 @@ create table budget_history (
 )"])
 
   (jdbc/execute! ds ["
-insert into quizz(question, user, attempt, success)
+insert into quiz(question, user, attempt, success)
   values('0_5', '1',1, false)"])
 
   (jdbc/execute! ds ["
-update quizz set attempt=0
+update quiz set attempt=0
 where user = \"1\""])
 
   (jdbc/execute! ds ["

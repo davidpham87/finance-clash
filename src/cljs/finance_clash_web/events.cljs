@@ -125,5 +125,3 @@
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
    {:db (assoc db :series-questions result)}))
-
-;; TODO(dph): request series and store it in series
