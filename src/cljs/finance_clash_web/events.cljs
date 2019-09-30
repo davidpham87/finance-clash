@@ -6,7 +6,8 @@
    [re-frame.core :as rf :refer
     [reg-event-db reg-event-fx reg-fx inject-cofx trim-v after path debug]]))
 
-(goog-define backend-url "http://localhost:3000")
+#_(goog-define backend-url "http://localhost:3000")
+(goog-define backend-url "http://206.81.21.152:3000")
 
 (defn endpoint [& params]
   (clojure.string/join "/" (concat [backend-url] params)))
