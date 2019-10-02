@@ -54,7 +54,8 @@
               coercion/coerce-response-middleware]}})
     (ring/create-default-handler))
    :access-control-allow-origin [#"^(http(s)?://)?localhost:(\d){4}$"
-                                 #"http://206.81.21.152"]
+                                 #"http://206.81.21.152"
+                                 #"^(http(s)?://)?www.finance-clash-msiai.pro"]
    :access-control-allow-headers #{:accept :content-type}
    :access-control-allow-methods #{:get :put :post}))
 
