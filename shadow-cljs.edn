@@ -68,7 +68,8 @@
    {:compiler-options
     {:infer-externs :auto
      :optimizations :advanced
-     :closure-defines {backend-url "http://finance-clash-msiai.pro:3000"}
+     :closure-defines
+     {finance-clash-web.events/backend-url "http://finance-clash-msiai.pro:3000"}
      :externs ["externs/material-ui.ext.js"]}}
 
    :devtools
