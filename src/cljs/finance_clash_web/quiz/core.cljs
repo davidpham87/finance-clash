@@ -91,7 +91,6 @@
     [:<> "Question Feedback"
      [:div {:style {:opacity 0.7}} [wealth-comp]]]]
    [:> mui/DialogContent {:style {:margin :auto :min-width 275 :width "40%"}}
-
     [:> mui/DialogContentText
      {:style {:display :flex ;; :flex-direction :column
               :align-items :center :justify :center}}
@@ -99,19 +98,17 @@
    [:> mui/DialogActions
     (when (= status :wrong)
       [:> mui/Button {:onClick #(dispatch [::events/select-question-phase
-                                           :answering])}
-       "Retry"])
+                                           :answering])} "Retry"])
     [:> mui/Button
-     {:onClick
-      (fn []
-        (dispatch [::events/update-available-questions
-                   (if (= status :correct) :answered :postpone)])
-        (dispatch [::events/select-question-phase :selection]))}
+     {:onClick (fn []
+                 (dispatch [::events/update-available-questions
+                            (if (= status :correct) :answered :postpone)])
+                 (dispatch [::events/select-question-phase :selection]))}
      "Next"]]])
 
 (defn display-question-comp [difficulty]
   (let [question-selected @(subscribe [::subscriptions/question-selected difficulty])
-        duration (-> ({:easy 20 :medium 40 :hard 60} difficulty 20) (* 1000))
+        duration (-> ({:easy 20 :medium 40 :hard 60} difficulty 20))
         data @(subscribe [::subscriptions/question question-selected])
         previous-attempts @(subscribe [::subscriptions/previous-attempts])]
     (when (seq question-selected)
@@ -119,7 +116,7 @@
     (if data
       (do
         (rf/dispatch [::events/pay-question difficulty])
-        #_(rf/dispatch [::timer-comp/start-timer {:id :quiz :duration duration}])
+        (rf/dispatch [::timer-comp/start-timer {:id :quiz :duration 20}])
         [display-question data previous-attempts])
       [:div "No data"])))
 
