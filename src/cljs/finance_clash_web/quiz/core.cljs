@@ -116,7 +116,7 @@
     (if data
       (do
         (rf/dispatch [::events/pay-question difficulty])
-        (rf/dispatch [::timer-comp/start-timer {:id :quiz :duration 20}])
+        #_(rf/dispatch [::timer-comp/start-timer {:id :quiz :duration 20}])
         [display-question data previous-attempts])
       [:div "No data"])))
 
