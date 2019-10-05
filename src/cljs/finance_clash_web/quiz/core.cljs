@@ -5,6 +5,8 @@
    ["@material-ui/icons/Cancel" :default ic-cancel]
    ["@material-ui/icons/Check" :default ic-check]
    ["@material-ui/icons/Send" :default ic-send]
+   [cljs-time.core :as ct]
+   [cljs-time.format :as ctf]
    [clojure.string :as s]
    [finance-clash-web.components.button :refer (submit-button)]
    [finance-clash-web.components.colors :as colors]
@@ -106,9 +108,13 @@
                  (dispatch [::events/select-question-phase :selection]))}
      "Next"]]])
 
+(defn ->isoformat [d]
+  (ctf/unparse (ctf/formatters :mysql) d))
+
+
 (defn display-question-comp [difficulty]
   (let [question-selected @(subscribe [::subscriptions/question-selected difficulty])
-        duration (-> ({:easy 20 :medium 40 :hard 60} difficulty 20))
+        duration (-> ({:easy 10 :medium 20 :hard 30} difficulty 10))
         data @(subscribe [::subscriptions/question question-selected])
         previous-attempts @(subscribe [::subscriptions/previous-attempts])]
     (when (seq question-selected)
@@ -116,7 +122,10 @@
     (if data
       (do
         (rf/dispatch [::events/pay-question difficulty])
-        #_(rf/dispatch [::timer-comp/start-timer {:id :quiz :duration 20}])
+        (rf/dispatch [::timer-comp/start-timer
+                      {:id :quiz :duration duration
+                       :start-time (->isoformat (ct/now))
+                       :remaining (+ 0 duration)}])
         [display-question data previous-attempts])
       [:div "No data"])))
 

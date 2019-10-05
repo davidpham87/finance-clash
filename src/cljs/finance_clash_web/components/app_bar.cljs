@@ -51,7 +51,8 @@
 (defn app-bar-label
   [active-panel-label timer]
   (cond
-    (pos? (:remaining timer 0)) timer
+    (pos? (or timer 0)) [:div {:style {:color (if (> timer 10) :black :red)}}
+                         (clojure.core/str "Seconds left: " timer)]
     active-panel-label (clojure.core/str "Finance Clash - "
                                          active-panel-label)
     :else "Finance Clash"))
@@ -60,7 +61,7 @@
 (defn app-bar-react [{:keys [classes] :as props}]
   (let [drawer-open? (subscribe [:drawer-open?])
         active-panel-label (subscribe [:active-panel-label])
-        timer (subscribe [::timer-comp/timer :quiz])]
+        timer (subscribe [::timer-comp/timer-remaining :quiz])]
     (fn [{:keys [classes] :as props}]
       [:> mui/AppBar {:position "absolute"
                       :class (cs (.-appBar classes)

@@ -11,16 +11,10 @@
 (reg-event-fx
  ::start-timer
  (fn [{db :db} [_ {:keys [id duration start-time] :as m}]]
-   (.log js/console m)
-   (let [d (or (:start-time m) (ct/now))
-         m (assoc m
-                  :start-time d
-                  :end-time (->isoformat (ct/plus d (ct/seconds (+ 2 duration))))
-                  :remaining (+ 2 duration))]
-     {:db (assoc-in db [:components :timer id] m)
-      ;; :dispatch [:register-interval {:id id :frequency 1000
-      ;;                                :event [::print id]}]
-      })))
+   (println m)
+   {:db (assoc-in db [:components :timer id] m)
+    :dispatch [:register-interval
+               {:id id :frequency 1000 :event [::update-timer id]}]}))
 
 (reg-event-fx
  ::print
@@ -33,9 +27,12 @@
  ::update-timer
  (fn [{db :db} [_ id]]
    (let [path [:components :timer id :remaining]
-         v (dec (get-in db path))]
-     {:db (assoc-in db path v)
-      :dispatch (if (pos? v) [:clear-interval {:id id}] [])})))
+         v (dec (get-in db path))
+         res {:db (assoc-in db path v)}]
+     (println v)
+     (if (pos? v)
+       res
+       (assoc res :dispatch [:clear-interval {:id id}])))))
 
 (reg-event-fx
  ::clear-timer
@@ -57,6 +54,6 @@
    (get-in comps [:timer])))
 
 (reg-sub
- ::timer
+ ::timer-remaining
  :<- [::timers]
- (fn [m [_ id]] (get m id)))
+ (fn [m [_ id]] (get-in m [id :remaining])))
