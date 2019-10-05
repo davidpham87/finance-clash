@@ -6,6 +6,7 @@
             [clojure.data.json :as json]
             [finance-clash.db :refer (execute-query!)]
             [finance-clash.budget :as budget]
+            [finance-clash.quiz :refer (latest-series)]
             [honeysql.core :as sql]
             [honeysql.helpers :as hsql :refer (select where from)]
             [muuntaja.core :as mc]
@@ -66,18 +67,18 @@
                           :body {:username username-input}})
                        {:status 422
                         :body {:message "Missing username"}})))}}]
-
      ["/wealth"
       {:get {:handler
              (fn [{{user-id :id} :path-params}]
                {:status 200
                 :body (budget/budget user-id)})}}]
      ["/answered-questions"
-      {:get {:parameters {:query (s/keys :req-un [::series])}
+      {:get {:parameters {:query (s/keys :opt-un [::series])}
              :handler
              (fn [m]
                (let [user-id (get-in m [:path-params :id])
-                     series (get-in m [:parameters :query :series])]
+                     series (or (get-in m [:parameters :query :series])
+                                (-> (first (execute-query! (latest-series))) :id))]
                  {:status 200
                   :body (answered-questions user-id series)}))}}]]]])
 

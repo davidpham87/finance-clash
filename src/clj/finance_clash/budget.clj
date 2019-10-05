@@ -21,7 +21,7 @@
 (def question-bonus {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
 
 (s/def ::user-id spec/string?)
-(s/def ::diffculty spec/string?)
+(s/def ::difficulty spec/string?)
 
 (defn budget-tx
   "budget transaction query"
@@ -129,14 +129,19 @@
     (earn! user-id value)))
 
 ;; Routes
-
 (def routes-buy-question
   ["/quiz/buy-question"
    {:coercion reitit.coercion.spec/coercion
-    :parameters {:body (s/keys :req-un [::user-id ::diffculty])}
-    :post {:handler
-           (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
-             (let [x (question-price (keyword difficulty))] (buy! user-id x)))}}])
+    :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
+    :post
+    {:handler
+     (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
+       (let [x (question-price (keyword difficulty))]
+         (buy! user-id x)
+         {:status 200 :body
+          {:status :successful-transaction
+           :cost x
+           :message (str "Acquired question for " x "€.")}}))}}])
 
 (def routes routes-buy-question)
 

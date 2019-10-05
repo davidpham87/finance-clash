@@ -20,7 +20,6 @@
 (defn ^:export main []
   (window-event-listeners)
   (rf/dispatch [:initialise-db])
-  (rf/dispatch [::finance-clash-web.events/retrieve-series-question])
   (mount-app))
 
 

@@ -36,7 +36,7 @@
    :panel-props {} ;; hack to dispatch arguments to component in lazy mode
    :credentials {}
    :question-files question-files
-   :user {} ;; data for auth
+   :user {:id "1"} ;; data for auth
    :user-input {}
    :loading {}
    :errors {}

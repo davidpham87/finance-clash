@@ -83,6 +83,10 @@
  :help-event
  (fn [db] (get-in db [:help-event])))
 
+(reg-sub
+ :wealth
+ (fn [db _] (:wealth db)))
+
 ;; Simulate the breakpoint from material design
 
 (reg-sub

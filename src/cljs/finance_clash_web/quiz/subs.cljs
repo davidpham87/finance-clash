@@ -9,8 +9,16 @@
  (fn [db] (get-in db [:ui-states :question-phase] :selection)))
 
 (reg-sub
+ ::questions-answered
+ (fn [{db :db}]
+   (:questions-answered-data db #{})))
+
+(reg-sub
  ::series-questions
- (fn [db] (:series-questions db {:easy [] :medium [] :hard []})))
+ (fn [db]
+   (let [series (:series-questions db {:easy [] :medium [] :hard []})
+         questions-answered (:questions-answered-data db #{})]
+     (reduce-kv (fn [m k v] (assoc m k (remove questions-answered v))) {} series))))
 
 (reg-sub
  ::possible
@@ -42,7 +50,6 @@
  ::question-status
  :<- [::quiz-question]
  (fn [m] (:status m :loading)))
-
 
 (reg-sub
  ::previous-attempts

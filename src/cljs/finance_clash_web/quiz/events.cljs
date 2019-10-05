@@ -1,9 +1,12 @@
 (ns finance-clash-web.quiz.events
   (:require
-   [finance-clash-web.events :refer (endpoint)]
+   [finance-clash-web.events :as core-events :refer (endpoint)]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx)]))
+
+(defn user-id [db]
+  (get-in db [:user :id]))
 
 (reg-event-db
  ::select-question-phase ;; either :selection or :answering
@@ -75,7 +78,7 @@
                    :uri (endpoint "quiz" chapter question "answer")
                    :format (ajax/json-request-format)
                    :response-format (ajax/json-response-format {:keywords? true})
-                   :params {:user-id "1" :selected-response user-answer
+                   :params {:user-id (user-id db) :selected-response user-answer
                             :series (get-in db [:series-data :id])}
                    :on-success [::success-check-question-answer]
                    :on-failure [:api-request-error]}})))
@@ -84,4 +87,24 @@
  ::success-check-question-answer
  (fn [{db :db} [_ result]]
    {:db (assoc-in db [:quiz-question :status]
-                  (keyword (:answer-status result :loading)))}))
+                  (keyword (:answer-status result :loading)))
+    :dispatch [::core-events/ask-wealth]}))
+
+(reg-event-fx
+ ::pay-question
+ (fn [{db :db} [_ difficulty]]
+   (println "Request pay question:  " difficulty)
+   {:db db
+    :http-xhrio {:method :post
+                 :uri (endpoint "quiz" "buy-question")
+                 :params {:user-id (user-id db) :difficulty difficulty}
+                 :format (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [::success-pay-question]
+                 :on-failure [:api-request-error]}}))
+
+(reg-event-fx
+ ::success-pay-question
+ (fn [{db :db} [_ result]]
+   (println "Pay question success: " result)
+   {:db (assoc db :wealth (- (:wealth db) (:cost result)))}))

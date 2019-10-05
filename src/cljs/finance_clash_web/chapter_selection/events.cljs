@@ -34,6 +34,7 @@
 (reg-event-fx
  ::success-record-next-series
  (fn [{db :db} [_ result]]
+   (js/alert "Your settings have been recorded.")
    {:db (update db :series-data (fnil conj []) result)}))
 
 (reg-event-fx

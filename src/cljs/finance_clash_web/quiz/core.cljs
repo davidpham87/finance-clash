@@ -1,26 +1,34 @@
 (ns finance-clash-web.quiz.core
   (:require
-   [goog.object :as gobj]
+   ["@material-ui/core" :as mui]
+   ["@material-ui/core/Grid" :default mui-grid]
+   ["@material-ui/icons/Cancel" :default ic-cancel]
+   ["@material-ui/icons/Check" :default ic-check]
+   ["@material-ui/icons/Send" :default ic-send]
    [clojure.string :as s]
-   [reagent.core :as reagent]
-   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db reg-sub)]
+   [finance-clash-web.components.button :refer (submit-button)]
    [finance-clash-web.components.colors :as colors]
-   [finance-clash-web.quiz.events :as events]
-   [finance-clash-web.quiz.subs :as subscriptions]
    [finance-clash-web.components.mui-utils :refer
     [cs client-width custom-theme with-styles text-field input-component panel-style
      adapt-mui-component-style]]
-   [finance-clash-web.components.button :refer (submit-button)]
-   ["@material-ui/icons/Send" :default ic-send]
-   ["@material-ui/icons/Check" :default ic-check]
-   ["@material-ui/icons/Cancel" :default ic-cancel]
+   [finance-clash-web.components.timer :as timer-comp]
+   [finance-clash-web.events :as core-events]
+   [finance-clash-web.quiz.events :as events]
+   [finance-clash-web.quiz.subs :as subscriptions]
+   [goog.object :as gobj]
+   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db reg-sub)]
+   [reagent.core :as reagent]))
 
-   ["@material-ui/core/Grid" :default mui-grid]
-   ["@material-ui/core" :as mui]))
+(defn wealth [w]
+  [:> mui/Typography {} "Wealth: " w "€"])
+
+(defn wealth-comp []
+  (let [w (rf/subscribe [:wealth])]
+    (rf/dispatch [::core-events/ask-wealth])
+    (fn [] [wealth @w])))
 
 ;; TODO(dph): insert timer and send answer time by substraction
 ;; TODO(dph): on timeout send a empty answer
-
 (def answer-button
   (adapt-mui-component-style
    (clj->js {:label {:textTransform "none"}
@@ -28,7 +36,8 @@
                     :color "black"
                     :background-color (colors/colors-rgb :aquamarine-bright)
                     "&:hover" {:color "white"
-                               :background-color (colors/colors-rgb :aquamarine-dark)}}})
+                               :background-color
+                               (colors/colors-rgb :aquamarine-dark)}}})
    mui/Button))
 
 (defn display-question
@@ -36,7 +45,8 @@
    previous-attempts]
   (let [module (first (clojure.string/split id "_"))]
     [:> mui/Card {:style {:max-width 360}}
-     [:> mui/CardHeader {:title (str "[" module  "] "question)}]
+     [:> mui/CardHeader {:title (str "[" module  "] "question)
+                         :subheader (reagent/as-element [wealth-comp])}]
      [:> mui/CardContent {:style {:height "100%"}}
       [:div {:style {:display :flex :flex-direction :column
                      :width "100%"
@@ -77,10 +87,14 @@
 (defn answer-feedback
   [{:keys [status] :or {status :correct}}]
   [:> mui/Dialog {:open true}
-   [:> mui/DialogTitle "Question Feedback"]
+   [:> mui/DialogTitle
+    [:<> "Question Feedback"
+     [:div {:style {:opacity 0.7}} [wealth-comp]]]]
    [:> mui/DialogContent {:style {:margin :auto :min-width 275 :width "40%"}}
-    [:> mui/DialogContentText {:style {:display :flex :align-items :center
-                                       :justify :center}}
+
+    [:> mui/DialogContentText
+     {:style {:display :flex ;; :flex-direction :column
+              :align-items :center :justify :center}}
      [answer-content status]]]
    [:> mui/DialogActions
     (when (= status :wrong)
@@ -97,12 +111,16 @@
 
 (defn display-question-comp [difficulty]
   (let [question-selected @(subscribe [::subscriptions/question-selected difficulty])
+        duration (-> ({:easy 20 :medium 40 :hard 60} difficulty 20) (* 1000))
         data @(subscribe [::subscriptions/question question-selected])
         previous-attempts @(subscribe [::subscriptions/previous-attempts])]
     (when (seq question-selected)
       (rf/dispatch [::events/set-question-quiz-id question-selected]))
     (if data
-      [display-question data previous-attempts]
+      (do
+        (rf/dispatch [::events/pay-question difficulty])
+        #_(rf/dispatch [::timer-comp/start-timer {:id :quiz :duration duration}])
+        [display-question data previous-attempts])
       [:div "No data"])))
 
 (defn difficulty-button
@@ -110,23 +128,10 @@
   ([args v]
    [:> mui/Button (merge {:fullWidth true :variant :contained} args) v]))
 
-(defn difficulty-selection [questions-available]
+(defn difficulty-buttons [questions-available]
   (let [event [::events/select-question-phase :answering]
-        questions-count (fn [k] (count (get questions-available k [])))
-        questions-remaining? (pos? (reduce + (mapv count (vals questions-available))))]
-    [:> mui/Card {:elevation 0 :style
-                  {:margin :auto
-                   :min-width 260 :width "50%"
-                   :max-height 400 :height "80%"}}
-     [:> mui/CardHeader {:title "Select Difficulty"}]
-     [:> mui/CardContent {:style {:height "100%"}}
-      [:> mui/Typography
-       (if questions-remaining?
-         "Rewards without bonus/malus."
-         [:div {:style {:color (colors/colors-rgb :red-light)}}
-          "No more available question."])]
-      (when questions-remaining?
-        [:> mui/Grid {:container true :style {:flex-grow 1 :height "80%"}
+        questions-count (fn [k] (count (get questions-available k [])))]
+    [:> mui/Grid {:container true :style {:flex-grow 1 :height "80%"}
                       :alignItems :center}
          [:> mui/Grid {:item true :xs 12}
           [:> mui/Grid {:container true :justify :space-around
@@ -139,20 +144,37 @@
               :style {:color "white":background-color
                       (colors/colors-rgb ;; :aquamarine-dark
                        :nucleus-blue-dark)}}
-             (str "Easy (-$3 / +$12) " "[" (questions-count :easy)  "]")]]
+             (str "Easy (-€3 / +€12) " "[" (questions-count :easy)  "]")]]
            [:> mui/Grid {:item true}
             [difficulty-button
              {:on-click #(dispatch (conj event :medium))
               :disabled (zero? (questions-count :medium))
               :style {:background-color (colors/colors-rgb :citrine-bright)}}
-             (str "Medium (-$7 / +$28) " "[" (questions-count :medium) "]")]]
+             (str "Medium (-€7 / +€28) " "[" (questions-count :medium) "]")]]
            [:> mui/Grid {:item true}
             [difficulty-button
              {:on-click #(dispatch (conj event :hard))
               :disabled (zero? (questions-count :hard))
               :style {:color "white" :background-color
                       (colors/colors-rgb :red-light-dark)}}
-             (str "Hard (-$10 / +$40) " "[" (questions-count :hard) "]")]]]]])]]))
+             (str "Hard (-€10 / +€40) " "[" (questions-count :hard) "]")]]]]]))
+
+(defn difficulty-selection [questions-available]
+  (let [questions-remaining? (pos? (reduce + (mapv count (vals questions-available))))]
+    [:> mui/Card {:elevation 0 :style
+                  {:margin :auto
+                   :min-width "50vw"
+                   :max-height 420 :height "80%"}}
+     [:> mui/CardHeader {:title "Select Difficulty"
+                         :subheader (reagent/as-element [wealth-comp])}]
+     [:> mui/CardContent {:style {:height "100%" :min-width 260 :width "100%"}}
+      [:> mui/Typography
+       (if questions-remaining?
+         "Rewards without bonus/malus."
+         [:div {:style {:color (colors/colors-rgb :red-light)}}
+          "No more available question."])]
+      (when questions-remaining?
+        [difficulty-buttons questions-available])]]))
 
 (defmulti content :phase :default :selection)
 
@@ -165,10 +187,14 @@
 (defmethod content :feedback [m]
   [answer-feedback {:status @(subscribe [::subscriptions/question-status])}])
 
+(defn init-events []
+  (rf/dispatch [::finance-clash-web.events/retrieve-series-question])
+  (rf/dispatch [::events/query-latest-series])
+  (rf/dispatch [::core-events/retrieve-answered-questions]))
+
 (defn root [m]
   (let [question-phase (subscribe [::subscriptions/question-phase])]
-    #_(dispatch [::events/select-question-phase :selection])
-    (rf/dispatch [::events/query-latest-series])
+    (init-events)
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))

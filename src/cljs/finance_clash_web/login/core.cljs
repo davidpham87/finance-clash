@@ -6,7 +6,6 @@
     :refer [reg-sub reg-fx reg-event-fx dispatch
             reg-event-db subscribe]]
    [goog.object :as gobj]
-
    [finance-clash-web.components.colors :as colors]
    [finance-clash-web.components.mui-utils :refer
     [cs client-width with-styles text-field input-component panel-style]]

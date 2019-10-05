@@ -6,8 +6,11 @@
    [re-frame.core :as rf :refer
     [reg-event-db reg-event-fx reg-fx inject-cofx trim-v after path debug]]))
 
-#_(goog-define backend-url "http://localhost:3000")
-(goog-define backend-url "http://206.81.21.152:3000")
+(goog-define backend-url "http://localhost:3000")
+#_(goog-define backend-url "http://finance-clash-msiai.pro:3000")
+
+(defn user-id [db]
+  (get-in db [:user :id]))
 
 (defn endpoint [& params]
   (clojure.string/join "/" (concat [backend-url] params)))
@@ -24,7 +27,7 @@
  [(inject-cofx :local-store-user)]
  (fn [{:keys [local-store-user]} _]
    ;; take 2 vals from coeffects. Ignore event vector itself.
-   {:db (assoc default-db :user local-store-user)
+   {:db default-db ;; (assoc default-db :user local-store-user)
     :dispatch-n
     (into [(when (seq local-store-user) [:set-active-panel :welcome])]
           (mapv #(vector ::retrieve-questions %) (range 26)))}))
@@ -70,6 +73,43 @@
          response (last event-vector)]
      {:db (update-in db [:errors request-type]
                      (fnil conj []) response)})))
+
+(defonce interval-handler                ;; notice the use of defonce
+  (let [live-intervals (atom {})]        ;; storage for live intervals
+    (fn handler [{:keys [action id frequency event]}] ;; the effect handler
+      (case action
+        :clean   (doseq [k (keys @live-intervals)]
+                   (handler {:action :end :id  k}))
+        :start   (when-not (get @live-intervals id)
+                   (swap! live-intervals assoc id
+                          (js/setInterval #(rf/dispatch event) frequency)))
+        :end     (do (js/clearInterval (get @live-intervals id))
+                     (swap! live-intervals dissoc id))))))
+
+;; when this code is reloaded `:clean` existing intervals
+(interval-handler {:action :clean})
+
+(reg-fx ;; the re-frame API for registering effect handlers
+ :interval ;; the effect id
+ interval-handler)
+
+(reg-event-fx
+ :clear-intervals
+ (fn [_ _]
+   {:interval {:action :clean}}))
+
+(reg-event-fx
+ :register-interval
+ (fn [{db :db} [_ {:keys [id frequency event] :as m}]]
+   {:db db
+    :interval (assoc m :action :start)}))
+
+(reg-event-fx
+ :clear-interval
+ (fn [{db :db} [_ {:keys [id frequency event] :as m}]]
+   {:db db
+    :interval (assoc m :action :end)}))
+
 
 (reg-event-fx
  ::retrieve-latest-series-id
@@ -126,3 +166,39 @@
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
    {:db (assoc db :series-questions result)}))
+
+(reg-event-fx
+ ::ask-wealth
+ (fn [{db :db} _]
+   (let [user-id (get-in db [:user :id])]
+     {:db db
+      :http-xhrio {:method :get
+                   :format (ajax/json-request-format)
+                   :response-format (ajax/json-response-format {:keywords? true})
+                   :on-success [::success-ask-wealth]
+                   :on-failure [:api-request-error]
+                   :uri (endpoint "user" user-id "wealth")}})))
+
+(reg-event-fx
+ ::success-ask-wealth
+ (fn [{db :db} [_ result]]
+   (.log js/console "Finished")
+   {:db (assoc db :wealth (-> result first :wealth (js/Math.round)))}))
+
+(reg-event-fx
+ ::retrieve-answered-questions
+ (fn [{db :db} _]
+   (let [id (user-id db)]
+     {:db db
+      :http-xhrio {:method :get
+                   :uri (endpoint "user" id "answered-questions")
+                   :params {:user-id id}
+                   :format (ajax/json-request-format)
+                   :response-format (ajax/json-response-format {:keywords? true})
+                   :on-success [::success-retrieve-answered-questions]
+                   :on-failure [:api-request-error]}})))
+
+(reg-event-fx
+ ::success-retrieve-answered-questions
+ (fn [{db :db} [_ result]]
+   {:db (assoc db :questions-answered-data (set (mapv :question result)))}))

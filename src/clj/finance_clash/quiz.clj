@@ -164,7 +164,8 @@
              success? (correct-answer? id user-id selected-response)]
          (println success? selected-response)
          (attempt! id user-id series success?)
-         (when (and success? (-> tx first :success (or 1) zero?))
+         (println "Success?: " success? tx (-> tx first :success))
+         (when (and success? (or (empty? tx) (-> tx first :success (or 1) zero?)))
            (budget/earn-question-value! user-id id))
          {:status 200
           :body {:id id
