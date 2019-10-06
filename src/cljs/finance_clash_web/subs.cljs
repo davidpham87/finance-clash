@@ -87,6 +87,9 @@
  :wealth
  (fn [db _] (:wealth db)))
 
+(reg-sub
+ :chapter-name
+ (fn [db [_ id]] (get-in db [:chapter-name id])))
 ;; Simulate the breakpoint from material design
 
 (reg-sub

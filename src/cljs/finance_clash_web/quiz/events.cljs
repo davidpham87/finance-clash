@@ -1,5 +1,6 @@
 (ns finance-clash-web.quiz.events
   (:require
+   [finance-clash-web.components.timer :as timer-comp]
    [finance-clash-web.events :as core-events :refer (endpoint)]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
@@ -108,3 +109,11 @@
  (fn [{db :db} [_ result]]
    (println "Pay question success: " result)
    {:db (assoc db :wealth (- (:wealth db) (:cost result)))}))
+
+(reg-event-fx
+ ::timeout-question
+ (fn [{db :db} [_ id]]
+   {:dispatch-n [[::timer-comp/clear-timer :quiz]
+                 [::set-question-quiz-loading]
+                 [::check-question-answer id 0]
+                 [::select-question-phase :feedback]]}))

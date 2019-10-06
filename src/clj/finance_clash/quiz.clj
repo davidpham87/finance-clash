@@ -6,6 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [java-time :as jt]
+            [finance-clash.auth :refer (protected-interceptor)]
             [finance-clash.db :refer (execute-query!)]
             [finance-clash.budget :as budget]
             [honeysql.core :as sql]
@@ -154,6 +155,7 @@
    {:post
     {:summary "Save an answer from the user and return if the selected answer was correct."
      :parameters {:body (s/keys :req-un [::user-id ::selected-response ::series])}
+     :interceptor [protected-interceptor]
      :handler
      (fn [m]
        (let [params (:parameters m)

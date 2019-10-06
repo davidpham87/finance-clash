@@ -1,8 +1,10 @@
 (ns finance-clash-web.db
   (:require
+   [clojure.string :as str]
    [cljs.reader]
    [re-frame.core :as rf :refer (reg-cofx)]))
 
+;; TODO get this into a config file
 (def question-files
   ["0_key_notions.json"
    "1_intro.json"
@@ -31,11 +33,41 @@
    "24_bourse.json"
    "25_liquidity_talk.json"])
 
+;; TODO get this into a config file
+(def chapter-names
+  {"9" "Sig et Caf",
+   "3" "Le Bilan",
+   "22" "Credit Talk",
+   "4" "Le Compte de Resultat",
+   "8" "Comptabilité",
+   "14" "Diagnostic Financier",
+   "21" "Rating Agencies",
+   "20" "Empty",
+   "19" "Trésorerie",
+   "17" "Microeconomie",
+   "25" "Liquidity Talk",
+   "15" "Financial Risks and Options",
+   "7" "Cycles Exploitation Inv Financement",
+   "5" "Introduction Finance",
+   "18" "Central Banks",
+   "12" "Financial Crisis",
+   "13" "Tva",
+   "24" "Bourse",
+   "6" "Le Capital",
+   "1" "Intro",
+   "0" "Key Notions",
+   "11" "Regulatory Requirements",
+   "2" "Etats Financiers",
+   "16" "Couts and Comptabilite Analytique",
+   "10" "Obligations",
+   "23" "Libor Fwd Rates"})
+
 (def default-db
   {:active-panel :login
    :panel-props {} ;; hack to dispatch arguments to component in lazy mode
    :credentials {}
    :question-files question-files
+   :chapter-names chapter-names
    :user {:id "1"} ;; data for auth
    :user-input {}
    :loading {}

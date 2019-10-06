@@ -98,7 +98,6 @@
         (reaction {:available @(subscribe [::subscriptions/chapter-available])
                    :priority @(subscribe [::subscriptions/chapter-priority])})]
     (fn [ms]
-      (.log js/console @checked-chapters)
       [chapters ms @checked-chapters])))
 
 (defn content [classes]

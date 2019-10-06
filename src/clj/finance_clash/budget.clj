@@ -1,20 +1,16 @@
 (ns finance-clash.budget
   "Implements budget tables and routes"
-  (:require [clj-http.client :as client]
-            [clojure.data.json :as json]
-            [clojure.set :refer (rename-keys)]
-            [clojure.pprint :refer (pprint)]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [java-time :as jt]
-            [finance-clash.db :refer (execute-query!)]
-            [honeysql.core :as sql]
-            [honeysql.helpers :as hsql
-             :refer (select where from insert-into)]
-            [muuntaja.core :as mc]
-            [muuntaja.format.yaml :as yaml]
-            [reitit.coercion.spec]
-            [spec-tools.spec :as spec]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [finance-clash.db :refer (execute-query!)]
+   [finance-clash.auth :refer (protected-interceptor)]
+   [honeysql.core :as sql]
+   [honeysql.helpers :as hsql
+    :refer (select where from insert-into)]
+   [java-time :as jt]
+   [reitit.coercion.spec]
+   [spec-tools.spec :as spec]))
 
 (def question-price {:easy 3 :medium 7 :hard 10})
 (def question-value-raw {:easy 12 :medium 28 :hard 40})
@@ -133,10 +129,12 @@
   ["/quiz/buy-question"
    {:coercion reitit.coercion.spec/coercion
     :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
+    :interceptors [protected-interceptor]
     :post
     {:handler
-     (fn [{{{:keys [user-id difficulty]} :body} :parameters}]
-       (let [x (question-price (keyword difficulty))]
+     (fn [m]
+       (let [{{{:keys [user-id difficulty]} :body} :parameters} m
+             x (question-price (keyword difficulty))]
          (buy! user-id x)
          {:status 200 :body
           {:status :successful-transaction

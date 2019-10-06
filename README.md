@@ -15,7 +15,6 @@ $ shadow-cljs release app
 clj -R:rebl -m cognitect.rebl
 ```
 
-
 ``` clojure
 (require '[nrepl.server :refer [start-server stop-server]])
 (defonce server (start-server :port 3334))
@@ -46,3 +45,9 @@ files.
 have or need. Including the `src/main/reagent/dom.cljs` to create an empty
 shell. Copied from
 [re-natal](https://github.com/drapanjanas/re-natal/blob/master/resources/cljs-reagent6/reagent_dom.cljs).
+
+
+## Auth
+
+We should unsign and us the credentials from the token for performing
+operation. Otherwise user could use other user-id to perform operation.

@@ -19,8 +19,6 @@
 (reg-event-fx
  ::print
  (fn [{db :db} [_ id]]
-   (.log js/console "Print")
-   (.log js/console id)
    {:db db}))
 
 (reg-event-fx
@@ -36,11 +34,9 @@
 
 (reg-event-fx
  ::clear-timer
- (fn [db [_ id]]
-   (let [path [:components :timer id]
-         m (get-in db path)]
-     {:db (assoc-in db path nil)
-      :dispatch [:clear-interval {:id id}]})))
+ (fn [{db :db} [_ id]]
+   {:db (assoc-in db [:components :timer id :remaining] -1)
+    :dispatch [:clear-interval {:id id}]}))
 
 (reg-sub
  ::components

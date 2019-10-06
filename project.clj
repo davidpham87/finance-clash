@@ -1,7 +1,10 @@
 (defproject finance-clash "0.1.0"
   :description "finance-clash backend"
   :dependencies
-  [[cider/cider-nrepl "0.22.3"]
+  [[buddy/buddy-auth "2.2.0"]
+   [buddy/buddy-hashers "1.4.0"]
+   [buddy/buddy-sign "3.1.0"]
+   [cider/cider-nrepl "0.22.3"]
    [cider/piggieback "0.4.1"]
    [clj-http "3.10.0"]
    [clojure.java-time "0.3.2"]

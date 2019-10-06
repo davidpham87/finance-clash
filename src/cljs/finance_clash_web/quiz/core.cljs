@@ -5,6 +5,7 @@
    ["@material-ui/icons/Cancel" :default ic-cancel]
    ["@material-ui/icons/Check" :default ic-check]
    ["@material-ui/icons/Send" :default ic-send]
+   ["react-reveal/Bounce" :as reveal-bounce]
    [cljs-time.core :as ct]
    [cljs-time.format :as ctf]
    [clojure.string :as s]
@@ -42,12 +43,37 @@
                                (colors/colors-rgb :aquamarine-dark)}}})
    mui/Button))
 
+(defn timeout [id timer-remaining]
+  (when (zero? timer-remaining)
+    (rf/dispatch [::events/timeout-question id]))
+  [:div])
+
+(defn display-question-button [{:keys [answer id i previous-attempts]}]
+  (let [timer-remaining @(subscribe [::timer-comp/timer-remaining :quiz])
+        outer-comp (if (< (or timer-remaining 12) 11) [:> reveal-bounce] [:<>])]
+    (conj outer-comp
+          [:div {:style {:display :flex :justify-content :center}}
+           [timeout id timer-remaining]
+           [:> answer-button
+            {:fullWidth true
+             :onClick
+             (fn [e]
+               (rf/dispatch [::timer-comp/clear-timer :quiz])
+               (rf/dispatch [::events/set-question-quiz-loading])
+               (rf/dispatch [::events/append-question-quiz-attempt i])
+               (rf/dispatch [::events/check-question-answer id i])
+               (rf/dispatch [::events/select-question-phase :feedback]))
+             :variant :outlined
+             :disabled (contains? (or previous-attempts {}) i)
+             :style {:margin-top 10 :margin-bottom 10 :width "100%"
+                     :min-height 60}}
+            answer]])))
+
 (defn display-question
-  [{:keys [id question responses duration] :as question-map}
-   previous-attempts]
+  [{:keys [id question responses duration] :as question-map} previous-attempts]
   (let [module (first (clojure.string/split id "_"))]
     [:> mui/Card {:style {:max-width 360}}
-     [:> mui/CardHeader {:title (str "[" module  "] "question)
+     [:> mui/CardHeader {:title question
                          :subheader (reagent/as-element [wealth-comp])}]
      [:> mui/CardContent {:style {:height "100%"}}
       [:div {:style {:display :flex :flex-direction :column
@@ -56,21 +82,10 @@
                      :flex 1
                      :justify-content :space-around :align-items :stretch}}
        (doall
-        (for [[i answer] (shuffle responses)]
-          ^{:key i}
-          [:div {:style {:display :flex :justify-content :center}}
-           [:> answer-button
-            {:fullWidth true
-             :onClick
-             (fn [e]
-               (rf/dispatch [::events/set-question-quiz-loading])
-               (rf/dispatch [::events/append-question-quiz-attempt i])
-               (rf/dispatch [::events/check-question-answer id i])
-               (rf/dispatch [::events/select-question-phase :feedback]))
-             :variant :outlined
-             :disabled (contains? (or previous-attempts {}) i)
-             :style {:margin-top 10 :margin-bottom 10 :width "100%" :min-height 60}}
-            answer]]))]]]))
+        (for [[i answer] responses #_(shuffle )
+              :let [args {:answer answer :id id :i i
+                          :previous-attempts previous-attempts}]]
+          ^{:key i} [display-question-button args]))]]]))
 
 (defn answer-content [status]
   (case status
@@ -111,11 +126,10 @@
 (defn ->isoformat [d]
   (ctf/unparse (ctf/formatters :mysql) d))
 
-
 (defn display-question-comp [difficulty]
   (let [question-selected @(subscribe [::subscriptions/question-selected difficulty])
-        duration (-> ({:easy 10 :medium 20 :hard 30} difficulty 10))
         data @(subscribe [::subscriptions/question question-selected])
+        duration (:duration data 10)
         previous-attempts @(subscribe [::subscriptions/previous-attempts])]
     (when (seq question-selected)
       (rf/dispatch [::events/set-question-quiz-id question-selected]))
@@ -125,8 +139,11 @@
         (rf/dispatch [::timer-comp/start-timer
                       {:id :quiz :duration duration
                        :start-time (->isoformat (ct/now))
+                       :end-time (-> (ct/now)
+                                     (ct/plus (ct/seconds duration))
+                                     ->isoformat)
                        :remaining (+ 0 duration)}])
-        [display-question data previous-attempts])
+        [display-question (update data :response shuffle) previous-attempts])
       [:div "No data"])))
 
 (defn difficulty-button
@@ -196,7 +213,8 @@
 (defn init-events []
   (rf/dispatch [::finance-clash-web.events/retrieve-series-question])
   (rf/dispatch [::events/query-latest-series])
-  (rf/dispatch [::core-events/retrieve-answered-questions]))
+  (rf/dispatch [::core-events/retrieve-answered-questions])
+  #_(rf/dispatch [::events/select-question-phase :selection]))
 
 (defn root [m]
   (let [question-phase (subscribe [::subscriptions/question-phase])]
