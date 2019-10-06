@@ -89,8 +89,16 @@
 
 (reg-sub
  :chapter-name
- (fn [db [_ id]] (get-in db [:chapter-name id])))
+ (fn [db [_ id]] (get-in db [:chapter-names id])))
 ;; Simulate the breakpoint from material design
+
+(reg-sub
+ :super-user?
+ (fn [db _]
+   (let [id (get-in db [:user :id])
+         super-users (:super-users db)]
+     (println id super-users)
+     (contains? super-users id))))
 
 (reg-sub
  :window-size

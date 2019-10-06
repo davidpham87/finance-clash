@@ -7,16 +7,17 @@
    [finance-clash.quiz]
    [finance-clash.specs]
    [finance-clash.user]
+   [finance-clash.interceptors.cors :as cors]
    [muuntaja.core :as m]
    [next.jdbc :as jdbc]
    [next.jdbc.result-set :as rs]
-   [reitit.interceptor.sieppari :as sieppari]
    [reitit.http :as http]
-   [reitit.http.interceptors.parameters :as parameters]
-   [reitit.http.interceptors.muuntaja :as muuntaja]
-   [reitit.http.interceptors.exception :as exception]
-   [reitit.ring :as ring]
    [reitit.http.coercion :as coercion]
+   [reitit.http.interceptors.exception :as exception]
+   [reitit.http.interceptors.muuntaja :as muuntaja]
+   [reitit.http.interceptors.parameters :as parameters]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.ring :as ring]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.cors]
    [ring.middleware.params :as params]))
@@ -34,57 +35,64 @@
                      {:status 200
                       :body {:total (+ x y)}})}]])
 
+(def app-data
+  {:data
+   {:muuntaja m/instance
+    :access-control
+    {:access-control-allow-origin
+     [#"^(http(s)?://)?localhost:(\d){4}$"
+      #"http://206.81.21.152"
+      #"^(http(s)?://)?www.finance-clash-msiai.pro"]
+     :access-control-allow-headers #{:accept :content-type :authorization}
+     :access-control-allow-methods #{:get :put :post}}
+    :interceptors
+    [;; query-params & form-params
+     (parameters/parameters-interceptor)
+     ;; content-negotiation
+     (muuntaja/format-negotiate-interceptor)
+     ;; encoding response body
+     (muuntaja/format-response-interceptor)
+     ;; exception handling
+     (exception/exception-interceptor)
+     ;; decoding request body
+     (muuntaja/format-request-interceptor)
+     (coercion/coerce-request-interceptor)
+     (coercion/coerce-response-interceptor)
+     (cors/cors-interceptor)]}})
+
+(def app-routes
+  [["/" {:get (fn [request]
+                (clojure.pprint/pprint
+                 [["/" {:get (fn [request]
+                               (clojure.pprint/pprint)
+                               {:body "Hello from finance-clash server 1"})}]
+                  ["/echo" {:get (fn [request] {:body "echo"})}]
+                  routes
+                  finance-clash.specs/routes
+                  finance-clash.quiz/routes
+                  finance-clash.user/routes
+                  finance-clash.budget/routes])
+                {:body "Hello from finance-clash server 3"})}]
+   ["/echo" {:get (fn [request] {:body "echo"})}]
+   routes
+   finance-clash.specs/routes
+   finance-clash.user/routes
+   finance-clash.quiz/routes
+   finance-clash.budget/routes])
+
 (def app
-  (->
-   (http/router
-      [["/" {:get (fn [request]
-                    (clojure.pprint/pprint
-                     [["/" {:get (fn [request]
-                                   (clojure.pprint/pprint)
-                                   {:body "Hello from finance-clash server 1"})}]
-                      ["/echo" {:get (fn [request] {:body "echo"})}]
-                      routes
-                      finance-clash.specs/routes
-                      finance-clash.quiz/routes
-                      finance-clash.user/routes
-                      finance-clash.budget/routes])
-                    {:body "Hello from finance-clash server 3"})}]
-       ["/echo" {:get (fn [request] {:body "echo"})}]
-       routes
-       finance-clash.specs/routes
-       finance-clash.user/routes
-       finance-clash.quiz/routes
-       finance-clash.budget/routes]
-      {:data {:muuntaja m/instance
-              :interceptors [;; query-params & form-params
-                             (parameters/parameters-interceptor)
-                             ;; content-negotiation
-                             (muuntaja/format-negotiate-interceptor)
-                             ;; encoding response body
-                             (muuntaja/format-response-interceptor)
-                             ;; exception handling
-                             (exception/exception-interceptor)
-                             ;; decoding request body
-                             (muuntaja/format-request-interceptor)
-                             (coercion/coerce-request-interceptor)
-                             (coercion/coerce-response-interceptor)]}})
-   (http/ring-handler (ring/create-default-handler)
+  (-> (http/router app-routes app-data)
+      (http/ring-handler (ring/create-default-handler)
                       {:executor sieppari/executor})
-   (ring.middleware.cors/wrap-cors
-    :access-control-allow-origin [#"^(http(s)?://)?localhost:(\d){4}$"
-                                  #"http://206.81.21.152"
-                                  #"^(http(s)?://)?www.finance-clash-msiai.pro"]
-    :access-control-allow-headers #{:accept :content-type}
-    :access-control-allow-methods #{:get :put :post})
-   (buddy.auth.middleware/wrap-authorization auth-backend)
-   (buddy.auth.middleware/wrap-authentication auth-backend)))
+      (buddy.auth.middleware/wrap-authorization auth-backend)
+      (buddy.auth.middleware/wrap-authentication auth-backend)))
 
 (defonce server (atom nil))
 
 (defn start []
   (let [jetty-server (jetty/run-jetty #'app {:port 3000, :join? false})]
     (reset! server jetty-server)
-    (println "server running in port 3000")))
+    (println "Server running in port 3000")))
 
 (defn stop []
   (.stop @server))

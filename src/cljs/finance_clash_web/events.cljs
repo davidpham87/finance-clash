@@ -24,14 +24,29 @@
       nil)))
 
 (reg-event-fx
+ :api-request-error
+ (fn
+   [{:keys [db]} event-vector]
+   (let [request-type (second event-vector)
+         response (last event-vector)]
+     {:db (update-in db [:errors request-type]
+                     (fnil conj []) response)})))
+
+(reg-event-fx
+ :clear-error
+ (fn [{:keys [db]} [_ request-type]]
+   {:db (assoc-in db [:errors request-type] [])}))
+
+(reg-event-fx
  :initialise-db
  [(inject-cofx :local-store-user)]
  (fn [{:keys [local-store-user]} _]
    ;; take 2 vals from coeffects. Ignore event vector itself.
-   {:db default-db ;; (assoc default-db :user local-store-user)
+   {:db (assoc default-db :user local-store-user) ;;
     :dispatch-n
     (into [(when (seq local-store-user) [:set-active-panel :welcome])]
           (mapv #(vector ::retrieve-questions %) (range 26)))}))
+;; UI
 
 (reg-event-db
  :toggle-drawer
@@ -61,19 +76,7 @@
  (fn [db [_ panel props]]
    (assoc-in db [:panel-props panel] props)))
 
-(reg-event-fx
- :clear-error
- (fn [{:keys [db]} [_ request-type]]
-   {:db (assoc-in db [:errors request-type] [])}))
-
-(reg-event-fx
- :api-request-error
- (fn
-   [{:keys [db]} event-vector]
-   (let [request-type (second event-vector)
-         response (last event-vector)]
-     {:db (update-in db [:errors request-type]
-                     (fnil conj []) response)})))
+;; Interval event
 
 (defonce interval-handler                ;; notice the use of defonce
   (let [live-intervals (atom {})]        ;; storage for live intervals
@@ -112,6 +115,37 @@
    {:db db
     :interval (assoc m :action :end)}))
 
+;; User events
+(reg-event-fx
+ ::ask-wealth
+ (fn [{db :db} _]
+   (let [user-id (get-in db [:user :id])]
+     {:db db
+      :http-xhrio {:method :get
+                   :headers (auth-header db)
+                   :format (ajax/json-request-format)
+                   :response-format (ajax/json-response-format {:keywords? true})
+                   :on-success [::success-ask-wealth]
+                   :on-failure [:api-request-error]
+                   :uri (endpoint "user" user-id "wealth")}})))
+
+(reg-event-fx
+ ::success-ask-wealth
+ (fn [{db :db} [_ result]]
+   {:db (assoc db :wealth (-> result first :wealth (js/Math.round)))}))
+
+(reg-event-fx
+ ::retrieve-series-question
+ (fn [{db :db} _]
+   {:db db
+    :http-xhrio {:method :get
+                 :format (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [::success-retrieve-series-question]
+                 :on-failure [:api-request-error]
+                 :uri (endpoint "series" "latest" "questions")}}))
+
+;; Quiz events
 
 (reg-event-fx
  ::retrieve-latest-series-id
@@ -154,38 +188,9 @@
      {:db (assoc-in db [:question-data (str chapter)] result)})))
 
 (reg-event-fx
- ::retrieve-series-question
- (fn [{db :db} _]
-   {:db db
-    :http-xhrio {:method :get
-                 :format (ajax/json-request-format)
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success [::success-retrieve-series-question]
-                 :on-failure [:api-request-error]
-                 :uri (endpoint "series" "latest" "questions")}}))
-
-(reg-event-fx
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
    {:db (assoc db :series-questions result)}))
-
-(reg-event-fx
- ::ask-wealth
- (fn [{db :db} _]
-   (let [user-id (get-in db [:user :id])]
-     {:db db
-      :http-xhrio {:method :get
-                   :format (ajax/json-request-format)
-                   :response-format (ajax/json-response-format {:keywords? true})
-                   :on-success [::success-ask-wealth]
-                   :on-failure [:api-request-error]
-                   :uri (endpoint "user" user-id "wealth")}})))
-
-(reg-event-fx
- ::success-ask-wealth
- (fn [{db :db} [_ result]]
-   (.log js/console "Finished")
-   {:db (assoc db :wealth (-> result first :wealth (js/Math.round)))}))
 
 (reg-event-fx
  ::retrieve-answered-questions

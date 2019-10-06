@@ -76,7 +76,6 @@
   (budget user-id v))
 
 ;; Compute bonus
-
 (defn now []
   (jt/with-clock (jt/system-clock "Europe/Paris")
     (jt/offset-time)))
@@ -103,7 +102,7 @@
 
 (defn question-value
   [difficulty {:keys [priority? bonus-period?] :as modifiers}]
-  (println difficulty modifiers)
+  #_(println difficulty modifiers)
   (* (get question-value-raw (keyword difficulty) 0)
      (if priority? (:priority? question-bonus) 1)
      (if bonus-period?
@@ -128,13 +127,15 @@
 (def routes-buy-question
   ["/quiz/buy-question"
    {:coercion reitit.coercion.spec/coercion
-    :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
-    :interceptors [protected-interceptor]
     :post
-    {:handler
+    {:interceptors [protected-interceptor]
+     :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
+     :handler
      (fn [m]
        (let [{{{:keys [user-id difficulty]} :body} :parameters} m
              x (question-price (keyword difficulty))]
+         #_(println "Buy question")
+         #_(println user-id difficulty)
          (buy! user-id x)
          {:status 200 :body
           {:status :successful-transaction

@@ -27,11 +27,8 @@
 
 (defn wealth-comp []
   (let [w (rf/subscribe [:wealth])]
-    (rf/dispatch [::core-events/ask-wealth])
     (fn [] [wealth @w])))
 
-;; TODO(dph): insert timer and send answer time by substraction
-;; TODO(dph): on timeout send a empty answer
 (def answer-button
   (adapt-mui-component-style
    (clj->js {:label {:textTransform "none"}
@@ -43,8 +40,8 @@
                                (colors/colors-rgb :aquamarine-dark)}}})
    mui/Button))
 
-(defn timeout [id timer-remaining]
-  (when (zero? timer-remaining)
+(defn timeout [id]
+  (when (zero? @(subscribe [::timer-comp/timer-remaining :quiz]))
     (rf/dispatch [::events/timeout-question id]))
   [:div])
 
@@ -53,7 +50,6 @@
         outer-comp (if (< (or timer-remaining 12) 11) [:> reveal-bounce] [:<>])]
     (conj outer-comp
           [:div {:style {:display :flex :justify-content :center}}
-           [timeout id timer-remaining]
            [:> answer-button
             {:fullWidth true
              :onClick
@@ -71,10 +67,13 @@
 
 (defn display-question
   [{:keys [id question responses duration] :as question-map} previous-attempts]
-  (let [module (first (clojure.string/split id "_"))]
-    [:> mui/Card {:style {:max-width 360}}
-     [:> mui/CardHeader {:title question
-                         :subheader (reagent/as-element [wealth-comp])}]
+  (let [module (first (clojure.string/split id "_"))
+        module-name @(subscribe [:chapter-name module])]
+    [:> mui/Card {:style {:min-width 275 :width "50vw"}}
+     [:> mui/CardHeader
+      {:title question
+       :subheader (reagent/as-element [:div {:style {:display :flex :justifyContent :space-between :margin-top 5}}
+                                       module-name [wealth-comp]])}]
      [:> mui/CardContent {:style {:height "100%"}}
       [:div {:style {:display :flex :flex-direction :column
                      :width "100%"
@@ -107,7 +106,7 @@
    [:> mui/DialogTitle
     [:<> "Question Feedback"
      [:div {:style {:opacity 0.7}} [wealth-comp]]]]
-   [:> mui/DialogContent {:style {:margin :auto :min-width 275 :width "40%"}}
+   [:> mui/DialogContent {:style {:margin :auto :width "40vh"}}
     [:> mui/DialogContentText
      {:style {:display :flex ;; :flex-direction :column
               :align-items :center :justify :center}}
@@ -143,7 +142,9 @@
                                      (ct/plus (ct/seconds duration))
                                      ->isoformat)
                        :remaining (+ 0 duration)}])
-        [display-question (update data :response shuffle) previous-attempts])
+        [:<>
+         [timeout (:id data)]
+         [display-question (update data :responses shuffle) previous-attempts]])
       [:div "No data"])))
 
 (defn difficulty-button
@@ -202,10 +203,13 @@
 (defmulti content :phase :default :selection)
 
 (defmethod content :selection [m]
+  (rf/dispatch [::core-events/ask-wealth])
   [difficulty-selection @(subscribe [::subscriptions/series-questions])])
 
 (defmethod content :answering [m]
-  [display-question-comp @(subscribe [::subscriptions/difficulty])])
+  (rf/dispatch [::core-events/ask-wealth])
+  [:<>
+   [display-question-comp @(subscribe [::subscriptions/difficulty])]])
 
 (defmethod content :feedback [m]
   [answer-feedback {:status @(subscribe [::subscriptions/question-status])}])

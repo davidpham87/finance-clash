@@ -43,6 +43,16 @@
   (-> (select :*) (from :user) (where [:= :id id]) (hsql/limit 1) sql/format
       execute-query! first))
 
+(defn update-user!
+  [{:keys [id] :as user-data}]
+  (let [user-data (if (:password user-data)
+                    (update user-data :password hashers/derive {:alg :bcrypt+sha512})
+                    (dissoc user-data :password))
+        user-data (if (:username user-data) user-data (dissoc user-data :username))]
+    (when (or (:password user-data) (:username user-data))
+      (-> (hsql/update :user) (hsql/sset user-data) (where [:= :id id])
+          sql/format execute-query! first))))
+
 (defn login-tx [user]
   (let [full-user (get-user (:id user))]
     (if (and full-user
@@ -70,6 +80,7 @@
       nil
       (do
         (execute-query! insert-user-query)
+        (budget/budget-init (:id user-data) 500)
         user-data))))
 
 (defn register [m]
@@ -104,36 +115,31 @@
   [["/user" {:coercion reitit.coercion.spec/coercion
              :get {:summary "User Hello message"
                    :handler (fn [m] {:status 200 :body "Hello"})}
-             :put {:summary "User login"
+             :put {:summary "Login user"
                    :parameters {:body ::credentials}
                    :handler login}
-             :post {:summary "User login"
+             :post {:summary "Register user"
                     :parameters {:body ::credentials}
                     :handler register}}]
    ["/user" {:coercion reitit.coercion.spec/coercion}
     ["/:id"
-     ["" {:get {:summary "Get username"
+     ["" {:get {:summary "Get user"
                 :handler
                 (fn [{{id :id} :path-params}]
                   {:status 200
-                   :body (username id)})}
-          :put {:summary "Set username"
+                   :body (dissoc (get-user id) :password)})}
+          :put {:summary "Set user"
                 :interceptors [protected-interceptor]
-                :parameters {:body (s/keys :req-un [::username])}
+                :parameters {:body (s/keys :opt-un [::username ::password])}
                 :handler
                 (fn [m]
                   (let [id (get-in m [:path-params :id])
-                        username-input (get-in m [:parameters :body :username])]
-                    (if username-input
-                      (do
-                        (username id username-input)
-                        {:status 200
-                         :body {:username username-input}})
-                      {:status 422
-                       :body {:message "Missing username"}})))}}]
+                        {:keys [username password]} (get-in m [:parameters :body])]
+                    (update-user! {:id id :username username :password password})
+                    {:status 200 :body {:id id :username username}}))}}]
      ["/wealth"
       {:get {:summary "Retrieve wealth of user"
-             :interceptors [protected-interceptor]
+             ;; :interceptors [protected-interceptor]
              :handler
              (fn [{{user-id :id} :path-params}]
                {:status 200
@@ -151,6 +157,8 @@
 (def routes user)
 
 (comment
+  (def token "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")
+
   (-> (client/get "http://localhost:3000") :body)
 
   (-> (client/get "http://localhost:3000/echo") :body)
@@ -159,27 +167,35 @@
       :body
       (json/read-str :key-fn keyword))
 
-  (-> (client/get "http://localhost:3000/user/neo2551/wealth")
+  (-> (client/get "http://localhost:3000/user/neo2551/wealth"
+                  {:content-tpye :json
+                   :headers {:Authorization (str "Token " token)}})
       :body
       (json/read-str :key-fn keyword))
+
+  (budget/budget-init "neo2551" 500)
+  (budget/earn! "neo2551" 500)
+  (budget/wealth "neo2551")
 
   (-> (client/put
        "http://localhost:3000/user/2"
        {:content-type :json
-        :headers {:Authorization (str "Token " "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")}
-        :body (json/write-str {:username "Vincent"})})
+        :headers {:Authorization (str "Token " token)}
+        :body (json/write-str {:username "Beck"})})
       :body
       (json/read-str :key-fn keyword))
 
   (-> (client/put
-       "http://localhost:3000/user"
+       "http://localhost:3000/user/neo2551"
        {:content-type :json
         :headers {:Authorization (str "Token " "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")}
-        :body (json/write-str {:id "neo2551" :password "hello_world"})})
+        :body (json/write-str {:username "Neo" :password "hello_world"})})
       :body
       (json/read-str :key-fn keyword))
-  (unsign-user "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")
+
+  (unsign-user token)
   (get-user "neo2551")
+
   (-> (client/post
        "http://localhost:3000/user"
        {:content-type :json

@@ -62,6 +62,8 @@
    "10" "Obligations",
    "23" "Libor Fwd Rates"})
 
+(def super-users #{"admin"})
+
 (def default-db
   {:active-panel :login
    :panel-props {} ;; hack to dispatch arguments to component in lazy mode
@@ -77,6 +79,7 @@
    :series-questions {:medium [] :hard [] :easy []}
    :series-questions-seen #{}
    :series-questions-answered #{}
+   :super-users super-users
    :ui-states
    {:drawer-open? false
     :drawer-displayed-sublists #{}}})

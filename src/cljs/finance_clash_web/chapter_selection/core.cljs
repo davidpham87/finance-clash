@@ -56,8 +56,11 @@
 
 (defn send-button []
   (let [available-ids @(subscribe [::subscriptions/chapter-available])
-        priority-ids @(subscribe [::subscriptions/chapter-priority])]
-    [submit-button [::events/record-next-series available-ids priority-ids]]))
+        priority-ids @(subscribe [::subscriptions/chapter-priority])
+        super-user? @(subscribe [:super-user?])]
+    (if super-user?
+      [submit-button [::events/record-next-series available-ids priority-ids]]
+      [:div])))
 
 (defn center [& children]
   [:div {:style {:display :flex :justify-content :center}}
@@ -66,32 +69,35 @@
 ;; TODO (Create more fined grined subscription events
 ;; for avoiding rerendering all of the checkbox)
 (defn chapters [ms checked-chapters]
-  [:div
-   (doall
-    (for [m ms]
-      ^{:key (:chapter m)}
-      [:div {:style {:min-width "50vw"
-                     :padding 5
-                     :display :flex :margin-top 10 :margin-bottom 10
-                     :justify-content :space-between :align-items :center}}
-       [:div (:chapter m) ": " (:title m)]
-       [:div {:style {:display :block}}
-        [:> mui/Tooltip {:title "Available" :placement :left :enterDelay 500}
-         [:> mui/Checkbox
-          {:checked (contains? (:available checked-chapters) (:chapter m))
-           :onChange
-           (fn [e]
-             (let [status (if (.. e -target -checked) :append :remove)]
-               (rf/dispatch [::events/update-available-chapters
-                             (:chapter m) status])))}]]
-        [:> mui/Tooltip {:title "Priority" :placement :right :enterDelay 500}
-         [:> mui/Checkbox
-          {:checked (contains? (:priority checked-chapters) (:chapter m))
-           :onChange
-           (fn [e]
-             (let [status (if (.. e -target -checked) :append :remove)]
-               (rf/dispatch [::events/update-priority-chapters
-                             (:chapter m) status])))}]]]]))])
+  (let [super-user? @(subscribe [:super-user?])]
+    [:div
+     (doall
+      (for [m ms]
+        ^{:key (:chapter m)}
+        [:div {:style {:min-width "50vw"
+                       :padding 5
+                       :display :flex :margin-top 10 :margin-bottom 10
+                       :justify-content :space-between :align-items :center}}
+         [:div (:chapter m) ": " (:title m)]
+         [:div {:style {:display :block}}
+          [:> mui/Tooltip {:title "Available" :placement :left :enterDelay 500}
+           [:> mui/Checkbox
+            {:checked (contains? (:available checked-chapters) (:chapter m))
+             :disabled (not super-user?)
+             :onChange
+             (fn [e]
+               (let [status (if (.. e -target -checked) :append :remove)]
+                 (rf/dispatch [::events/update-available-chapters
+                               (:chapter m) status])))}]]
+          [:> mui/Tooltip {:title "Priority" :placement :right :enterDelay 500}
+           [:> mui/Checkbox
+            {:checked (contains? (:priority checked-chapters) (:chapter m))
+             :disabled (not super-user?)
+             :onChange
+             (fn [e]
+               (let [status (if (.. e -target -checked) :append :remove)]
+                 (rf/dispatch [::events/update-priority-chapters
+                               (:chapter m) status])))}]]]]))]))
 
 (defn chapters-comp [ms]
   (let [checked-chapters
@@ -107,7 +113,7 @@
      [:> mui/CardHeader {:title "Module Selection"}]]]
    [chapters-comp question-data]
    [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}}
-    [center [send-button ]]]])
+    [center [send-button]]]])
 
 
 (defn root [m]

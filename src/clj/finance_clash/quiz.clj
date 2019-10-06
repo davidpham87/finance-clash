@@ -164,9 +164,9 @@
              id (str chapter "_" question)
              tx (quiz-tx id user-id series)
              success? (correct-answer? id user-id selected-response)]
-         (println success? selected-response)
+         #_(println success? selected-response)
          (attempt! id user-id series success?)
-         (println "Success?: " success? tx (-> tx first :success))
+         #_(println "Success?: " success? tx (-> tx first :success))
          (when (and success? (or (empty? tx) (-> tx first :success (or 1) zero?)))
            (budget/earn-question-value! user-id id))
          {:status 200

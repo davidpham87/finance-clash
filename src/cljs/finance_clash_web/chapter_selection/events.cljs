@@ -1,6 +1,6 @@
 (ns finance-clash-web.chapter-selection.events
   (:require
-   [finance-clash-web.events :refer (endpoint)]
+   [finance-clash-web.events :refer (endpoint auth-header)]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx dispatch)]))
@@ -24,6 +24,7 @@
     :http-xhrio
     {:method :post
      :uri (endpoint "series")
+     :headers (auth-header db)
      :format (ajax/json-request-format)
      :response-format (ajax/json-response-format {:keywords? true})
      :params {:available (sort (mapv js/parseInt available-ids))

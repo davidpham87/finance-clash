@@ -1,23 +1,22 @@
 (ns finance-clash-web.login.core
   (:require-macros [reagent.ratom])
   (:require
-   [reagent.core :as reagent]
-   [re-frame.core :as rf
-    :refer [reg-sub reg-fx reg-event-fx dispatch
-            reg-event-db subscribe]]
-   [goog.object :as gobj]
+   ["@material-ui/core" :as mui]
+   ["@material-ui/core/Button" :default mui-button]
+   ["@material-ui/core/InputLabel" :default mui-input-label]
+   ["@material-ui/core/Tab" :default mui-tab]
+   ["@material-ui/core/Tabs" :default mui-tabs]
+   ["@material-ui/core/Typography" :default mui-typography]
+   ["@material-ui/icons/Lock" :default ic-lock]
+   ["@material-ui/icons/PersonAdd" :default ic-person-add]
    [finance-clash-web.components.colors :as colors]
    [finance-clash-web.components.mui-utils :refer
     [cs client-width with-styles text-field input-component panel-style]]
-
-   ["@material-ui/core" :as mui]
-   ["@material-ui/core/Tabs" :default mui-tabs]
-   ["@material-ui/core/Tab" :default mui-tab]
-   ["@material-ui/core/Typography" :default mui-typography]
-   ["@material-ui/core/InputLabel" :default mui-input-label]
-   ["@material-ui/core/Button" :default mui-button]
-   ["@material-ui/icons/Lock" :default ic-lock]
-   ["@material-ui/icons/PersonAdd" :default ic-person-add]))
+   [finance-clash-web.login.events :as events]
+   [goog.object :as gobj]
+   [re-frame.core :as rf :refer (reg-sub reg-fx reg-event-fx dispatch
+                                         reg-event-db subscribe)]
+   [reagent.core :as reagent]))
 
 (reg-event-db
  ::set-tab
@@ -32,25 +31,25 @@
 (reg-event-db
  ::record-email
  (fn [db [_ credentials]]
-   (assoc-in db [:credentials :email] (:email credentials))))
+   (assoc-in db [:credentials :email] (or (:email credentials) (:id credentials)))))
 
 (reg-event-fx
  ::submit-login-credentials
  (fn [{db :db} [_ credentials]]
    {:db (assoc db :credentials credentials)
-    :dispatch-n [[:user/login credentials]]}))
+    :dispatch-n [[::events/login credentials]]}))
 
 (reg-event-fx
  ::submit-register-credentials
  (fn [{db :db} [_ credentials]]
    {:db (assoc db :credentials credentials)
-    :dispatch-n [[:user/register credentials]]}))
+    :dispatch-n [[::events/register credentials]]}))
 
 (reg-event-fx
  ::submit-update-userprofile
  (fn [{db :db} [_ credentials]]
    {:db (assoc db :credentials credentials)
-    :dispatch-n [[:user/update-userprofile credentials]]}))
+    :dispatch-n [[::events/update-userprofile credentials]]}))
 
 (reg-sub
  ::login-credentials
@@ -100,7 +99,8 @@
   (let [spacing (fn [x] ((.. theme -spacing) x))]
     #js {:paper #js {:color :white
                      :marginTop (spacing 1)
-                     :width 400
+                     :min-width 280
+                     :width "50vh"
                      :display "flex"
                      :flexDirection "column"
                      :alignItems "center"
@@ -129,7 +129,7 @@
    {:fullWidth true
     :variant "contained"
     :color :secondary
-    :onClick #(rf/dispatch [:user/logout])
+    :onClick #(rf/dispatch [::events/logout])
     :class (cs (gobj/get classes "submit"))}
    "Logout"])
 
@@ -138,16 +138,20 @@
   (let [error? (some #(= (:status %) 404) @errors)]
     [:> mui/FormControl {:margin "normal" :required true
                          :fullWidth true :error error?}
-     [input-label {:html-for "email"} "Email Address"]
+     [input-label {:html-for "email"} "User id"]
      [:> mui/Input
-      {:id "email" :name "email" :type "email"
+      {:id "email" :name "email" :type "string"
        :inputComponent input-component
-       :autoComplete "email" :autoFocus true
+       ;; :autoComplete "email"
+       :autoFocus true
        :error error?
        :disabled (or @loading? (when disabled? @disabled?))
        :inputProps {:style {:background-color :white :padding-left 10
                             :padding-right 10}}
-       :value (or (@credentials :email) "")
+       :value (cond
+                (seq (:email @credentials)) (:email @credentials)
+                (seq (:id @credentials)) (:id @credentials)
+                :else "")
        :on-change (partial update-credentials :email)}]]))
 
 (defn username [{:keys [credentials update-credentials loading? required?]}]
@@ -166,7 +170,7 @@
 
 (defn password
   [{:keys [credentials update-credentials loading? errors required?]}]
-  (let [error? (some #(or (= (:status %) 404)
+  (let [error? (some #(or (= (:status %) 409)
                           (= (:type %) :insecure-password)) @errors)]
     [:> mui/FormControl
      {:margin "normal" :required (if (nil? required?) true required?)
@@ -180,7 +184,7 @@
        :disabled @loading?
        :style {:background-color :white :padding-left 10 :padding-right 10}
        :on-change (partial update-credentials :password)}]
-     (when (some #(= (:status %) 404) @errors)
+     (when (some #(= (:status %) 409) @errors)
        [:> mui/FormHelperText "Invalid credentials. Please enter them again."])
      (when (some #(= (:type %) :insecure-password) @errors)
        [:> mui/FormHelperText "Insecure password. Password should be at least 12 characters."])]))
@@ -257,8 +261,8 @@
   (let [credentials (new-crendentials)
         event-value #(-> % .-target .-value)
         update-credentials #(swap! credentials assoc %1 (event-value %2))
-        loading? (subscribe [:loading :uesr/login])
-        errors (subscribe [:errors :user/login])
+        loading? (subscribe [:loading ::events/login])
+        errors (subscribe [:errors ::events/login])
         form-controls {:credentials credentials
                        :update-credentials update-credentials
                        :loading? loading?
@@ -274,11 +278,11 @@
         equal-password-inputs? (= (:password m) (:confirm-password m))
         secured-password? (> (count (:password m)) 11)]
     (when-not equal-password-inputs?
-      (dispatch [:user/register-validation-error
+      (dispatch [::events/register-validation-error
                  :unequal-password
                  "Password are not identical"]))
     (when-not secured-password?
-      (dispatch [:user/register-validation-error
+      (dispatch [::events/register-validation-error
                  :insecure-password
                  "Password should be at least 12 characters long."]))
     (and equal-password-inputs? secured-password?)))
@@ -287,8 +291,8 @@
   (let [credentials (reagent/atom {:email "" :password "" :remember-me false})
         event-value #(-> % .-target .-value)
         update-credentials #(swap! credentials assoc %1 (event-value %2))
-        loading? (subscribe [:loading :uesr/login])
-        errors (subscribe [:errors :user/login])
+        loading? (subscribe [:loading ::events/register])
+        errors (subscribe [:errors ::events/register])
         form-controls {:credentials credentials
                        :update-credentials update-credentials
                        :loading? loading?
@@ -306,12 +310,13 @@
 (defn register-form-inner
   [{:keys [classes form-controls panel-font-color]
     :or {panel-font-color panel-font-color}}]
-  [:form {:on-submit
-          (fn [e]
-            (.preventDefault e)
-            (when-let [errors? (or (password-valid? :user/register @(:credentials form-controls)))]
-              (rf/dispatch [::submit-register-credentials @(:credentials form-controls)])))
-          :class (cs (gobj/get classes "form"))}
+  [:form
+   {:on-submit
+    (fn [e]
+      (.preventDefault e)
+      (when-let [errors? (or (password-valid? :user/register @(:credentials form-controls)))]
+        (rf/dispatch [::submit-register-credentials @(:credentials form-controls)])))
+    :class (cs (gobj/get classes "form"))}
    [email form-controls]
    [password form-controls]
    [:> mui/Typography {:style {:color panel-font-color}}
@@ -323,8 +328,8 @@
   (let [credentials (new-crendentials)
         event-value #(-> % .-target .-value)
         update-credentials #(swap! credentials assoc %1 (event-value %2))
-        loading? (subscribe [:loading :uesr/register])
-        errors (subscribe [:errors :user/register])
+        loading? (subscribe [:loading ::events/register])
+        errors (subscribe [:errors ::events/register])
         form-controls {:credentials credentials
                        :update-credentials update-credentials
                        :loading? loading?
@@ -338,37 +343,36 @@
 (defn update-userprofile-form-inner
   [{:keys [classes form-controls panel-font-color]
     :or {panel-font-color panel-font-color}}]
+  (println (:credentials form-controls))
   [:form {:on-submit (:on-submit-fn form-controls)
           :class (cs (gobj/get classes "form"))}
    [email (assoc form-controls :disabled? (reagent/atom true))] ;; hack to disable
    [username form-controls]
-   [password (assoc form-controls :required? false)]
-   [:> mui/Typography {:style {:color panel-font-color}}
-    "Passwords contain at least 12 characters."]
-   [confirm-password (assoc form-controls :required? false)]
+   ;; [password (assoc form-controls :required? false)]
+   ;; [:> mui/Typography {:style {:color panel-font-color}}
+   ;;  "Passwords contain at least 12 characters."]
+   ;; [confirm-password (assoc form-controls :required? false)]
    [submit-button form-controls classes "Udpate profile"]])
 
 (defn update-userprofile-form [classes]
   (let [credentials (new-crendentials)
         event-value #(-> % .-target .-value)
         update-credentials #(swap! credentials assoc %1 (event-value %2))
-        loading? (subscribe [:loading :uesr/update-userprofile])
-        errors (subscribe [:errors :user/update-userprofile])
+        loading? (subscribe [:loading ::events/register])
+        errors (subscribe [:errors ::events/register])
         on-submit-fn
         (fn [e]
           (.preventDefault e)
           (when-let
               [errors?
                (or (zero? (count (:password @credentials)))
-                   (password-valid? :user/update-userprofile
-                                    @credentials))]
+                   (password-valid? ::events/update-userprofile @credentials))]
             (rf/dispatch [::submit-update-userprofile @credentials])))
         form-controls {:credentials credentials
                        :update-credentials update-credentials
                        :loading? loading?
                        :errors errors
                        :on-submit-fn on-submit-fn}]
-
     (swap! (:credentials form-controls) merge @(subscribe [:user-profile]))
     (fn [classes]
       ^{:key :update-userprofile}
@@ -456,10 +460,11 @@
           [:> mui/Grid {:container true :justify :center :alignItems :center
                         :style {:height "80vh"}}
            [:> mui/Grid {:item true}
-            [:> mui/Paper {:elevation 0
+            [:> mui/Paper {:elevation 10
                            :style {:margin-top "0vh"
+                                   :border-radius 3
                                    :background-position :center
-                                   :background-color "rgba(0,0,0,0)"
+                                   :background-color "rgba(0,0,0,0.8)"
                                    :color "white"
                                    :margin-left :auto
                                    :margin-right :auto

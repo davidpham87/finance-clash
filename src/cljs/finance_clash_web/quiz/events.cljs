@@ -1,7 +1,7 @@
 (ns finance-clash-web.quiz.events
   (:require
    [finance-clash-web.components.timer :as timer-comp]
-   [finance-clash-web.events :as core-events :refer (endpoint)]
+   [finance-clash-web.events :as core-events :refer (endpoint auth-header)]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx)]))
@@ -49,7 +49,7 @@
         :dispatch [::reset-quiz-question]}
        :answered
        {:db (-> db
-                (assoc-in path (vec (rest m)))
+                (assoc-in path (vec (remove #{(:id quiz-question)} (rest m))))
                 (update-in [:series-question-answered] conj (:id quiz-question)))
         :dispatch [::reset-quiz-question]}))))
 
@@ -94,10 +94,12 @@
 (reg-event-fx
  ::pay-question
  (fn [{db :db} [_ difficulty]]
-   (println "Request pay question:  " difficulty)
+   (println "Request pay question: " difficulty)
+   (println {:user-id (user-id db) :difficulty difficulty})
    {:db db
     :http-xhrio {:method :post
                  :uri (endpoint "quiz" "buy-question")
+                 :headers (auth-header db)
                  :params {:user-id (user-id db) :difficulty difficulty}
                  :format (ajax/json-request-format)
                  :response-format (ajax/json-response-format {:keywords? true})
