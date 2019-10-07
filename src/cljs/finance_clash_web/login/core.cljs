@@ -343,7 +343,6 @@
 (defn update-userprofile-form-inner
   [{:keys [classes form-controls panel-font-color]
     :or {panel-font-color panel-font-color}}]
-  (println (:credentials form-controls))
   [:form {:on-submit (:on-submit-fn form-controls)
           :class (cs (gobj/get classes "form"))}
    [email (assoc form-controls :disabled? (reagent/atom true))] ;; hack to disable
@@ -451,8 +450,9 @@
       (let [tab-value (if @user-logged? :update-userprofile @tab)]
         [:main {:class (cs (gobj/get classes "content"))
                 :style {:min-height "100vh"
-                        :background-image "url(images/daily_questions.jpg)"
+                        :background-image "url(images/background.jpg)"
                         :background-position :center
+                        :background-size :cover
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]

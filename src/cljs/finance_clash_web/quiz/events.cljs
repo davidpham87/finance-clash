@@ -94,8 +94,6 @@
 (reg-event-fx
  ::pay-question
  (fn [{db :db} [_ difficulty]]
-   (println "Request pay question: " difficulty)
-   (println {:user-id (user-id db) :difficulty difficulty})
    {:db db
     :http-xhrio {:method :post
                  :uri (endpoint "quiz" "buy-question")
@@ -109,7 +107,6 @@
 (reg-event-fx
  ::success-pay-question
  (fn [{db :db} [_ result]]
-   (println "Pay question success: " result)
    {:db (assoc db :wealth (- (:wealth db) (:cost result)))}))
 
 (reg-event-fx

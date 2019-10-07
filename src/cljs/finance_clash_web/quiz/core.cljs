@@ -65,15 +65,25 @@
                      :min-height 60}}
             answer]])))
 
+(defn timer-comp []
+  (let [timer (subscribe [::timer-comp/timer-remaining :quiz])]
+    (fn []
+      [:div {:style {:color (if (<= @timer 10) :red :grey)}}
+       (clojure.core/str "Seconds left: " @timer)])))
+
 (defn display-question
   [{:keys [id question responses duration] :as question-map} previous-attempts]
   (let [module (first (clojure.string/split id "_"))
         module-name @(subscribe [:chapter-name module])]
-    [:> mui/Card {:style {:min-width 275 :width "50vw"}}
+    [:> mui/Card {:style {:min-width 275 :width "50vw"
+                          :background-color "rgba(255, 255, 255, 0.95)"}}
      [:> mui/CardHeader
       {:title question
-       :subheader (reagent/as-element [:div {:style {:display :flex :justifyContent :space-between :margin-top 5}}
-                                       module-name [wealth-comp]])}]
+       :subheader (reagent/as-element
+                   [:<>
+                    [:div {:style {:display :flex :justifyContent :space-between :margin-top 5}}
+                     [wealth-comp] [:div module-name]]
+                    [timer-comp]])}]
      [:> mui/CardContent {:style {:height "100%"}}
       [:div {:style {:display :flex :flex-direction :column
                      :width "100%"
@@ -81,7 +91,7 @@
                      :flex 1
                      :justify-content :space-around :align-items :stretch}}
        (doall
-        (for [[i answer] responses #_(shuffle )
+        (for [[i answer] responses
               :let [args {:answer answer :id id :i i
                           :previous-attempts previous-attempts}]]
           ^{:key i} [display-question-button args]))]]]))
@@ -187,6 +197,7 @@
   (let [questions-remaining? (pos? (reduce + (mapv count (vals questions-available))))]
     [:> mui/Card {:elevation 0 :style
                   {:margin :auto
+                   :background-color "rgba(255, 255, 255, 0.95)"
                    :min-width "50vw"
                    :max-height 420 :height "80%"}}
      [:> mui/CardHeader {:title "Select Difficulty"
@@ -226,8 +237,9 @@
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))
-                :style {:background-image "url(images/welcome.jpg)"
+                :style {:background-image "url(images/daily_questions.jpg)"
                         :background-position :center
+                        :background-size :cover
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]

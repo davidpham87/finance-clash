@@ -122,8 +122,9 @@
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))
-                :style {:background-image "url(images/background.jpeg)"
+                :style {:background-image "url(images/chapter.jpg)"
                         :background-position :center
+                        :background-size :cover
                         :color :white
                         :z-index 0}}
          [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
@@ -134,7 +135,7 @@
              :style {:margin 5
                      :padding 5
                      :background-position :center
-                     :background-color "rgba(255,255,255,1)"
+                     :background-color "rgba(255,255,255,0.8)"
                      :color "black" :width "100%"
                      :z-index 10}}
             [:> mui/Grid {:container true :justify "center" :alignItems :flex-end}

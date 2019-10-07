@@ -1,8 +1,7 @@
 (ns finance-clash.interceptors.cors
   (:require
    [clojure.spec.alpha :as s]
-   [ring.middleware.cors :as cors]
-   [clojure.pprint :refer (pprint)]))
+   [ring.middleware.cors :as cors]))
 
 (s/def ::allow-origin (s/coll-of s/regex? :kind vector?))
 (s/def ::allow-methods (s/coll-of keyword? :kind set?))

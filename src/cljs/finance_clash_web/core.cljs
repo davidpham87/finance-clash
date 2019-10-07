@@ -14,7 +14,6 @@
                   (.-innerHeight js/window)])))
 
 (defn mount-app []
-  (println "Mounting the app")
   (reagent/render [app] (.getElementById js/document "app")))
 
 (defn ^:export main []

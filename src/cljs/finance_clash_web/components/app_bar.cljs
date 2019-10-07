@@ -49,19 +49,15 @@
        :title #js {:flex-grow 1}})
 
 (defn app-bar-label
-  [active-panel-label timer]
+  [active-panel-label]
   (cond
-    (pos? (or timer 0)) [:div {:style {:color (if (> timer 10) :black :red)}}
-                         (clojure.core/str "Seconds left: " timer)]
-    active-panel-label (clojure.core/str "Finance Clash - "
-                                         active-panel-label)
+    active-panel-label (clojure.core/str "Finance Clash - " active-panel-label)
     :else "Finance Clash"))
 
 ;; TODO(dph): put the timer here
 (defn app-bar-react [{:keys [classes] :as props}]
   (let [drawer-open? (subscribe [:drawer-open?])
-        active-panel-label (subscribe [:active-panel-label])
-        timer (subscribe [::timer-comp/timer-remaining :quiz])]
+        active-panel-label (subscribe [:active-panel-label])]
     (fn [{:keys [classes] :as props}]
       [:> mui/AppBar {:position "absolute"
                       :class (cs (.-appBar classes)
@@ -79,7 +75,7 @@
         [:> mui/Typography
          {:component "h1" :variant "h6" :color "primary" :no-wrap true
           :class (cs (.-title classes))}
-         [app-bar-label @active-panel-label @timer]]
+         [app-bar-label @active-panel-label]]
         #_[:> mui/Tooltip {:title "Help"}
          [:> mui/IconButton {:onClick #(dispatch [:set-active-panel help-event])
                              :color "primary"}

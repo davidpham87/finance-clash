@@ -34,8 +34,9 @@
  ::success-login
  set-user-interceptor
  (fn [{user :db} [{result :user}]]
+   (println result)
    {:db (merge user result)
-    :dispatch [:set-panel :quiz]}))
+    :dispatch [:set-active-panel :quiz]}))
 
 (reg-event-fx ;; usage (dispatch [:user/register registration])
  ::register ;; triggered when a users submits registration form

@@ -84,7 +84,7 @@
 
 
 
-- question: Aibus hedges by selling forward USD vs EUR at an exchange rate of EUR/USD 1.15?
+- question: Airbus hedges by selling forward USD vs EUR at an exchange rate of EUR/USD 1.15?
   responses:
   - The hedge is profitable if the EUR/USD is below 1.15 on expiration.
   - The hedge is profitable if the EUR/USD is above 1.15 on expiration.

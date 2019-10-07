@@ -12,7 +12,6 @@
  :active-panel-label
  :<- [:active-panel]
  (fn [active-panel _]
-   (println panels-label)
    (get panels-label active-panel active-panel)))
 
 
@@ -97,7 +96,6 @@
  (fn [db _]
    (let [id (get-in db [:user :id])
          super-users (:super-users db)]
-     (println id super-users)
      (contains? super-users id))))
 
 (reg-sub
