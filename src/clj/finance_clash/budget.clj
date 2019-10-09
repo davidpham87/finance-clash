@@ -100,9 +100,19 @@
       sql/format
       execute-query!))
 
+(defn ranking
+  ([] (ranking 30))
+  ([limit]
+   (-> {:select [:username [(sql/call :round :wealth 2) :wealth]]
+        :from [:budget]
+        :left-join [:user [:= :user.id :budget.user]]
+        :order-by [[:wealth :desc]]
+        :limit limit}
+       sql/format
+       execute-query!)))
+
 (defn question-value
   [difficulty {:keys [priority? bonus-period?] :as modifiers}]
-  #_(println difficulty modifiers)
   (* (get question-value-raw (keyword difficulty) 0)
      (if priority? (:priority? question-bonus) 1)
      (if bonus-period?
@@ -123,24 +133,28 @@
   (let [value (question-id->question-value question-id)]
     (earn! user-id value)))
 
+
+
 ;; Routes
 (def routes-buy-question
-  ["/quiz/buy-question"
-   {:coercion reitit.coercion.spec/coercion
-    :post
-    {:interceptors [protected-interceptor]
-     :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
-     :handler
-     (fn [m]
-       (let [{{{:keys [user-id difficulty]} :body} :parameters} m
-             x (question-price (keyword difficulty))]
-         #_(println "Buy question")
-         #_(println user-id difficulty)
-         (buy! user-id x)
-         {:status 200 :body
-          {:status :successful-transaction
-           :cost x
-           :message (str "Acquired question for " x "€.")}}))}}])
+  [["/quiz/buy-question"
+    {:coercion reitit.coercion.spec/coercion
+     :post
+     {:interceptors [protected-interceptor]
+      :parameters {:body (s/keys :req-un [::user-id ::difficulty])}
+      :handler
+      (fn [m]
+        (let [{{{:keys [user-id difficulty]} :body} :parameters} m
+              x (question-price (keyword difficulty))]
+          (buy! user-id x)
+          {:status 200 :body
+           {:status :successful-transaction
+            :cost x
+            :message (str "Acquired question for " x "€.")}}))}}]
+   ["/ranking"
+    {:coercion reitit.coercion.spec/coercion
+     :get
+     {:handler (fn [m] {:status 200 :body (ranking)})}}]])
 
 (def routes routes-buy-question)
 
