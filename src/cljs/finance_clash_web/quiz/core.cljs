@@ -233,7 +233,6 @@
 
 (defn root [m]
   (let [question-phase (subscribe [::subscriptions/question-phase])]
-    (init-events)
     (fn [{:keys [classes] :as props}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))
@@ -250,4 +249,5 @@
             [content {:phase @question-phase}]]]]]))))
 
 (defn root-panel [props]
+  (init-events)
   [:> (with-styles [panel-style] root) props])

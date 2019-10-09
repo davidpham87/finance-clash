@@ -139,6 +139,8 @@
     {:dispatch-event [:set-active-panel :login]}]
    [mui-list-item-std [ic-explore "Questions"]
     {:dispatch-event [:set-active-panel :quiz]}]
+   [mui-list-item-std [ic-bar-chart "Ranking"]
+    {:dispatch-event [:set-active-panel :ranking]}]
    [mui-list-item-std [ic-dashboard "Modules"]
     {:dispatch-event [:set-active-panel :chapter-selection]}]])
 

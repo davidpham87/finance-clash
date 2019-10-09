@@ -6,6 +6,7 @@
    [finance-clash-web.components.app-bar :refer (app-bar)]
    [finance-clash-web.components.drawer :refer (drawer)]
    [finance-clash-web.login.core :rename {root-panel login-panel}]
+   [finance-clash-web.ranking.core :rename {root-panel ranking-panel}]
    [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
    [finance-clash-web.quiz.core :rename {root-panel quiz-panel}]
    ["@material-ui/core" :as mui]
@@ -20,6 +21,9 @@
 
 (defmethod active-panel :quiz [_]
   [quiz-panel])
+
+(defmethod active-panel :ranking [_]
+  [ranking-panel])
 
 (defn app []
   [:div {:style {:display "flex"}}
