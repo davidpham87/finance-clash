@@ -44,8 +44,8 @@
 
 (reg-sub
  :user-logged?
- :<- [:user-profile]
- (fn [user-profile _] (not (empty? user-profile))))
+ :<- [:user]
+ (fn [user] (not (empty? user))))
 
 (reg-sub
  :user-role

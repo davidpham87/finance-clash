@@ -5,6 +5,7 @@
    [finance-clash-web.components.mui-utils :refer (custom-theme)]
    [finance-clash-web.components.app-bar :refer (app-bar)]
    [finance-clash-web.components.drawer :refer (drawer)]
+   [finance-clash-web.admin.core :rename {root-panel admin-panel}]
    [finance-clash-web.login.core :rename {root-panel login-panel}]
    [finance-clash-web.ranking.core :rename {root-panel ranking-panel}]
    [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
@@ -24,6 +25,10 @@
 
 (defmethod active-panel :ranking [_]
   [ranking-panel])
+
+(defmethod active-panel :admin [_]
+  [admin-panel])
+
 
 (defn app []
   [:div {:style {:display "flex"}}

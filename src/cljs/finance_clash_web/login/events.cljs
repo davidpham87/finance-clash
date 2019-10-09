@@ -93,5 +93,5 @@
 (reg-event-fx
  ::success-update-userprofile
  (fn [{db :db} [_ result]]
-   {:db (merge (:user db) result)
+   {:db (update db :user merge result)
     :dispatch [:clear-error ::register]}))

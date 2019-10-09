@@ -15,5 +15,5 @@ pom.xml
 app/
 web-build/
 public/js/cljs-runtime/*
-
+sql/finance-clash-database.db
   

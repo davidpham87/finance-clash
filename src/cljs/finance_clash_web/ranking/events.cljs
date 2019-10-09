@@ -13,7 +13,7 @@
     {:method :get
      :uri (endpoint "ranking")
      :format (ajax/json-request-format)
-     :response (ajax/json-response-format)
+     :response-format (ajax/json-response-format {:keywords? true})
      :on-success [::success-query-ranking]
      :on-failure [:api-request-error]}}))
 

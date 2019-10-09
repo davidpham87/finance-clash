@@ -69,7 +69,7 @@
               #js {:width (spacing-unit 9)}}
 
          :drawerPaperPaperProps
-         #js {:background (colors/colors-rgb :main)
+         #js {:background (colors/colors-rgb :graphite)
               :color (.. custom-theme -palette -common -white)
               :position "relative" :overflowX "hidden"
               :height "100vh"
@@ -131,28 +131,43 @@
   "Path displayed for navigation"
   {:login "Login"
    :chapter-selection "Module Selection"
-   :quiz "Quiz"})
+   :quiz "Quiz"
+   :ranking "Ranking"
+   :welcome "Welcome"
+   :default "Welcome"
+   :admin "Administration"})
 
-(defn tabs-public [user-role drawer-open? classes]
+(defn tabs-public []
+  [:<> [mui-list-item-std [ic-home "Home"]
+        {:dispatch-event [:set-active-panel :login]}]])
+
+(defn tabs-logged [logged?]
+  (when logged?
+    [:<>
+     [mui-list-item-std [ic-explore "Questions"]
+      {:dispatch-event [:set-active-panel :quiz]}]
+     [mui-list-item-std [ic-bar-chart "Ranking"]
+      {:dispatch-event [:set-active-panel :ranking]}]
+     [mui-list-item-std [ic-dashboard "Modules"]
+      {:dispatch-event [:set-active-panel :chapter-selection]}]]))
+
+(defn tabs-admin [super-user?]
   [:<>
-   [mui-list-item-std [ic-home "Home"]
-    {:dispatch-event [:set-active-panel :login]}]
-   [mui-list-item-std [ic-explore "Questions"]
-    {:dispatch-event [:set-active-panel :quiz]}]
-   [mui-list-item-std [ic-bar-chart "Ranking"]
-    {:dispatch-event [:set-active-panel :ranking]}]
-   [mui-list-item-std [ic-dashboard "Modules"]
-    {:dispatch-event [:set-active-panel :chapter-selection]}]])
+   (when super-user?
+     [mui-list-item-std [ic-settings "Admin"]
+      {:dispatch-event [:set-active-panel :admin]}])])
 
 (defn drawer-react
   "The main components of the drawer. Refactor this tab to provides the tabs as
   argument."
   [{:keys [classes] :as props}]
   (let [drawer-open? (subscribe [:drawer-open?])
-        user-role (subscribe [:user-role])]
+        user-logged? (subscribe [:user-logged?])
+        super-user? (subscribe [:super-user?])]
     (fn [{:keys [classes] :as props}]
-      (let [user-role (or @user-role #{:user})
-            tabs [[tabs-public user-role @drawer-open? classes]]]
+      (let [tabs [[tabs-public]
+                  [tabs-logged @user-logged?]
+                  [tabs-admin @super-user?]]]
         [:> mui/Drawer
          {:open @drawer-open?
           :class (cs (.-drawerPaper classes)
