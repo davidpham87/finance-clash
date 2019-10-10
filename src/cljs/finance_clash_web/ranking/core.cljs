@@ -15,7 +15,6 @@
 (def table-body mui/TableBody)
 
 (defn icon [i n]
-  (println i n)
   (cond
     (= i 1) "\uD83E\uDD47" ; gold medal
     (= i 2) "\uD83E\uDD48"
