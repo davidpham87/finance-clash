@@ -43,12 +43,29 @@ create table chapters (
 ) "])
 
   (jdbc/execute! ds ["
-drop table quizz_attempt
+drop table quiz_attempt
 "])
 
   (jdbc/execute! ds ["
-drop table quizz
+drop table quiz
 "])
+
+  (jdbc/execute! ds ["
+delete from quiz_attempt;
+"])
+
+
+  (jdbc/execute! ds ["
+delete from budget;
+vacuum;"])
+
+  (jdbc/execute! ds ["
+delete from budget_history;
+vacuum;"])
+
+  (jdbc/execute! ds ["
+delete from quiz_attempt;
+vacuum;"])
 
   (jdbc/execute! ds ["
 create table quiz_attempt (
@@ -65,9 +82,9 @@ create table quiz (
   question varchar(10)
 )"])
 
-
   (jdbc/execute! ds ["
-drop table quiz_series
+delete from quiz_series;
+vaccum
 "])
 
   (jdbc/execute! ds ["
@@ -76,8 +93,13 @@ create table quiz_series (
   release_date text
 )"])
 
+
   (jdbc/execute! ds ["
-drop table budget;"])
+create table budget (
+  user varchar(32) primary key,
+  wealth double,
+  update_at text DEFAULT (datetime('now', 'utc'))
+)"])
 
   (jdbc/execute! ds ["
 create table budget (
@@ -87,6 +109,8 @@ create table budget (
 )"])
 
   (jdbc/execute! ds [" drop table budget_history;"])
+
+
 
   (jdbc/execute! ds ["
 create table budget_history (
@@ -102,6 +126,11 @@ insert into quiz(question, user, attempt, success)
   (jdbc/execute! ds ["
 update quiz set attempt=0
 where user = \"1\""])
+
+  (jdbc/execute! ds ["
+delete from user;
+vacuum;"])
+
 
   (jdbc/execute! ds ["
 insert into user(id, username, password)

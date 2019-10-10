@@ -12,7 +12,7 @@
    [reitit.coercion.spec]
    [spec-tools.spec :as spec]))
 
-(def question-price {:easy 3 :medium 7 :hard 10})
+(def question-price {:easy 5 :medium 12 :hard 17})
 (def question-value-raw {:easy 12 :medium 28 :hard 40})
 (def question-bonus {:priority? 1.2 :bonus-period? 1.2 :malus-period? 0.5})
 
@@ -41,6 +41,13 @@
 (defn budget-init [user-id v]
   (-> {:insert-into :budget
        :values [{:user user-id :wealth (or v 100)}]}
+      sql/format
+      execute-query!))
+
+(defn budget-init-all [v]
+  (-> {:insert-into [[:budget [:user :wealth]]
+                     {:select [:id [v :wealth]]
+                      :from [:user]}]}
       sql/format
       execute-query!))
 
@@ -165,4 +172,6 @@
   (buy "1" 200)
   (budget-tx "1")
   (question-id->question-value "0_0")
+
+
   )

@@ -1,5 +1,6 @@
 (ns finance-clash.quiz
   (:require [clj-http.client :as client]
+            [clojure.data.generators :as gen]
             [clojure.data.json :as json]
             [clojure.set :refer (rename-keys)]
             [clojure.pprint :refer (pprint)]
@@ -19,6 +20,8 @@
 
 ;; Import data
 ;; This should be on its own namespace ideally.
+(def random-seed 1)
+
 (def mi
   (mc/create (-> mc/default-options
                  (mc/install yaml/format))))
@@ -241,16 +244,18 @@
         (as-> qs (into qs (remove #(contains? (into #{} qs) %) ms))))))
 
 (defn get-series-questions [available-ids priority-ids]
-  (let [priority-filter (into #{} priority-ids)
-        questions
-        (->> (get-questions available-ids [:id :chapter :difficulty])
-             execute-query!
-             shuffle
-             (group-by :difficulty)
-             (reduce-kv #(assoc %1 %2
-                                (->> (reorder-priority %3 priority-ids 5)
-                                     (mapv :id))) {}))]
-    questions))
+  (binding [gen/*rnd* (java.util.Random. random-seed)]
+    (let [priority-filter (into #{} priority-ids)
+          questions
+          (->> (get-questions available-ids [:id :chapter :difficulty])
+               execute-query!
+               gen/shuffle
+               (group-by :difficulty)
+               (reduce-kv #(assoc %1 %2
+                                  (->> (reorder-priority %3 priority-ids 5)
+                                       (mapv :id)
+                                       (take 20))) {}))]
+      (dissoc questions "empty"))))
 
 (def routes-series
   ["/series"

@@ -178,20 +178,20 @@
               :style {:color "white":background-color
                       (colors/colors-rgb ;; :aquamarine-dark
                        :nucleus-blue-dark)}}
-             (str "Easy (-€3 / +€12) " "[" (questions-count :easy)  "]")]]
+             (str "Easy (-€5 / +€12) " "[" (questions-count :easy)  "]")]]
            [:> mui/Grid {:item true}
             [difficulty-button
              {:on-click #(dispatch (conj event :medium))
               :disabled (zero? (questions-count :medium))
               :style {:background-color (colors/colors-rgb :citrine-bright)}}
-             (str "Medium (-€7 / +€28) " "[" (questions-count :medium) "]")]]
+             (str "Medium (-€12 / +€28) " "[" (questions-count :medium) "]")]]
            [:> mui/Grid {:item true}
             [difficulty-button
              {:on-click #(dispatch (conj event :hard))
               :disabled (zero? (questions-count :hard))
               :style {:color "white" :background-color
                       (colors/colors-rgb :red-light-dark)}}
-             (str "Hard (-€10 / +€40) " "[" (questions-count :hard) "]")]]]]]))
+             (str "Hard (-€17 / +€40) " "[" (questions-count :hard) "]")]]]]]))
 
 (defn difficulty-selection [questions-available]
   (let [questions-remaining? (pos? (reduce + (mapv count (vals questions-available))))]
@@ -251,3 +251,13 @@
 (defn root-panel [props]
   (init-events)
   [:> (with-styles [panel-style] root) props])
+
+(comment
+  (cider-resolve-alias (cider-current-ns) "subscriptions")
+  (cider-find-ns "-" "finance-clash-web.core")
+  (cider--find-ns "finance-clash-web.core")
+  ::question-phase
+  (ns-qualifier (and
+                 (string-match "^:+\\(.+\\)/.+$" "::subscriptions/question-phase")
+                 (match-string 1 "::subscriptions/question-phase")))
+  )

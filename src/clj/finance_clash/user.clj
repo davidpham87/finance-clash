@@ -80,7 +80,7 @@
       nil
       (do
         (execute-query! insert-user-query)
-        (budget/budget-init (:id user-data) 500)
+        (budget/budget-init (:id user-data) 100)
         user-data))))
 
 (defn register [m]
@@ -93,7 +93,6 @@
       {:status 409 :body {:message "User already exists"}})))
 
 #_(defn update-tx [user])
-
 
 ;; Get/set username from id
 ;; authentificate? no password
@@ -185,11 +184,24 @@
       :body
       (json/read-str :key-fn keyword))
 
-  (-> (client/put
-       "http://localhost:3000/user/neo2551"
+  (-> (client/post
+       "http://localhost:3000/user"
        {:content-type :json
-        :headers {:Authorization (str "Token " "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")}
-        :body (json/write-str {:username "Neo" :password "hello_world"})})
+        :body (json/write-str {:id "admin" :password "welcome_finance"})})
+      :body
+      (json/read-str :key-fn keyword))
+
+  (-> (client/post
+       "http://localhost:3000/user"
+       {:content-type :json
+        :body (json/write-str {:id "vincent_beck" :password "welcome_finance"})})
+      :body
+      (json/read-str :key-fn keyword))
+
+  (-> (client/post
+       "http://localhost:3000/user"
+       {:content-type :json
+        :body (json/write-str {:id "neo2551" :password "welcome_finance"})})
       :body
       (json/read-str :key-fn keyword))
 
@@ -199,7 +211,7 @@
   (-> (client/post
        "http://localhost:3000/user"
        {:content-type :json
-        :body (json/write-str {:id "neo2551" :password "hello_world"})})
+        :body (json/write-str {:id "neo2558" :password "hello_world"})})
       :body
       (json/read-str :key-fn keyword))
 
@@ -209,6 +221,8 @@
   (username "2" "Vincent")
   (username "3")
   (username "3" "")
-  (get-user "Neo")
+  (get-user "admin")
+
+  #_(register-tx {:id "admin" :password "welcome_finance"})
   (doseq [chapter (range 4)]
     (convert-question chapter)))

@@ -10,6 +10,7 @@
    [metosin/muuntaja-yaml "0.6.4"]
    [metosin/reitit "0.3.9" :excluesions [metosin/jsonista]]
    [org.clojure/clojure "1.10.0"]
+   [org.clojure/data.generators "0.1.2"]
    [org.clojure/data.json "0.2.6"]
    #_[org.rksm/suitable "0.2.14" :exclusions [org.clojure/clojurescript]]
    [org.xerial/sqlite-jdbc "3.28.0"]
