@@ -34,7 +34,6 @@
  ::success-login
  set-user-interceptor
  (fn [{user :db} [{result :user}]]
-   (println result)
    {:db (merge user result)
     :dispatch [:set-active-panel :quiz]}))
 
