@@ -70,7 +70,7 @@
     {:infer-externs :auto
      :optimizations :advanced
      :closure-defines
-     {finance-clash-web.events/backend-url "https://finance-clash-msiai.pro:3000"}
+     {finance-clash-web.events/backend-url "https://finance-clash-msiai.pro/api"}
      :externs ["externs/material-ui.ext.js"]}}
 
    :devtools
