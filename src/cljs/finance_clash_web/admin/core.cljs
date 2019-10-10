@@ -12,17 +12,20 @@
   (let [username (reagent/atom "")
         password (reagent/atom "")]
     (fn []
-      [:> mui/Card {:style {:min-width 480 :width "50vw"}}
+      [:> mui/Card {:style {:min-width "50vw"}}
        [:> mui/CardHeader {:title "Reset Password"}]
        [:> mui/CardContent
-        [:> mui/Grid {:container true :justify :space-between}
-         [text-field {:value @username
-                      :label "User id"
-                      :on-change #(reset! username (.. % -target -value))}]
-
-         [text-field {:value @password
-                      :label "New password"
-                      :on-change #(reset! password (.. % -target -value))}]]
+        [:> mui/Grid {:container true :justify :space-between :align-items :flex-end}
+         [:> mui/Grid {:item true :xs 12 :sm 6}
+          [text-field {:value @username
+                       :fullWidth true
+                       :label "User id"
+                       :on-change #(reset! username (.. % -target -value))}]]
+         [:> mui/Grid {:item true :xs 12 :sm 6}
+          [text-field {:value @password
+                       :fullWidth true
+                       :label "New password"
+                       :on-change #(reset! password (.. % -target -value))}]]]
         [:> mui/Button
          {:color :primary :variant :contained :style {:margin-top 20}
           :on-click #(dispatch [::events/update-password @username @password])}

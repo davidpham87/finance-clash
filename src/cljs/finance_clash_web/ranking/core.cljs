@@ -53,8 +53,7 @@
 
 (defn content []
   (let [ranking @(subscribe [::subs/ranking])]
-    [:> mui/Card {:elevation 10
-                  :style {:min-width 480 :width "50vw"}}
+    [:> mui/Card {:elevation 10 :style {:min-width "50vw"}}
      [:> mui/CardHeader {:title "Ranking"}]
      [:> mui/CardContent
       [:> mui/Table [header] [body ranking]]]]))
