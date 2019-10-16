@@ -350,6 +350,8 @@
   (doseq [chapter (range (count question-files))]
     (import-question->db chapter))
 
+  (-> {:select [:*] :from [:questions]} (sql/format) (execute-query!))
+
   (def chapter 0)
   (def questions (-> (import-question chapter) (json/read-str :key-fn keyword)))
 

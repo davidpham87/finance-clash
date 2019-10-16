@@ -25,13 +25,13 @@
 
   :repl-options {:init-ns finance-clash.server}
   :ring {:handler finance-clash.server/app}
-  :plugins [[cider/cider-nrepl "0.22.3"]
+  :plugins [[cider/cider-nrepl "0.22.4"]
             #_[lein-re-frisk "0.5.8"]
             [lein-ring "0.12.5"]]
   :resource-paths ["assets"]
   :source-paths ["src/clj" "assets"]
 
-  :profile {:repl {:dependencies [[cider/cider-nrepl "0.22.3"]
-                                  [cider/piggieback "0.4.1"]]}}
+  :profile {:repl {:dependencies [[cider/cider-nrepl "0.22.4"]
+                                  [cider/piggieback "0.4.2"]]}}
 
   )

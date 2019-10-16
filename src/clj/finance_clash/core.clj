@@ -22,7 +22,8 @@ drop table user
 "])
 
   (jdbc/execute! ds ["
-drop table questions
+delete from questions;
+vaccum;
 "])
 
   (jdbc/execute! ds ["

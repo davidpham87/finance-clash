@@ -215,6 +215,16 @@
       :body
       (json/read-str :key-fn keyword))
 
+  (def reset-wealth! []
+    (let  [users (-> {:select [:id] :from [:user]}
+                     sql/format
+                     (execute-query!)
+                     (as-> m (mapv :id m)))])
+    (doseq [u users]
+      (budget/budget-init u 100)))
+
+  (budget/ranking)
+
   (budget/earn "1" 100)
   (username "1")
   (username "2")

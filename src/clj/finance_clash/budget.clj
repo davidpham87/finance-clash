@@ -88,8 +88,8 @@
     (jt/offset-time)))
 
 (defn bonus-period?
-  "Bonus period is between 19 and 8 EU time."
-  [h] (or (< h 8) (> h 19)))
+  "Bonus period is between 19 and 9 EU time."
+  [h] (or (< h 9) (> h 18)))
 
 (defn query-question [id]
   (-> {:select [:difficulty]
@@ -139,8 +139,6 @@
 (defn earn-question-value! [user-id question-id]
   (let [value (question-id->question-value question-id)]
     (earn! user-id value)))
-
-
 
 ;; Routes
 (def routes-buy-question

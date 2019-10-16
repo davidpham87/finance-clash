@@ -1,7 +1,7 @@
----
+﻿---
 # 000 - MSIAI - Key Notions
 
-- question: J'effectue un placement de €10'000 à 2%, combien d'intérêts je toucherai dans 1 an?
+- question: J'effectue un placement de €1'000 à 2%, combien d'intérêts je toucherai dans 1 an?
   responses:
   - €2.
   - €20.
@@ -12,7 +12,7 @@
   difficulty: easy
 
 
-- question: J'effectue un placement de €10'000 à 2%, les intérêts sont composés, combien d'intérêts je toucherai sur les 2 prochaines années?
+- question: J'effectue un placement de €1'000 à 2%, les intérêts sont composés, combien d'intérêts je toucherai sur les 2 prochaines années?
   responses:
   - Moins de €40.
   - €40.
@@ -98,7 +98,7 @@
 - question: Quelle affirmation est correcte?
   responses:
   - EBIT = Sales Value - Variable cost - Fixed cost.
-  - EBIT = Sales Value - Variable cost - Fixed cost - Amortisation.
+  - EBIT = Sales Value - Variable cost - Fixed cost - Amortisation - Depreciation.
   - EBIT = Sales Value - Variable cost - Fixed cost - Tax.
   - EBIT = Sales Value - Variable cost - Fixed cost - Interests due.
   correct-response: 2
