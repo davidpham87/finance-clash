@@ -84,7 +84,7 @@
 (def app
   (-> (http/router app-routes app-data)
       (http/ring-handler (ring/create-default-handler)
-                      {:executor sieppari/executor})
+                         {:executor sieppari/executor})
       (buddy.auth.middleware/wrap-authorization auth-backend)
       (buddy.auth.middleware/wrap-authentication auth-backend)))
 

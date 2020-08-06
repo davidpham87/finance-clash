@@ -1,17 +1,17 @@
 (ns finance-clash-web.views
   (:require
-   [reagent.core :as reagent]
-   [re-frame.core :as rf :refer (dispatch subscribe)]
-   [finance-clash-web.components.mui-utils :refer (custom-theme)]
+   ["@material-ui/core" :as mui]
+   ["react" :as react]
+   [finance-clash-web.admin.core :rename {root-panel admin-panel}]
+   [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
    [finance-clash-web.components.app-bar :refer (app-bar)]
    [finance-clash-web.components.drawer :refer (drawer)]
-   [finance-clash-web.admin.core :rename {root-panel admin-panel}]
+   [finance-clash-web.components.mui-utils :refer (custom-theme)]
    [finance-clash-web.login.core :rename {root-panel login-panel}]
-   [finance-clash-web.ranking.core :rename {root-panel ranking-panel}]
-   [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
    [finance-clash-web.quiz.core :rename {root-panel quiz-panel}]
-   ["@material-ui/core" :as mui]
-   ["react" :as react]))
+   [finance-clash-web.ranking.core :rename {root-panel ranking-panel}]
+   [re-frame.core :as rf :refer (subscribe)]
+   [reagent.core :as reagent]))
 
 (defmulti active-panel identity :default :login)
 (defmethod active-panel :login [args]
@@ -35,7 +35,6 @@
    [:> mui/CssBaseline]
    [:> mui/MuiThemeProvider {:theme custom-theme}
     [:> app-bar]
-    #_[user-feedback-comp]
     [:div {:style {:display "flex"}}
      [:> drawer (clj->js {:user-role @(subscribe [:user-role])})]]
     [:> react/Suspense

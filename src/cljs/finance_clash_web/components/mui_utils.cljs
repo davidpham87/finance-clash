@@ -8,23 +8,19 @@
    ["@material-ui/core/Select" :default mui-select]
    ["@material-ui/core/TextField" :default mui-text-field]
    ["@material-ui/core/Tooltip" :default mui-tooltip]
-   ["@material-ui/core/colors" :as mui-colors]
    ["@material-ui/core/styles" :refer [withStyles createMuiTheme]]
-
-   [clojure.string :as str]
    [clojure.string :as str]
    [finance-clash-web.components.colors :as colors]
-   [goog.object :as gobj]
    [re-frame.core :as rf]
    [reagent.core :as reagent]
-   [reagent.core :as reagent]
+   [reagent.dom :as dom]
    [reagent.impl.template :as rtpl]))
 
 (defn cs [& names]
   (str/join " " (filter identity names)))
 
 (defn client-width [component]
-  (let [node (reagent/dom-node component)]
+  (let [node (dom/dom-node component)]
     (if node (.-clientWidth node) 0)))
 
 (defn combine-style-fns [style-fns]

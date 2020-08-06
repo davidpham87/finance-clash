@@ -1,20 +1,48 @@
-{:paths ["src/clj"]
- :deps {cider/cider-nrepl {:mvn/version "0.22.0"}
-        nrepl/nrepl {:mvn/version "0.6.0"}
-        org.clojure/clojure {:mvn/version "1.10.0"}
-        ring/ring-jetty-adapter {:mvn/version "1.7.1"}
-        metosin/reitit {:mvn/version "0.3.9"}}
+{:paths ["src/cljc"]
+ :deps
+ {funcool/cuerdas {:mvn/version "2020.03.26-3"}
+  metosin/muuntaja-yaml {:mvn/version "0.6.7"}
+  metosin/reitit {:mvn/version "0.5.5"}}
+
  :aliases
- {:rebl
-  {:extra-deps
-   {cider/cider-nrepl {:mvn/version "0.22.0"}
-    nrepl/nrepl {:mvn/version "0.6.0"}
-    org.clojure/clojure {:mvn/version "1.10.0"}
-    org.clojure/core.async {:mvn/version "0.4.490"}
-    com.cognitect/rebl {:local/root "/home/david/.m2/repository/com/cognitect/rebl/0.9.220/REBL-0.9.220.jar"}
-    org.openjfx/javafx-fxml     {:mvn/version "11.0.1"}
-    org.openjfx/javafx-controls {:mvn/version "11.0.1"}
-    org.openjfx/javafx-swing    {:mvn/version "11.0.1"}
-    org.openjfx/javafx-base     {:mvn/version "11.0.1"}
-    org.openjfx/javafx-web      {:mvn/version "11.0.1"}}
-   :main-opts  ["-m" "cognitect.rebl"]}}}
+ {:clj
+  {:extra-paths ["src/clj" "assets"]
+   :extra-deps
+   {buddy/buddy-auth {:mvn/version "2.2.0"}
+    buddy/buddy-hashers {:mvn/version "1.4.0"}
+    buddy/buddy-sign {:mvn/version "3.1.0"}
+
+    clj-http {:mvn/version "3.10.2"}
+    clojure.java-time {:mvn/version "0.3.2"}
+
+    juxt/crux-core {:mvn/version "20.07-1.10.0-beta"}
+    juxt/crux-jdbc {:mvn/version "20.07-1.10.0-beta"}
+
+    honeysql {:mvn/version "1.0.444"}
+
+    org.clojure/clojure {:mvn/version "1.10.1"}
+    org.clojure/data.generators {:mvn/version "1.0.0"}
+    org.clojure/data.json {:mvn/version "1.0.0"}
+    org.xerial/sqlite-jdbc {:mvn/version "3.32.3.2"}
+    ring-cors {:mvn/version "0.1.13"}
+    ring/ring-jetty-adapter {:mvn/version "1.8.1"}
+    seancorfield/next.jdbc {:mvn/version "1.1.582" :exclusions [org.clojure/clojure]}}}
+
+  :cljs
+  {:extra-paths ["src/cljs"]
+   :extra-deps
+   {camel-snake-kebab {:mvn/version "0.4.1"}
+    cljs-ajax {:mvn/version "0.8.0"}
+    datascript {:mvn/version "1.0.0"}
+    re-frame {:mvn/version "1.0.0" :exclusions [cljsjs/react cljsjs/react-dom]}
+    reagent {:mvn/version "0.10.0" :exclusions [cljsjs/react cljsjs/react-dom]}
+    com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
+    com.cognitect/transit-cljs {:mvn/version "0.8.264"}
+    day8.re-frame/http-fx {:mvn/version "0.2.1"}
+    day8.re-frame/re-frame-10x {:mvn/version "0.6.5" :exclusions [cljsjs/react cljsjs/react-dom]}
+
+    binaryage/devtools {:mvn/version "LATEST"}
+    cider/cider-nrepl {:mvn/version "LATEST"}
+    refactor-nrepl {:mvn/version "LATEST"}
+    nrepl/nrepl {:mvn/version "LATEST"}
+    thheller/shadow-cljs {:mvn/version "LATEST"}}}}}

@@ -94,3 +94,8 @@
  (fn [{db :db} [_ result]]
    {:db (update db :user merge result)
     :dispatch [:clear-error ::register]}))
+
+
+(comment
+  (rf/dispatch [::success-login {:user {:username "David"}}])
+  )

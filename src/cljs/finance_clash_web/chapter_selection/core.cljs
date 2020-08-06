@@ -4,15 +4,12 @@
    ["@material-ui/core/Grid" :default mui-grid]
    ["@material-ui/icons/Send" :default ic-send]
    [clojure.string :as s]
-   [finance-clash-web.components.button :refer (submit-button)]
-   [finance-clash-web.components.mui-utils :refer
-    [cs client-width custom-theme with-styles text-field input-component panel-style]]
    [finance-clash-web.chapter-selection.events :as events]
    [finance-clash-web.chapter-selection.subs :as subscriptions]
+   [finance-clash-web.components.button :refer (submit-button)]
+   [finance-clash-web.components.mui-utils :refer (cs with-styles panel-style)]
    [goog.object :as gobj]
-   [re-frame.core :as rf :refer (dispatch subscribe reg-event-db)]
-   [reagent.core :as reagent]
-   [reagent.debug :as rd]
+   [re-frame.core :as rf :refer (dispatch subscribe)]
    [reagent.ratom :refer-macros (reaction)]))
 
 (def question-files
@@ -106,7 +103,7 @@
     (fn [ms]
       [chapters ms @checked-chapters])))
 
-(defn content [classes]
+(defn content [_]
   [:<>
    [:> mui/Grid {:item true :xs 12}
     [:> mui/Card {:elevation 0}
@@ -119,7 +116,7 @@
 (defn root [m]
   (let []
     (dispatch [::events/query-chapters])
-    (fn [{:keys [classes] :as props}]
+    (fn [{:keys [classes]}]
       (let []
         [:main {:class (cs (gobj/get classes "content"))
                 :style {:background-image "url(images/chapter.jpg)"

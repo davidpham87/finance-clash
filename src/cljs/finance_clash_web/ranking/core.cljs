@@ -4,7 +4,6 @@
    [finance-clash-web.components.mui-utils :refer
     [cs client-width with-styles text-field input-component panel-style]]
    [goog.object :as gobj]
-   [reagent.core :as reagent]
    [finance-clash-web.ranking.events :as events]
    [finance-clash-web.ranking.subs :as subs]
    [re-frame.core :refer (dispatch subscribe)]))

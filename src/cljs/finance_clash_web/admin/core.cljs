@@ -1,12 +1,12 @@
 (ns finance-clash-web.admin.core
   (:require
    ["@material-ui/core" :as mui]
-   [finance-clash-web.components.mui-utils :refer
-    [cs client-width with-styles text-field input-component panel-style]]
-   [goog.object :as gobj]
-   [reagent.core :as reagent]
    [finance-clash-web.admin.events :as events]
-   [re-frame.core :refer (dispatch subscribe)]))
+   [finance-clash-web.components.mui-utils :refer
+    (cs with-styles text-field panel-style)]
+   [goog.object :as gobj]
+   [re-frame.core :refer (dispatch)]
+   [reagent.core :as reagent]))
 
 (defn content []
   (let [username (reagent/atom "")
