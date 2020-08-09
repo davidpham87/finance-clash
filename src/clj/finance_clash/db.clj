@@ -1,7 +1,11 @@
 (ns finance-clash.db
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
-            [datomic.api :as d]))
+            #_[datomic.api :as d]
+            [datahike.api :as d]
+            [datahike-postgres.core]
+            #_[crux.api :as crux]
+            #_[crux.jdbc]))
 
 (def db
   {:dbtype "sqlite"
@@ -109,61 +113,39 @@ SELECT rowid, * FROM user;
     :db/cardinality :db.cardinality/many
     :db/doc "Exercises to train students."}
 
-
-   ;; homework
-   {:db/ident :lecture.homework/title
-    :db/valueType :db.type/instant
-    :db/cardinality :db.cardinality/one
-    :db/doc "Name of the homework."}
-
-   {:db/ident :lecture.homework/exam?
-    :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one
-    :db/doc "Whether the homework set is an exam."}
-
-   {:db/ident :lecture.homework/start
-    :db/valueType :db.type/instant
-    :db/cardinality :db.cardinality/one
-    :db/doc "The beginning date of the homework."}
-
-   {:db/ident :lecture.homework/deadline
-    :db/valueType :db.type/instant
-    :db/cardinality :db.cardinality/one
-    :db/doc "Last time to return the homework"}
-
-   {:db/ident :lecture.homework/tags
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/many
-    :db/doc "Tags of the homework."}
-
-   {:db/ident :lecture.homework/quizz
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many
-    :db/doc "Quizz from which the homework is taken from."}
-
-   {:db/ident :lecture.homwork/shuffle?
-    :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one
-    :db/doc "Whether to shuffle the questions."}
-
    ;; exercises
 
-   {:db/ident :lecture.exercise/title
+   {:db/ident :exercises/title
     :db/valueType :db.type/instant
     :db/cardinality :db.cardinality/one
     :db/doc "Name of the exercises."}
 
-   {:db/ident :lecture.exercise/tags
+   {:db/ident :exercises/kind
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one
+    :db/doc "One of :exam, :training, :homework"}
+
+   {:db/ident :exercises/tags
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/many
     :db/doc "Tags of the exercises."}
 
-   {:db/ident :lecture.exercise/quizz
+   {:db/ident :exercises/start
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
+    :db/doc "The beginning date of the homework."}
+
+   {:db/ident :exercises/deadline
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
+    :db/doc "Last time to return the homework"}
+
+   {:db/ident :exercises/quizz
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
     :db/doc "Quizz from which the exercises is taken from."}
 
-   {:db/ident :lecture.exercise/shuffle?
+   {:db/ident :exercises/shuffle?
     :db/valueType :db.type/boolean
     :db/cardinality :db.cardinality/one
     :db/doc "Whether to shuffle the questions in the exercises."}
@@ -235,3 +217,88 @@ SELECT rowid, * FROM user;
          (d/db conn))
      (into [])
      (sort-by second))
+
+
+(comment
+
+  (def crux-db
+    {:crux.node/topology '[crux.jdbc/topology]
+     :crux.jdbc/dbtype "postgresql"
+     :crux.jdbc/dbname   "cruxdb2"
+     :crux.jdbc/host     "localhost"
+     :crux.jdbc/port     "5432"
+     :crux.jdbc/user     "postgres"
+     :crux.jdbc/password "postgres"})
+
+  (defn start-jdbc-node []
+    (crux/start-node crux-db))
+
+  (crux/submit-tx
+   (crux/start-node crux-db)
+   [[:crux.tx/put
+     {:crux.db/id :dbpedia.resource/Pablo-Picasso ; id
+      :name "Pablo"
+      :last-name "Picasso"}
+     #inst "2018-05-18T09:20:27.966-00:00"]])
+
+  (def node (crux/start-node crux-db))
+
+  (let [db (-> node crux/db)]
+    (crux/q db
+            '{:find [e]
+              :where [[e :name "Pablo"]]}))
+
+  (crux/entity (crux/db node) :dbpedia.resource/Pablo-Picasso)
+)
+
+
+(comment
+
+  (def cfg {:store              {:backend  :pg
+                                 :username "postgres"
+                                 :password "postgres"
+                                 :path     "/datahike"
+                                 :host     "localhost"
+                                 :port     5432}
+            :schema-flexibility :write
+            :keep-history?      true})
+
+  (d/create-database cfg)
+
+
+  (def conn (d/connect cfg))
+
+  (d/transact conn finanche-clash-schema)
+
+
+  ;; The first transaction will be the schema we are using:
+  (d/transact conn [{:db/ident :name
+                     :db/valueType :db.type/string
+                     :db/cardinality :db.cardinality/one }
+                    {:db/ident :age
+                     :db/valueType :db.type/long
+                     :db/cardinality :db.cardinality/one }])
+
+  ;; Let's add some data and wait for the transaction
+  (d/transact conn [{:name  "Alice", :age   20 }
+                    {:name  "Bob", :age   30 }
+                    {:name  "Charlie", :age   40 }
+                    {:age 15 }])
+
+  (d/q '[:find ?e ?n ?a
+         :keys entity name age
+         :where
+         [?e :name ?n]
+         [?e :age ?a]]
+       @conn)
+
+  #_(d/transact conn [{:db/ident :name
+                     :db/valueType :db.type/string
+                     :db/cardinality :db.cardinality/one }
+                    {:db/ident :age
+                     :db/valueType :db.type/long
+                     :db/cardinality :db.cardinality/one }])
+
+
+
+  )
