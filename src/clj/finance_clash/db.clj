@@ -65,7 +65,7 @@ SELECT rowid, * FROM user;
 
    {:db/ident :user/id
     :db/valueType :db.type/string
-    :db/unique :db/identity
+    :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one
     :db/doc "User id"}
 
@@ -99,23 +99,42 @@ SELECT rowid, * FROM user;
     :db/cardinality :db.cardinality/many
     :db/doc "Templates from which the lecture is taken"}
 
-   ;; points
    {:db/ident :lecture/homework
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
     :db/doc "Questions belonging to the lecture."}
 
+   {:db/ident :lecture/exercises
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/doc "Exercises to train students."}
+
+
+   ;; homework
+   {:db/ident :lecture.homework/title
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
+    :db/doc "Name of the homework."}
+
    {:db/ident :lecture.homework/exam?
     :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one
     :db/doc "Whether the homework set is an exam."}
 
    {:db/ident :lecture.homework/start
     :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
     :db/doc "The beginning date of the homework."}
 
    {:db/ident :lecture.homework/deadline
     :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
     :db/doc "Last time to return the homework"}
+
+   {:db/ident :lecture.homework/tags
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/many
+    :db/doc "Tags of the homework."}
 
    {:db/ident :lecture.homework/quizz
     :db/valueType :db.type/ref
@@ -124,7 +143,30 @@ SELECT rowid, * FROM user;
 
    {:db/ident :lecture.homwork/shuffle?
     :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one
     :db/doc "Whether to shuffle the questions."}
+
+   ;; exercises
+
+   {:db/ident :lecture.exercise/title
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one
+    :db/doc "Name of the exercises."}
+
+   {:db/ident :lecture.exercise/tags
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/many
+    :db/doc "Tags of the exercises."}
+
+   {:db/ident :lecture.exercise/quizz
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/doc "Quizz from which the exercises is taken from."}
+
+   {:db/ident :lecture.exercise/shuffle?
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one
+    :db/doc "Whether to shuffle the questions in the exercises."}
 
    ;; questions
    {:db/ident :question/tags
@@ -134,14 +176,22 @@ SELECT rowid, * FROM user;
 
    {:db/ident :question/difficulty
     :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one
     :db/doc "Difficulty of the question. One of [:easy, :medium, :hard]"}
 
    {:db/ident :question/points
     :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one
     :db/doc "Number of points (in order to override the default difficulty points)"}
+
+   {:db/ident :question/title
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/doc "Title of the question."}
 
    {:db/ident :question/question
     :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
     :db/doc "Question that is asked to the student."}
 
    {:db/ident :question/answers
@@ -156,15 +206,32 @@ SELECT rowid, * FROM user;
 
    {:db/ident :question/explanation
     :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
     :db/doc "Markdown string to explain the answer."}
 
    ;; quizz
+
    {:db/ident :quizz/tags
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/many
     :db/doc "Tags of the quizz (category, year)"}
 
+   {:db/ident :quizz/title
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/doc "Title of the quizz."}
+
    {:db/ident :quizz/questions
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
     :db/doc "Questions belonging to the quizz."}])
+
+(d/transact conn finanche-clash-schema)
+
+(->> (d/q '[:find ?e ?attr
+           :in $
+           :where
+           [?e :db/ident ?attr]]
+         (d/db conn))
+     (into [])
+     (sort-by second))
