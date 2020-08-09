@@ -15,8 +15,10 @@
     clj-http {:mvn/version "3.10.2"}
     clojure.java-time {:mvn/version "0.3.2"}
 
-    juxt/crux-core {:mvn/version "20.07-1.10.0-beta"}
-    juxt/crux-jdbc {:mvn/version "20.07-1.10.0-beta"}
+    com.datomic/datomic-free {:mvn/version "0.9.5703.21"}
+
+    juxt/crux-core {:mvn/version "20.08-1.10.1-beta"}
+    juxt/crux-jdbc {:mvn/version "20.08-1.10.1-beta"}
 
     honeysql {:mvn/version "1.0.444"}
 
