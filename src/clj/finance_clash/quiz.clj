@@ -1,30 +1,32 @@
 (ns finance-clash.quiz
-  (:require [clj-http.client :as client]
-            [clojure.data.generators :as gen]
-            [clojure.data.json :as json]
-            [clojure.set :refer (rename-keys)]
-            [clojure.pprint :refer (pprint)]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [java-time :as jt]
-            [finance-clash.auth :refer (protected-interceptor)]
-            [finance-clash.db :refer (execute-query!)]
-            [finance-clash.budget :as budget]
-            [honeysql.core :as sql]
-            [honeysql.helpers :as hsql
-             :refer (select where from insert-into)]
-            [muuntaja.core :as mc]
-            [muuntaja.format.yaml :as yaml]
-            [reitit.coercion.spec]
-            [spec-tools.spec :as spec]))
+  (:require
+   [clj-http.client :as client]
+   [clojure.data.generators :as gen]
+   [clojure.data.json :as json]
+   [clojure.java.io]
+   [clojure.pprint :refer (pprint)]
+   [clojure.set :refer (rename-keys)]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [datomic.api :as d]
+   [finance-clash.auth :refer (protected-interceptor)]
+   [honeysql.core :as sql]
+   [honeysql.helpers :as hsql
+    :refer (select where from insert-into)]
+   [java-time :as jt]
+   [muuntaja.core :as mc]
+   [muuntaja.format.yaml :as yaml]
+   [reitit.coercion.spec]
+   [spec-tools.spec :as spec]))
+
+;; [finance-clash.budget :as budget]
+;; [finance-clash.db :refer (execute-query!)]
 
 ;; Import data
 ;; This should be on its own namespace ideally.
 (def random-seed 1)
 
-(def mi
-  (mc/create (-> mc/default-options
-                 (mc/install yaml/format))))
+(def mi (mc/create (-> mc/default-options (mc/install yaml/format))))
 
 (def question-files
   ["0_Key_Notions.yaml"
