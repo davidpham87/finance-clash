@@ -11,8 +11,7 @@
    :init-fn finance-clash.app/init
    :output-dir "app"
    :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
-   :dev {:closure-defines
-         {"re_frame.trace.trace_enabled_QMARK_" true}}
+   :dev {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}
    :release {:compiler-options
              {:infer-externs :auto
               :closure-defines {"re_frame.trace.trace_enabled_QMARK_" false}
@@ -37,7 +36,8 @@
     {:infer-externs :auto
      :optimizations :advanced
      :output-feature-set :es6
-     :closure-defines {finance-clash-web.events/backend-url "https://finance-clash-msiai.pro/api"}
+     :closure-defines
+     {finance-clash-web.events/backend-url "https://finance-clash-msiai.pro/api"}
      :externs
      ["externs/material-ui.ext.js"
       "datascript/externs.js"]}}
