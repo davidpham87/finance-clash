@@ -1,6 +1,18 @@
 (ns finance-clash.db
   (:require [datomic.api :as d]))
 
+(def tags-schema
+  "Defines tags."
+  [#:db{:ident       :tags/description
+        :valueType   :db.type/string
+        :cardinality :db.cardinality/one
+        :doc         "Description of the value of the tag, e.g. category, country, year"}
+   #:db{:ident       :tags/value
+        :valueType   :db.type/string
+        :unique      :db.unique/identity
+        :cardinality :db.cardinality/one
+        :doc         "Tags value"}])
+
 (def user-schema
   "Defines a user"
   [#:db{:ident       :user/name
@@ -15,6 +27,7 @@
    #:db{:ident       :user/kind
         :valueType   :db.type/ref
         :cardinality :db.cardinality/one
+        :isComponent true
         :doc         "Kind of user [:user.kind/professor, :user.kind/student]"}
    #:db{:ident :user.kind/professor}
    #:db{:ident :user.kind/student}])
@@ -38,11 +51,13 @@
    #:db{:ident       :lecture/professors
         :valueType   :db.type/ref
         :cardinality :db.cardinality/many
+        :isComponent true
         :doc         "Professor(s) of the lecture"}
 
    #:db{:ident       :lecture/students
         :valueType   :db.type/ref
         :cardinality :db.cardinality/many
+        :isComponent true
         :doc         "Students following the lecture."}
 
    #:db{:ident       :lecture/start
@@ -62,79 +77,71 @@
 
    #:db{:ident       :lecture/problems
         :valueType   :db.type/ref
+        :isComponent true
         :cardinality :db.cardinality/many
         :doc         "Problem set offered to students for training or examination."}
 
    #:db{:ident       :lecture/tags
-        :valueType   :db.type/string
+        :valueType   :db.type/ref
         :cardinality :db.cardinality/many
         :doc         "Additional tags for the lecture for identifying them."}
 
-   #:db{:ident       :lecture.problems/title
+   #:db{:ident       :problems/title
         :valueType   :db.type/instant
         :cardinality :db.cardinality/one
         :doc         "Title of the set of problems."}
 
-   #:db{:ident       :lecture.problems/kind
+   #:db{:ident       :problems/kind
         :valueType   :db.type/keyword
         :cardinality :db.cardinality/one
         :doc         "One of :exam :training :homework"}
 
-   #:db{:ident       :lecture.problems/tags
-        :valueType   :db.type/string
+   #:db{:ident       :problems/tags
+        :valueType   :db.type/ref
         :cardinality :db.cardinality/many
         :doc         "Tags of the problems."}
 
-   #:db{:ident       :lecture.problems/start
+   #:db{:ident       :problems/start
         :valueType   :db.type/instant
         :cardinality :db.cardinality/one
         :doc         "The beginning date of the problem set."}
 
-   #:db{:ident       :lecture.problems/deadline
+   #:db{:ident       :problems/deadline
         :valueType   :db.type/instant
         :cardinality :db.cardinality/one
         :doc         "Last time to return the problem set"}
 
-   #:db{:ident       :lecture.problems/questions
+   #:db{:ident       :problems/questions
         :valueType   :db.type/ref
+        :isComponent true
         :cardinality :db.cardinality/many
-        :doc         "Questions of the problem set."}
+        :doc "Questions of the problem set. You might want to add questions or
+        modify questions that are in the quizzes template."}
 
-   #:db{:ident       :lecture.problems/quizzes
-        :valueType   :db.type/ref
-        :cardinality :db.cardinality/many
-        :doc         "Quiz the problem set."}
-
-   #:db{:ident       :lecture.problems/shuffle?
+   #:db{:ident       :problems/shuffle?
         :valueType   :db.type/boolean
         :cardinality :db.cardinality/one
         :doc         "Whether to shuffle the questions in the problems."}
 
-   #:db{:ident       :lecture.problems/transactions
+   #:db{:ident       :problems/transactions
         :valueType   :db.type/ref
         :cardinality :db.cardinality/many
         :doc         "All the answers provided by the student."}
 
-   #:db{:ident       :lecture.problems.transaction/user
+   #:db{:ident       :transaction/user
         :valueType   :db.type/ref
         :cardinality :db.cardinality/one
         :doc         "User who answered"}
 
-   #:db{:ident       :lecture.problems.transaction/question
+   #:db{:ident       :transaction/question
         :valueType   :db.type/ref
         :cardinality :db.cardinality/one
         :doc         "Question which was answered."}
 
-   #:db{:ident       :lecture.problems.transaction/answer
+   #:db{:ident       :transaction/answer
         :valueType   :db.type/string
         :cardinality :db.cardinality/one
-        :doc         "Answer from the user."}
-
-   #:db{:ident       :lecture.problems.transaction/timestamp
-        :valueType   :db.type/instant
-        :cardinality :db.cardinality/one
-        :doc         "When the answer has been submitted"}])
-
+        :doc         "Answer from the user."}])
 
 (def quiz-schema
   "Quizzes are collection of questions allowing to group questions for reuse."
@@ -143,11 +150,12 @@
         :cardinality :db.cardinality/one
         :doc         "Title of the quiz."}
    #:db{:ident       :quiz/tags
-        :valueType   :db.type/string
+        :valueType   :db.type/ref
         :cardinality :db.cardinality/many
         :doc         "Tags of the quiz (category year)."}
    #:db{:ident       :quiz/questions
         :valueType   :db.type/ref
+        :isComponent true
         :cardinality :db.cardinality/many
         :doc         "Questions belonging to the quiz."}])
 
@@ -155,12 +163,14 @@
   "Questions and answers schema. A question can have be either a multiple choice
   or a single string question. The answer can be either multiple or unique."
   [#:db{:ident       :question/tags
-        :valueType   :db.type/string
+        :valueType   :db.type/ref
+        :isComponent true
         :cardinality :db.cardinality/many
         :doc         "Tags of the question (category year)."}
 
    #:db{:ident       :question/difficulty
         :valueType   :db.type/ref
+        :isComponent true
         :cardinality :db.cardinality/one
         :doc         "Difficulty of the question."}
    #:db{:ident :question.difficulty/easy}
@@ -168,9 +178,14 @@
    #:db{:ident :question.difficulty/hard}
 
    #:db{:ident       :question/points
-        :valueType   :db.type/keyword
+        :valueType   :db.type/long
         :cardinality :db.cardinality/one
         :doc         "Number of points (in order to override the default difficulty points)"}
+
+   #:db{:ident       :question/duration
+        :valueType   :db.type/long
+        :cardinality :db.cardinality/one
+        :doc         "Duration of the question in seconds. Max 2^63-1."}
 
    #:db{:ident       :question/title
         :valueType   :db.type/string
@@ -187,20 +202,35 @@
         :cardinality :db.cardinality/one
         :doc         "Markdown string to explain the answer."}
 
+   #:db{:ident       :question/choices
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/many
+        :isComponent true
+        :doc         "Possible answers choice to the student."}
+
    #:db{:ident       :question/answers
         :valueType   :db.type/ref
         :cardinality :db.cardinality/many
+        :isComponent true
         :doc         "Possible answers to the student."}
 
-   #:db{:ident       :question/correct-answers
-        :valueType   :db.type/ref
-        :cardinality :db.cardinality/many
-        :doc         "Possible answers to the student."}
-
-   #:db{:ident       :answer/description
+   #:db{:ident       :answer/value
         :valueType   :db.type/string
-        :cardinality :db.cardinality/many
-        :doc         "Possible answers to the student."}
+        :cardinality :db.cardinality/one
+        :doc         "Answer's value."}
+
+   #:db{:ident       :answer/position
+        :valueType   :db.type/long
+        :cardinality :db.cardinality/one
+        :doc         "Specify the position when ordering possible choices."}
+
+   #:db{:ident       :answer/kind
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc         "Answers kind."}
+
+   #:db{:ident       :answer.kind/string}
+   #:db{:ident       :answer.kind/numerical}
 
    #:db{:ident       :answer/documentation
         :valueType   :db.type/string
@@ -208,7 +238,7 @@
         :doc         "Documentation to the question for adding details."}])
 
 (def finanche-clash-schema
-  (into [] cat [user-schema lecture-schema quizz-schema question-answer-schema]))
+  (into [] cat [tags-schema user-schema lecture-schema quiz-schema question-answer-schema]))
 
 
 (def datomic-uri "datomic:free://localhost:4334/finance-clash")
@@ -220,6 +250,7 @@
 
 (def conn (atom (d/connect datomic-uri)))
 
+(defn get-conn [] (d/connect datomic-uri))
 
 (defn get-db
   ([] (get-db @conn))
@@ -228,21 +259,29 @@
 (set! *print-length* 250)
 
 (defn init []
+  (d/delete-database datomic-uri)
   (d/create-database datomic-uri)
-  (let [conn (d/connect datomic-uri)]
-    (d/transact conn finanche-clash-schema)
+  (let [connection (d/connect datomic-uri)]
+    (d/transact connection finanche-clash-schema)
+    (reset! conn connection)
     true))
 
-
 (comment
+
+  (init)
+
+  (def conn (atom (d/connect datomic-uri)))
+
+  (let [connection (d/connect datomic-uri)]
+    (d/transact connection finanche-clash-schema))
 
   (->> (d/q '[:find ?e ?attr
               :in $
               :where
               [?e :db/ident ?attr]]
-            (d/db @conn))
+            (d/db (d/connect datomic-uri)))
        (into [])
-       (sort-by second))
+       (sort-by first))
 
   (def crux-db
     {:crux.node/topology '[crux.jdbc/topology]
@@ -274,6 +313,11 @@
   (crux/entity (crux/db node) :dbpedia.resource/Pablo-Picasso)
 )
 
+
+(comment
+
+  finanche-clash-schema
+  )
 
 ;; (comment
 

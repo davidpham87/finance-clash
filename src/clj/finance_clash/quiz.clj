@@ -5,7 +5,7 @@
    [clojure.data.json :as json]
    [clojure.java.io]
    [clojure.pprint :refer (pprint)]
-   [clojure.set :refer (rename-keys)]
+   [clojure.set :as set :refer (rename-keys)]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [datomic.api :as d]
@@ -17,6 +17,7 @@
    [muuntaja.core :as mc]
    [muuntaja.format.yaml :as yaml]
    [reitit.coercion.spec]
+   [finance-clash.db]
    [spec-tools.spec :as spec]))
 
 ;; [finance-clash.budget :as budget]
@@ -25,6 +26,8 @@
 ;; Import data
 ;; This should be on its own namespace ideally.
 (def random-seed 1)
+
+(def execute-query! (constantly true))
 
 (def mi (mc/create (-> mc/default-options (mc/install yaml/format))))
 
@@ -56,41 +59,93 @@
    "24_Bourse.yaml"
    "25_Liquidity_Talk.yaml"])
 
-(defn read-questions [chapter]
+(defn read-questions [question-files chapter]
   (->> (get question-files chapter)
        (str "questions/") clojure.java.io/resource slurp
        (mc/decode mi "application/x-yaml")))
 
-(defn convert-question [chapter]
-  (let [new-filename (-> (get question-files chapter)
-                         str/lower-case
-                         (str/replace #"yaml$" "json")
-                         (as-> s (clojure.core/str "assets/questions/" s)))
+(comment
+  (-> (read-questions questions-files 0)
+      (set/rename {:correct-response :question/answer
+                   :question :question/title
+                   :responses :question/choices
+                   :duration :question/duration
+                   :difficulty :question/difficulty})
+      (as-> $
+          (map #(update % :question/difficulty
+                        (fn [s] (keyword "question.difficulty" s))) $))))
+
+(defn convert-question [question-files chapter]
+  (let [new-filename
+        (-> (get question-files chapter)
+            str/lower-case
+            (str/replace #"yaml$" "json")
+            (as-> s (clojure.core/str "assets/questions/" s)))
         data (->> (read-questions chapter)
                   (mc/encode mi "application/json")
                   slurp)]
     (println new-filename)
     (spit new-filename data)))
 
-(defn format-question->db [m chapter number]
-  #_(println m)
-  (-> m
-      (assoc :id (str chapter "_" number)
-             :chapter chapter
-             :number number)
-      (dissoc :question :responses)
-      (rename-keys {:correct-response :correct_response})))
+(defn format-question->db [m chapter]
+  (let [choices->answers
+        (fn [choices]
+          (map-indexed
+           (fn [i s] {:db/id (str (d/tempid :answer))
+                      :answer/value (str s) :answer/position (inc i)}) choices))
+        questions
+        (->>
+         (set/rename m {:correct-response :question/answers
+                        :question :question/question
+                        :responses :question/choices
+                        :duration :question/duration
+                        :difficulty :question/difficulty})
+         (into []
+               (comp
+                (map #(update % :question/difficulty
+                              (fn [s] (if (seq s)
+                                        (keyword "question.difficulty" s)
+                                        (keyword "question.difficulty" :medium)))))
+                (map #(update % :question/choices choices->answers))
+                (map #(assoc % :question/title (get % :question/question)))
+                (map #(update % :question/answers
+                              (fn [i]
+                                (-> (get % :question/choices)
+                                    (nth (dec (int i))) :db/id))))
+                (map #(assoc % :question/tags
+                             {:tags/description "chapter"
+                              :tags/value chapter}))
+                (map #(assoc % :db/id (str (d/tempid :chapter)))))))]
+    {:quiz/title chapter
+     :quiz/questions questions}))
 
-(defn import-question->db [chapter]
-  (let [data (->> (read-questions chapter)
-                  (mc/encode mi "application/json")
-                  slurp)
-        data (json/read-str data :key-fn keyword)
-        query (fn [data chapter]
-                (-> (insert-into :questions)
-                    (hsql/values (map-indexed #(format-question->db %2 chapter %1) data))
-                    (sql/format)))]
-    (execute-query! (query data chapter))))
+
+(defn impot-question->db []
+  (let [data (for [idx (range (count question-files))
+                   :let [chapter (-> (nth question-files idx)
+                                     (str/replace #".yaml" "")
+                                     (str/split  #"_")
+                                     rest
+                                     (as-> $ (str/join " " $)))]]
+               (format-question->db (read-questions question-files idx) chapter))]
+    (d/transact (finance-clash.db/get-conn) (vec data))))
+
+(comment
+
+  (->> (d/q '[:find ?t
+              :where
+              [?e :quiz/title ?t]]
+            (finance-clash.db/get-db))
+       (map first)
+       #_(d/pull (finance-clash.db/get-db) '[*]))
+
+  (->> (d/q '[:find ?e
+              :where
+              [?e :quiz/title "Key Notions"]]
+            (finance-clash.db/get-db))
+       first
+       first
+       (d/pull (finance-clash.db/get-db) '[*])))
 
 ;; REST API
 
@@ -173,7 +228,7 @@
          (attempt! id user-id series success?)
          #_(println "Success?: " success? tx (-> tx first :success))
          (when (and success? (or (empty? tx) (-> tx first :success (or 1) zero?)))
-           (budget/earn-question-value! user-id id))
+           #_(budget/earn-question-value! user-id id))
          {:status 200
           :body {:id id
                  :answer-status (if success? "correct" "wrong")}}))}}])

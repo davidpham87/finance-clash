@@ -44,22 +44,38 @@
         breakpoint-sm-up ((.. theme -breakpoints -up) "sm")]
 
     #js {:drawerPaper
-         #js {:width drawer-width
-              :height "100vh"}
+         #js {:position "relative"
+              :white-space "nowrap"
+              :width drawer-width
+              :flexShrink 0
+              :height "100%"
+              :transition
+              (.create transitions "width"
+                       #js {:easing easing-sharpe
+                            :duration (.-enteringScreen duration)})}
 
          :drawerPaperClose
          #js {:paper #js {:background (colors/colors-rgb :main)
                           :color (.. theme -palette -common -white)}
-              :overFlow-x "hidden"
-              :position "relative"}
+              :overFlowX "hidden"
+              :position "relative"
+              :transition
+              (.create transitions "width"
+                       #js {:easing easing-sharpe
+                            :duration (.-leavingScreen duration)})
+              :width (spacing-unit 8)
+              "@media (min-width:600px)"
+              #js {:width (spacing-unit 9)}}
 
          :drawerPaperProps
-         #js {:background (colors/colors-rgb :graphite)
+         #js {:background (colors/colors-rgb :main)
               :color (.. custom-theme -palette -common -white)
-              :width (dec drawer-width)
-              :position "relative"
-              :overflow-x "hidden"
-              :height "100vh"}
+              :position "relative" :overflowX "hidden"
+              :height "100%"
+              :transition
+              (.create transitions "width"
+                       #js {:easing easing-sharpe
+                            :duration (.-enteringScreen duration)})}
 
          :toolbarIcon (.assign js/Object
                                (.. theme -mixins -toolbar)
@@ -156,7 +172,7 @@
           :variant :temporary
           :className (cs (gobj/get classes "drawerPaper"))
           :ModalProps #js {:onBackdropClick #(dispatch [:close-drawer])}
-          :PaperProps #js {:class (cs (gobj/get classes "drawerPaperProps"))}}
+          :PaperProps #js {:className (cs (gobj/get classes "drawerPaperProps"))}}
          [:div {:style {:width "280px"}}
           [:div {:class (.-toolbarIcon classes)}
            [:> mui/IconButton {:onClick #(dispatch [:toggle-drawer])}
