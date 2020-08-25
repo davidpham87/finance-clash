@@ -3,8 +3,9 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [finance-clash.db :refer (execute-query!)]
+   [datomic.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
+   [finance-clash.db :refer (execute-query!)]
    [honeysql.core :as sql]
    [honeysql.helpers :as hsql
     :refer (select where from insert-into)]
@@ -20,67 +21,47 @@
 (s/def ::difficulty spec/string?)
 
 (defn budget-tx
-  "budget transaction query"
   ([user-id]
-   (-> {:select [:*] :from [:budget_history] :where [:= :user user-id]}
-       sql/format
-       execute-query!))
-  ([user-id value]
-   (-> {:insert-into :budget_history
-        :values [{:user user-id :exchange_value value
-                  :update_at (sql/call :datetime "now" "utc")}]}
-       sql/format
-       execute-query!)))
+   (d/pull (finance-clash.db/get-db) [:user/transactions] [:user/id user-id]))
+  ([user-id {:keys [value reason]}]
+   (let [tx-data #:user{:id user-id :transactions
+                        #:user.transaction{:amount value :reason reason}}]
+     (d/transact (finance-clash.db/get-conn) [tx-data]))))
 
-(defn clear-budget-tx [user-id]
-  (-> {:delete-from  :budget_history
-       :where [:= :user user-id]}
-      sql/format
-      execute-query!))
+(defn clear-budget-tx! [user-id]
+  (let [db (finance-clash.db/get-db)
+        eids (d/pull db [{:user/transactions [:db/id]}] user-id)
+        tx-data (mapv #(vector :db/retractEntity %) eids)]
+    (d/transact (finance-clash.db/get-conn) tx-data)))
 
 (defn budget-init [user-id v]
-  (-> {:insert-into :budget
-       :values [{:user user-id :wealth (or v 100)}]}
-      sql/format
-      execute-query!))
+  (clear-budget-tx! user-id)
+  (budget-tx user-id {:value v :reason "init"}))
 
 (defn budget-init-all [v]
-  (-> {:insert-into [[:budget [:user :wealth]]
-                     {:select [:id [v :wealth]]
-                      :from [:user]}]}
-      sql/format
-      execute-query!))
-
-(defn budget-reset [user-id v]
-  (-> (hsql/update :budget)
-      (hsql/sset {:wealth v
-                  :update_at (sql/call :datetime "now" "utc")})
-      (where [:= :user user-id])
-      sql/format
-      execute-query!))
+  (let [users (d/q '[:find ?u
+                    :where
+                    [_ :user/id ?u]]
+                   (finance-clash.db/get-db))
+        tx-data (mapv (fn [u] #:user{:id u :transactions
+                                     #:user.transaction{:amount v :reason "init"}})
+                      users)]
+    (d/transact (finance-clash.db/get-conn) [tx-data])))
 
 (defn budget
   ([user-id]
-   (-> {:select [:*] :from [:budget] :where [:= :user user-id] :limit 1}
-       sql/format
-       execute-query!))
+   (transduce (map :user.transcations/amount) + 0 (budget-tx user-id)))
   ([user-id v]
-   (-> (hsql/update :budget)
-       (hsql/sset {:wealth (sql/call :+ :wealth v)
-                   :update_at (sql/call :datetime "now" "utc")})
-       (where [:= :user user-id])
-       sql/format
-       execute-query!)))
+   (let [user-budget (budget user-id)]
+     (budget-tx user-id (- v user-budget)))))
 
 (defn wealth [user-id] (budget user-id))
 
 (defn buy! [user-id v]
-  (budget-tx user-id (- v))
-  (budget user-id (- v)))
+  (budget-tx user-id (- v)))
 
 (defn earn! [user-id v]
-  (budget-tx user-id v)
-  (budget user-id v))
+  (budget-tx user-id v))
 
 ;; Compute bonus
 (defn now []
@@ -88,8 +69,9 @@
     (jt/offset-time)))
 
 (defn bonus-period?
-  "Bonus period is between 19 and 9 EU time."
-  [h] (or (< h 9) (> h 18)))
+  "Bonus period is between 19 and 9 EU time. [Depcrecated]"
+  [h] #_(or (< h 9) (> h 18))
+  false)
 
 (defn query-question [id]
   (-> {:select [:difficulty]

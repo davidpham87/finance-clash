@@ -30,7 +30,33 @@
         :isComponent true
         :doc         "Kind of user [:user.kind/professor, :user.kind/student]"}
    #:db{:ident :user.kind/professor}
-   #:db{:ident :user.kind/student}])
+   #:db{:ident :user.kind/student}]
+
+  #:db{:ident       :user/transactions
+       :valueType   :db.type/ref
+       :cardinality :db.cardinality/one
+       :isComponent true
+       :doc         "Transactions for scores"}
+
+  ;; to be redefined.
+  #:db{:ident       :user.transactions/amount
+       :valueType   :db.type/long
+       :cardinality :db.cardinality/one
+       :isComponent true
+       :doc         "Amount of transactions"}
+
+  #:db{:ident       :user.transactions/account
+       :valueType   :db.type/ref
+       :cardinality :db.cardinality/one
+       :isComponent true
+       :doc         "Which account the transactions is made on. For now, it will be the
+       lectures."}
+
+  #:db{:ident       :user.transactions/reason
+       :valueType   :db.type/string
+       :cardinality :db.cardinality/one
+       :isComponent true
+       :doc         "Comment on the transaction."})
 
 (def lecture-schema
   "A lecture is a collection of homeworks and students with a given defined
@@ -115,7 +141,7 @@
         :valueType   :db.type/ref
         :isComponent true
         :cardinality :db.cardinality/many
-        :doc "Questions of the problem set. You might want to add questions or
+        :doc         "Questions of the problem set. You might want to add questions or
         modify questions that are in the quizzes template."}
 
    #:db{:ident       :problems/shuffle?
@@ -141,7 +167,12 @@
    #:db{:ident       :transaction/answer
         :valueType   :db.type/string
         :cardinality :db.cardinality/one
-        :doc         "Answer from the user."}])
+        :doc         "Answer from the user."}
+
+   #:db{:ident       :transaction/correct?
+        :valueType   :db.type/boolean
+        :cardinality :db.cardinality/one
+        :doc         "Whether the answer has been accepted as correct or not."}])
 
 (def quiz-schema
   "Quizzes are collection of questions allowing to group questions for reuse."

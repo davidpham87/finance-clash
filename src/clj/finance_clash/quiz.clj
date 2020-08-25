@@ -139,29 +139,20 @@
        (map first)
        #_(d/pull (finance-clash.db/get-db) '[*]))
 
-  (->> (d/q '[:find ?e
+  (->> (d/q '[:find (pull ?e [*])
               :where
-              [?e :quiz/title "Key Notions"]]
+              [?e :quiz/title]]
             (finance-clash.db/get-db))
-       first
-       first
        (d/pull (finance-clash.db/get-db) '[*])))
 
 ;; REST API
 
 (defn get-all-ids []
-  (-> (select :id)
-      (from :questions)
-      (sql/format)
-      (execute-query!)))
+  (d/q '[:find ?e
+         :where
+         [?e :question/title]]
+       (finance-clash.db/get-db)))
 
-(defn init-chapters
-  "Fill chapters table."
-  []
-  (-> {:insert-into :chapters
-       :values (for [i (range 26)] {:chapter i})}
-      (sql/format)
-      (execute-query!)))
 
 ;; questions
 (s/def ::chapter spec/int?)
@@ -174,24 +165,37 @@
 (s/def ::weight spec/int?)
 
 (defn quiz-tx [question-id user-id series-id]
-  (-> (select :success) (from :quiz_attempt)
-      (where [:= :question question-id] [:= :user user-id]
-             [:= :series series-id])
-      (hsql/limit 1)
-      (sql/format)
-      (execute-query!)))
+  (let [db (finance-clash.db/get-db)]
+    (d/pull '[:find (pull ?e [*])
+              :in $ ?q ?u ?s
+              :where
+              [?s :problems/transactions ?e]
+              [?e :transaction/question ?q]
+              [?e :transaction/user ?u]]
+            db
+            question-id
+            [:user/id user-id]
+            series-id)))
 
-(defn correct-answer? [question-id user-id selected-answer]
-  (let [correct-response
-        (fn [id]
-          (-> (select :correct_response)
-              (from :questions)
-              (hsql/where [:= :id id])
-              (hsql/limit 1)
-              (sql/format)
-              (execute-query!)))]
-    (= (-> (correct-response question-id) first :correct_response)
-       selected-answer)))
+(defn correct-answer? [question-id answer]
+  (let [correct-responses
+        (->> (d/pull (finance-clash.db/get-db)
+                     '[{:question/answers [:answer/value]}]
+                    question-id)
+             :question/answers
+             (into #{} (map :answer/value)))]
+    (contains? correct-responses answer)))
+
+
+(comment
+  (d/pull (finance-clash.db/get-db)
+          '[{:question/answers [*]}]
+          17592186045665)
+
+  (correct-answer? 17592186045665 "Investment bank.")
+
+  )
+
 
 (defn attempt! [question-id user-id series success?]
   (let [tx (quiz-tx question-id user-id series)
