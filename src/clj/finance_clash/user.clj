@@ -4,7 +4,7 @@
    [clj-http.client :as client]
    [clojure.data.json :as json]
    [clojure.spec.alpha :as s]
-   [datomic.api]
+   [datomic.api :as d]
    [finance-clash.auth :as auth :refer (sign-user protected-interceptor unsign-user)]
    [finance-clash.budget :as budget]
    [finance-clash.db :refer (execute-query!)]
@@ -35,8 +35,12 @@
 (defn get-user
   "Get user by username"
   [id]
-  (-> (select :*) (from :user) (where [:= :id id]) (hsql/limit 1) sql/format
-      execute-query! first))
+  (-> (d/q '[:find (pull ?e [:user/id :user/password])
+             :in $ ?id
+             :where [?e :user/id ?id]]
+           (finance-clash.db/get-db)
+           id)
+      ffirst))
 
 (defn update-user!
   [{:keys [id] :as user-data}]
@@ -48,12 +52,16 @@
       (-> (hsql/update :user) (hsql/sset user-data) (where [:= :id id])
           sql/format execute-query! first))))
 
-(defn login-tx [user]
-  (let [full-user (get-user (:id user))]
+(defn login-tx [{:keys [id password] :as user}]
+  (let [full-user (first (get-user (:id user)))
+        full-user (when full-user
+                    (d/pull (finance-clash.db/get-db)
+                            [:user/id :user/password]
+                            full-user))]
     (if (and full-user
-             (hashers/check (:password user) (:password full-user)))
-      (-> (dissoc full-user :password)
-          (assoc :token (sign-user user)))
+             (hashers/check (:password user) (:user/password full-user)))
+      (-> (dissoc full-user :user/password)
+          (assoc :user/token (sign-user user)))
       ::unmatch-credentials)))
 
 (defn login [m]
@@ -63,28 +71,48 @@
       {:status 200 :body {:user user-tx}}
       {:status 409 :body {:message "Your username or password is not correct."}})))
 
-(defn register-tx [user]
+(defn register-tx [{:keys [id password] :as user}]
   (let [user-data (-> (select-keys user [:id :password])
                       (update :password hashers/derive {:alg :bcrypt+sha512})
-                      (assoc :username (:id user)))
-        user-already-exist? (get-user (:id user-data))
-        insert-user-query (-> (hsql/insert-into :user)
-                              (hsql/values [user-data])
-                              sql/format)]
-    (if user-already-exist?
-      nil
-      (do
-        (execute-query! insert-user-query)
-        (budget/budget-init (:id user-data) 100)
-        user-data))))
+                      (assoc :name (:id user)))
+        user-data (reduce-kv (fn [m k v] (assoc m (keyword "user" (name k)) v)) {} user-data)
+        already-exist? (get-user (:user/id user-data))]
+    (if already-exist?
+      :user/already-exists
+      {:tx-data (d/transact
+                 @finance-clash.db/conn
+                 [(-> user-data
+                      (assoc :user/transactions {:user.transactions/amount 100
+                                                 :user.transactions/reason "Initial"}))])
+       :user-data user-data})))
+
+(comment
+  (d/transact @finance-clash.db/conn
+              [{:user/id "David"
+                :user/name "David"
+                :user/password (hashers/derive "hello" {:alg :bcrypt+sha512})}])
+
+  (d/q {:find '[?e]
+        :where '[[?e :user/id "Henry"]]}
+   (finance-clash.db/get-db))
+  (get-user "Vincent")
+  (register-tx {:id "Neo" :password "Hello"})
+  (register-tx {:id "Vincent" :password "Hello"})
+
+  (register {:parameters {:body {:id "Vincent2" :password "Hello"}}})
+
+  (login-tx {:id "Neo" :password "Hello"})
+  (login-tx {:id "Vincent" :password "Hello"})
+  (login {:parameters {:body {:id "Neo" :password "Hello"}}})
+  )
 
 (defn register [m]
   (let [user (get-in m [:parameters :body])
-        user (register-tx user)]
-    (if user
+        user-data (register-tx user)]
+    (if (not= user-data :user/already-exists)
       {:status 200
        :body {:message "Register"
-              :user (-> user (dissoc :password) (assoc :token (sign-user user)))}}
+              :user (-> user-data :user-data (dissoc :password) (assoc :user/token (sign-user user)))}}
       {:status 409 :body {:message "User already exists"}})))
 
 #_(defn update-tx [user])

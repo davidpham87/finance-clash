@@ -192,9 +192,7 @@
           '[{:question/answers [*]}]
           17592186045665)
 
-  (correct-answer? 17592186045665 "Investment bank.")
-
-  )
+  (correct-answer? 17592186045665 "Investment bank."))
 
 
 (defn attempt! [question-id user-id series success?]

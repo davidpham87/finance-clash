@@ -24,39 +24,43 @@
         :unique      :db.unique/identity
         :cardinality :db.cardinality/one
         :doc         "User id"}
+   #:db{:ident       :user/password
+        :valueType   :db.type/string
+        :unique      :db.unique/identity
+        :cardinality :db.cardinality/one
+        :doc         "Hashed password"}
+
    #:db{:ident       :user/kind
         :valueType   :db.type/ref
         :cardinality :db.cardinality/one
         :isComponent true
         :doc         "Kind of user [:user.kind/professor, :user.kind/student]"}
    #:db{:ident :user.kind/professor}
-   #:db{:ident :user.kind/student}]
+   #:db{:ident :user.kind/student}
 
-  #:db{:ident       :user/transactions
-       :valueType   :db.type/ref
-       :cardinality :db.cardinality/one
-       :isComponent true
-       :doc         "Transactions for scores"}
+   #:db{:ident       :user/transactions
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/one
+        :isComponent true
+        :doc         "Transactions for scores"}
 
-  ;; to be redefined.
-  #:db{:ident       :user.transactions/amount
-       :valueType   :db.type/long
-       :cardinality :db.cardinality/one
-       :isComponent true
-       :doc         "Amount of transactions"}
+   ;; to be redefined.
+   #:db{:ident       :user.transactions/amount
+        :valueType   :db.type/long
+        :cardinality :db.cardinality/one
+        :doc         "Amount of transactions"}
 
-  #:db{:ident       :user.transactions/account
-       :valueType   :db.type/ref
-       :cardinality :db.cardinality/one
-       :isComponent true
-       :doc         "Which account the transactions is made on. For now, it will be the
+   #:db{:ident       :user.transactions/account
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/one
+        :isComponent true
+        :doc         "Which account the transactions is made on. For now, it will be the
        lectures."}
 
-  #:db{:ident       :user.transactions/reason
-       :valueType   :db.type/string
-       :cardinality :db.cardinality/one
-       :isComponent true
-       :doc         "Comment on the transaction."})
+   #:db{:ident       :user.transactions/reason
+        :valueType   :db.type/string
+        :cardinality :db.cardinality/one
+        :doc         "Comment on the transaction."}])
 
 (def lecture-schema
   "A lecture is a collection of homeworks and students with a given defined
@@ -296,6 +300,8 @@
     (d/transact connection finanche-clash-schema)
     (reset! conn connection)
     true))
+
+(defn execute-query! [& rest])
 
 (comment
 

@@ -5,13 +5,15 @@
    [clojure.string :as str]
    [datomic.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
-   [finance-clash.db :refer (execute-query!)]
+   [finance-clash.db]
    [honeysql.core :as sql]
    [honeysql.helpers :as hsql
     :refer (select where from insert-into)]
    [java-time :as jt]
    [reitit.coercion.spec]
    [spec-tools.spec :as spec]))
+
+(defn execute-query! [& rest])
 
 (def question-price {:easy 5 :medium 12 :hard 17})
 (def question-value-raw {:easy 12 :medium 28 :hard 40})
