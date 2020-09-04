@@ -40,7 +40,7 @@
 
    #:db{:ident       :user/transactions
         :valueType   :db.type/ref
-        :cardinality :db.cardinality/one
+        :cardinality :db.cardinality/many
         :isComponent true
         :doc         "Transactions for scores"}
 

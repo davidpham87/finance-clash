@@ -27,7 +27,10 @@
    (d/pull (finance-clash.db/get-db) [:user/transactions] [:user/id user-id]))
   ([user-id {:keys [value reason]}]
    (let [tx-data #:user{:id user-id :transactions
-                        #:user.transaction{:amount value :reason reason}}]
+                        #:user.transactions{:amount value :reason reason}}
+         tx-data (cond-> tx-data
+                   (nil? reason) (update-in [:user/transactions]
+                                            dissoc :user.transactions/reason))]
      (d/transact (finance-clash.db/get-conn) [tx-data]))))
 
 (defn clear-budget-tx! [user-id]
@@ -52,18 +55,18 @@
 
 (defn budget
   ([user-id]
-   (transduce (map :user.transcations/amount) + 0 (budget-tx user-id)))
+   (transduce (map :user.transactions/amount) + 0 (:user/transactions (budget-tx user-id))))
   ([user-id v]
    (let [user-budget (budget user-id)]
-     (budget-tx user-id (- v user-budget)))))
+     (budget-tx user-id {:value (- v user-budget)}))))
 
 (defn wealth [user-id] (budget user-id))
 
 (defn buy! [user-id v]
-  (budget-tx user-id (- v)))
+  (budget-tx user-id {:value (- v) :reason "buy"}))
 
 (defn earn! [user-id v]
-  (budget-tx user-id v))
+  (budget-tx user-id {:value v :reason "earn"}))
 
 ;; Compute bonus
 (defn now []
@@ -106,7 +109,7 @@
   [difficulty {:keys [priority? bonus-period?] :as modifiers}]
   (* (get question-value-raw (keyword difficulty) 0)
      (if priority? (:priority? question-bonus) 1)
-     (if bonus-period?
+     #_(if bonus-period?
        (:bonus-period? question-bonus)
        (:malus-period? question-bonus))))
 
@@ -154,6 +157,8 @@
   (buy "1" 200)
   (budget-tx "1")
   (question-id->question-value "0_0")
-
-
-  )
+  (budget-tx "neo2551" {:value 100 :reason "Initial"})
+  (transduce (map :user.transactions/amount) + 0 (:user/transactions (budget-tx "neo2551")))
+  (budget "neo2551")
+  (buy! "neo2551" 100)
+  (earn! "neo2551" 300))

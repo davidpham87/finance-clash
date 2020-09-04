@@ -10,7 +10,7 @@
    [finance-clash.db :refer (execute-query!)]
    [finance-clash.quiz :refer (latest-series)]
    [honeysql.core :as sql]
-   [honeysql.helpers :as hsql :refer (select where from)]
+   [honeysql.helpers :as hsql :refer (where)]
    [reitit.coercion.spec]
    [spec-tools.spec :as spec]))
 
@@ -20,44 +20,36 @@
 (defn username
   "Get and set username, do not create new user, if no username"
   ([id]
-   (-> (select :username) (from :user) (where [:= :id id])
-       sql/format
-       execute-query!
-       first))
+   (d/q '[:find ?n
+          :keys username
+          :args $ ?id
+          :where
+          [?e :user/id ?id]
+          [?e :user/name ?n]]
+        (finance-clash.db/get-db)
+        id))
   ([id s]
-   (-> (hsql/update :user)
-       (hsql/sset {:username s})
-       (where [:= :id id])
-       sql/format
-       execute-query!
-       first)))
+   (d/transact (finance-clash.db/conn) [{:user/id id :user/name s}])))
 
 (defn get-user
-  "Get user by username"
+  "Get user with id"
   [id]
-  (-> (d/q '[:find (pull ?e [:user/id :user/password])
-             :in $ ?id
-             :where [?e :user/id ?id]]
+  (-> (d/q '[:find (pull ?e [:user/id :db/id :user/password :user/name])
+             :in $ ?u
+             :where [?e :user/id ?u]]
            (finance-clash.db/get-db)
            id)
       ffirst))
 
 (defn update-user!
-  [{:keys [id] :as user-data}]
-  (let [user-data (if (:password user-data)
-                    (update user-data :password hashers/derive {:alg :bcrypt+sha512})
-                    (dissoc user-data :password))
-        user-data (if (:username user-data) user-data (dissoc user-data :username))]
-    (when (or (:password user-data) (:username user-data))
-      (-> (hsql/update :user) (hsql/sset user-data) (where [:= :id id])
-          sql/format execute-query! first))))
+  [{:keys [id password username]}]
+  (let [password (when password (hashers/derive password {:alg :bcrypt+sha512}))
+        user-data #:user{:id id :password password :name username}]
+    (when (or password username)
+      (d/transact (finance-clash.db/get-conn) [user-data]))))
 
 (defn login-tx [{:keys [id password] :as user}]
-  (let [full-user (first (get-user (:id user)))
-        full-user (when full-user
-                    (d/pull (finance-clash.db/get-db)
-                            [:user/id :user/password]
-                            full-user))]
+  (let [full-user (get-user (:id user))]
     (if (and full-user
              (hashers/check (:password user) (:user/password full-user)))
       (-> (dissoc full-user :user/password)
@@ -98,10 +90,13 @@
   (get-user "Vincent")
   (register-tx {:id "Neo" :password "Hello"})
   (register-tx {:id "Vincent" :password "Hello"})
-
+  (d/pull (finance-clash.db/get-db) '[*] (:db/id (get-user "David")))
   (register {:parameters {:body {:id "Vincent2" :password "Hello"}}})
 
-  (login-tx {:id "Neo" :password "Hello"})
+  (update-user! {:id "David" :password "hello" :username "Luke"})
+  (get-user "Neo")
+  (get-user "David")
+  (login-tx {:id "David" :password "what?"})
   (login-tx {:id "Vincent" :password "Hello"})
   (login {:parameters {:body {:id "Neo" :password "Hello"}}})
   )
@@ -155,26 +150,38 @@
                 :parameters {:body (s/keys :opt-un [::username ::password])}
                 :handler
                 (fn [m]
-                  (let [id (get-in m [:path-params :id])
+                  (let [token-id (:identity m)
+                        id (get-in m [:path-params :id])
                         {:keys [username password]} (get-in m [:parameters :body])]
-                    (update-user! {:id id :username username :password password})
-                    {:status 200 :body {:id id :username username}}))}}]
+                    (println token-id)
+                    (if (= token-id {:user id})
+                      (do
+                        (update-user! {:id id :username username :password password})
+                        {:status 200 :body {:id id :username username :token token-id}})
+                      {:status 403 :body {:error "Unauthorized"}})))}}]
      ["/wealth"
       {:get {:summary "Retrieve wealth of user"
              ;; :interceptors [protected-interceptor]
              :handler
-             (fn [{{user-id :id} :path-params}]
-               {:status 200
-                :body (budget/budget user-id)})}}]
+             (fn [{{user-id :id} :path-params :as m}]
+               (if (= (:identity m) {:user user-id})
+                 {:status 200
+                  :body (budget/budget user-id)}
+                 {:status 403
+                  :body {:error "Unauthorized"}}))}}]
      ["/answered-questions"
       {:get {:parameters {:query (s/keys :opt-un [::series])}
              :handler
              (fn [m]
-               (let [user-id (get-in m [:path-params :id])
+               (let [identity (get-in m [:identity])
+                     user-id (get-in m [:path-params :id])
                      series (or (get-in m [:parameters :query :series])
                                 (-> (first (execute-query! (latest-series))) :id))]
-                 {:status 200
-                  :body (answered-questions user-id series)}))}}]]]])
+                 (if (= identity {:user user-id})
+                   {:status 200
+                    :body (answered-questions user-id series)}
+                   {:status 403
+                    :body {:error "Unauthorized"}})))}}]]]])
 
 (def routes user)
 
@@ -187,7 +194,7 @@
   (-> (client/get "http://localhost:3000/spec") :body)
   (-> (client/get "http://localhost:3000/user/1/answered-questions?series=1")
       :body
-      (json/read-str :key-fn keyword))
+      #_(json/read-str :key-fn keyword))
 
   (-> (client/get "http://localhost:3000/user/neo2551/wealth"
                   {:content-tpye :json
@@ -200,10 +207,10 @@
   (budget/wealth "neo2551")
 
   (-> (client/put
-       "http://localhost:3000/user/2"
+       "http://localhost:3000/user/vincent_beck"
        {:content-type :json
         :headers {:Authorization (str "Token " token)}
-        :body (json/write-str {:username "Beck"})})
+        :body (json/write-str {:username "Pham"})})
       :body
       (json/read-str :key-fn keyword))
 
@@ -229,7 +236,7 @@
       (json/read-str :key-fn keyword))
 
   (unsign-user token)
-  (get-user "neo2551")
+  (get-user "vincent_beck")
 
   (-> (client/post
        "http://localhost:3000/user"

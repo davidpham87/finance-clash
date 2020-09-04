@@ -32,7 +32,10 @@
   :dev
   {:extra-paths ["dev/clj"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "LATEST"}}}
+   {cider/cider-nrepl    {:mvn/version "LATEST"}
+    refactor-nrepl       {:mvn/version "LATEST"}
+    nrepl/nrepl          {:mvn/version "LATEST"}
+    thheller/shadow-cljs {:mvn/version "LATEST"}}}
 
   :cljs
   {:extra-paths ["src/cljs"]
