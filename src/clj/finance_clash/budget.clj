@@ -88,7 +88,7 @@
         hours (subs s 11 13)
         minutes (subs s 14 16)]
     (jt/with-clock (jt/system-clock "Europe/Paris")
-      (->> [years qmonth days hours minutes]
+      (->> [years month days hours minutes]
            (mapv clojure.edn/read-string)
            (apply jt/offset-date-time)))))
 
@@ -113,13 +113,15 @@
 (defn ranking
   ([] (ranking 30))
   ([limit]
-   (-> {:select [:username [(sql/call :round :wealth 2) :wealth]]
-        :from [:budget]
-        :left-join [:user [:= :user.id :budget.user]]
-        :order-by [[:wealth :desc]]
-        :limit limit}
-       sql/format
-       execute-query!)))
+   (->> (d/q '[:find (pull ?u [:user/id :user/score])
+              :where
+              [?u :user/id]]
+             (finance-clash.db/get-db))
+        (map first)
+        (sort-by :user/score)
+        reverse
+        (take limit)
+        vec)))
 
 (defn question-value [difficulty] (get question-value-raw (keyword difficulty) 0))
 

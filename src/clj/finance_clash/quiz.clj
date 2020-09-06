@@ -11,18 +11,12 @@
    [datomic.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
    [finance-clash.budget :as budget]
-   [honeysql.core :as sql]
-   [honeysql.helpers :as hsql
-    :refer (select where from insert-into)]
    [java-time :as jt]
    [muuntaja.core :as mc]
    [muuntaja.format.yaml :as yaml]
    [reitit.coercion.spec]
    [finance-clash.db]
    [spec-tools.spec :as spec]))
-
-;; [finance-clash.budget :as budget]
-;; [finance-clash.db :refer (execute-query!)]
 
 ;; Import data
 ;; This should be on its own namespace ideally.
@@ -482,7 +476,6 @@
   (doseq [chapter (range (count question-files))]
     (import-question->db chapter))
 
-  (-> {:select [:*] :from [:questions]} (sql/format) (execute-query!))
 
   (def chapter 0)
   (def questions (-> (import-question chapter) (json/read-str :key-fn keyword)))

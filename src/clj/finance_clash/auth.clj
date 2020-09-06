@@ -1,8 +1,7 @@
 (ns finance-clash.auth
   (:require
-   [buddy.auth :refer [authenticated? throw-unauthorized]]
-   [buddy.sign.jwt :as jwt]
-   [clojure.pprint :refer (pprint)]))
+   [buddy.auth :refer [authenticated?]]
+   [buddy.sign.jwt :as jwt]))
 
 (def secret "mysupersecret")
 
