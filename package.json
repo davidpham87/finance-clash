@@ -10,7 +10,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/pickers": "^3.2.10",
     "create-react-class": "^15.6.3",
-    "date-fns": "^2.15.0",
+    "date-fns": "^2.16.1",
     "deepmerge": "^4.2.2",
     "highlight.js": "^9.18.3",
     "hoist-non-react-statics": "^3.3.2",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "babel-preset-expo": "^5.2.0",
-    "shadow-cljs": "^2.11.0"
+    "shadow-cljs": "^2.11.1"
   },
   "private": true
 }

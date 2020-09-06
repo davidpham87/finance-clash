@@ -161,4 +161,6 @@
   (transduce (map :user.transactions/amount) + 0 (:user/transactions (budget-tx "neo2551")))
   (budget "neo2551")
   (buy! "neo2551" 100)
-  (earn! "neo2551" 300))
+  (earn! "neo2551" 300)
+
+  )

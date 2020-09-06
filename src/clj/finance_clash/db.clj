@@ -117,7 +117,7 @@
         :doc         "Additional tags for the lecture for identifying them."}
 
    #:db{:ident       :problems/title
-        :valueType   :db.type/instant
+        :valueType   :db.type/string
         :cardinality :db.cardinality/one
         :doc         "Title of the set of problems."}
 
@@ -208,6 +208,7 @@
         :isComponent true
         :cardinality :db.cardinality/one
         :doc         "Difficulty of the question."}
+   #:db{:ident :question.difficulty/empty}
    #:db{:ident :question.difficulty/easy}
    #:db{:ident :question.difficulty/medium}
    #:db{:ident :question.difficulty/hard}
@@ -312,13 +313,14 @@
   (let [connection (d/connect datomic-uri)]
     (d/transact connection finanche-clash-schema))
 
-  (->> (d/q '[:find ?e ?attr
+  (->> (d/q '[:find (pull ?e [:db/ident {:db/valueType [:db/ident]}])
               :in $
               :where
               [?e :db/ident ?attr]]
             (d/db (d/connect datomic-uri)))
+       (map first)
        (into [])
-       (sort-by first))
+       (sort-by :db/ident))
 
   (def crux-db
     {:crux.node/topology '[crux.jdbc/topology]

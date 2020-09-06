@@ -130,8 +130,67 @@
                (format-question->db (read-questions question-files idx) chapter))]
     (d/transact (finance-clash.db/get-conn) (vec data))))
 
-(comment
+(defn question-titles []
+  (->> (d/q '[:find ?t
+              :where
+              [?e :quiz/title ?t]]
+            (finance-clash.db/get-db))
+       (map first)))
 
+(defn create-problems
+  [{:problems/keys [title kind start deadline shuffle? questions] :as m}]
+  (d/transact (finance-clash.db/get-conn)
+              [m]))
+
+(comment
+  (question-titles)
+  (defn questions [quiz-titles]
+    (->> (d/q '[:find ?e
+               :in $ [?qt ...]
+               :where
+               [?q :quiz/title ?qt]
+               [?q :quiz/questions ?e]]
+             (finance-clash.db/get-db)
+             quiz-titles)
+         (mapv first)))
+  (questions ["Key Notions" "Libor Fwd Rates"])
+  (d/pull-many (finance-clash.db/get-db) '[*]
+               (questions ["Key Notions" "Libor Fwd Rates"]))
+
+
+  (let [m #:problems{:title "First"
+                     :kind :homework
+                     :start #inst "2020-01-01"
+                     :deadline #inst "2020-12-31"
+                     :shuffle? false
+                     :questions [17592186045473
+                                 17592186046564
+                                 17592186045479
+                                 17592186047592
+                                 17592186046570
+                                 17592186045485
+                                 17592186047598
+                                 17592186046576
+                                 17592186047604
+                                 17592186046582
+                                 17592186047610
+                                 17592186046588
+                                 17592186045437
+                                 17592186046594
+                                 17592186045443
+                                 17592186046600
+                                 17592186045449
+                                 17592186046477
+                                 17592186045455
+                                 17592186046483
+                                 17592186045461
+                                 17592186046552
+                                 17592186046489
+                                 17592186045467
+                                 17592186046558
+                                 17592186046495]}]
+    (create-problems m))
+  (impot-question->db)
   (->> (d/q '[:find ?t
               :where
               [?e :quiz/title ?t]]
@@ -141,9 +200,10 @@
 
   (->> (d/q '[:find (pull ?e [*])
               :where
-              [?e :quiz/title]]
-            (finance-clash.db/get-db))
-       (d/pull (finance-clash.db/get-db) '[*])))
+              ;; [?q :quiz/title "Bourse"]
+              ;; [?q :quiz/questions ?e]
+              [?e :question/difficulty :question.difficulty/empty]]
+            (finance-clash.db/get-db))))
 
 ;; REST API
 
@@ -153,6 +213,8 @@
          [?e :question/title]]
        (finance-clash.db/get-db)))
 
+(comment
+  (get-all-ids))
 
 ;; questions
 (s/def ::chapter spec/int?)
@@ -189,10 +251,20 @@
 
 (comment
   (d/pull (finance-clash.db/get-db)
-          '[{:question/answers [*]}]
-          17592186045665)
+          '[*]
+          17592186046433)
 
-  (correct-answer? 17592186045665 "Investment bank."))
+  (d/q '[:find (pull ?e '[*])
+        :where
+        [?e :problems/title]]
+       (finance-clash.db/get-db))
+  (correct-answer? 17592186046433 "C.")
+
+
+
+  (quiz-tx "What is the worst rating?" "neo")
+
+  )
 
 
 (defn attempt! [question-id user-id series success?]

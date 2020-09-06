@@ -78,27 +78,30 @@
                                                  :user.transactions/reason "Initial"}))])
        :user-data user-data})))
 
+(defn init-users []
+  [(register-tx {:id "admin" :password "hello_finance"})
+   (register-tx {:id "neo" :password "hello"})
+   (register-tx {:id "vincent" :password "hello_finance"})])
+
 (comment
   (d/transact @finance-clash.db/conn
               [{:user/id "David"
                 :user/name "David"
                 :user/password (hashers/derive "hello" {:alg :bcrypt+sha512})}])
+  (init-users)
 
   (d/q {:find '[?e]
         :where '[[?e :user/id "Henry"]]}
    (finance-clash.db/get-db))
   (get-user "Vincent")
-  (register-tx {:id "Neo" :password "Hello"})
-  (register-tx {:id "Vincent" :password "Hello"})
-  (d/pull (finance-clash.db/get-db) '[*] (:db/id (get-user "David")))
-  (register {:parameters {:body {:id "Vincent2" :password "Hello"}}})
-
+  (d/pull (finance-clash.db/get-db) '[*] (:db/id (get-user "neo")))
   (update-user! {:id "David" :password "hello" :username "Luke"})
   (get-user "Neo")
   (get-user "David")
   (login-tx {:id "David" :password "what?"})
   (login-tx {:id "Vincent" :password "Hello"})
   (login {:parameters {:body {:id "Neo" :password "Hello"}}})
+
   )
 
 (defn register [m]
