@@ -38,11 +38,21 @@
    #:db{:ident :user.kind/professor}
    #:db{:ident :user.kind/student}
 
+   #:db{:ident       :user/score
+        :valueType   :db.type/long
+        :cardinality :db.cardinality/one
+        :doc         "Temporary fields for the first project"}
+
    #:db{:ident       :user/transactions
         :valueType   :db.type/ref
         :cardinality :db.cardinality/many
         :isComponent true
         :doc         "Transactions for scores"}
+
+   #:db{:ident       :user/score-accounts
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc         "Scores accounts"}
 
    ;; to be redefined.
    #:db{:ident       :user.transactions/amount
@@ -61,6 +71,18 @@
         :valueType   :db.type/string
         :cardinality :db.cardinality/one
         :doc         "Comment on the transaction."}])
+
+(def accounts
+  "Defines the accounts schema"
+  [#:db{:ident       :account/amount
+        :valueType   :db.type/long
+        :cardinality :db.cardinality/one
+        :isComponent true
+        :doc         "The amount of one the account"}
+   #:db{:ident       :account/lecture
+        :valueType   :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc         "To which lecture the account is stored"}])
 
 (def lecture-schema
   "A lecture is a collection of homeworks and students with a given defined

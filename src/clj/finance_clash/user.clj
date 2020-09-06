@@ -75,7 +75,8 @@
                  @finance-clash.db/conn
                  [(-> user-data
                       (assoc :user/transactions {:user.transactions/amount 100
-                                                 :user.transactions/reason "Initial"}))])
+                                                 :user.transactions/reason "Initial"}
+                             :user/score 100))])
        :user-data user-data})))
 
 (defn init-users []

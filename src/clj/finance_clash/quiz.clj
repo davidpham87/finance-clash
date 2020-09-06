@@ -352,56 +352,46 @@
 (defn available?
   "Query availability of question given their ids (chapter_number)"
   ([]
-   (let [available
-         (-> (select :*) (from :chapters) (hsql/where [:= :available true])
-             (sql/format) execute-query!)]
-     available))
+   (d/pull-many (finance-clash.db/get-db) [:problems/questions]
+                (available-series)))
   ([ids] (available? ids true))
-  ([ids v]
-   (let [v (if (nil? v) true v)
-         reset-available?
-         (-> (hsql/update :chapters) (hsql/sset {:available (not v)})
-             (where [:not-in :chapter ids]) sql/format)
-         update-query
-         (-> (hsql/update :chapters) (hsql/sset {:available v})
-             (where [:in :chapter ids]) sql/format)]
-     (execute-query! reset-available?)
-     (execute-query! update-query)
-     (zipmap ids (repeat true)))))
+  ([ids v] (available?)))
 
-(defn get-questions [chapters-ids cols]
-  (-> {:select cols
-       :from [:questions]
-       :where [:in :chapter chapters-ids]}
-      sql/format))
+(defn get-questions [series]
+  (d/q '[:find (pull ?q [*])
+         :in $ ?p
+         :where
+         [?e :problems/title ?p]
+         [?e :problems/questions ?q]]
+       (finance-clash.db/get-db)
+       series))
 
-(defn latest-series []
-  (-> {:select [:*]
-       :from [:quiz_series]
-       :order-by [[:release_date :desc]]
-       :limit 1}
-      sql/format))
+(comment (get-questions "First"))
 
-(defn reorder-priority
-  "Reorder n priority questions in front."
-  [ms priority-ids n]
-  (let [priority-ids (into #{} priority-ids)]
-    (-> (take n (filter #(priority-ids (:chapter %)) ms))
-        vec
-        (as-> qs (into qs (remove #(contains? (into #{} qs) %) ms))))))
+(defn available-series []
+  (->> (d/q '[:find ?e
+              :in $ ?now
+              :where
+              [?e :problems/deadline ?d]
+              [(< ?now ?d)]]
+            (finance-clash.db/get-db)
+            (java.util.Date.))
+       (mapv first)))
 
-(defn get-series-questions [available-ids priority-ids]
-  (binding [gen/*rnd* (java.util.Random. random-seed)]
-    (let [questions
-          (->> (get-questions available-ids [:id :chapter :difficulty])
-               execute-query!
-               gen/shuffle
-               (group-by :difficulty)
-               (reduce-kv #(assoc %1 %2
-                                  (->> (reorder-priority %3 priority-ids 5)
-                                       (mapv :id)
-                                       (take 20))) {}))]
-      (dissoc questions "empty"))))
+(comment
+  (let [deadline "2020-09-05"]
+    (-> (.. (jt/local-date-time "yyyy-MM-dd HH:mm"
+                                (str deadline " 10:00"))
+            (atZone (jt/zone-id "Europe/Paris"))
+            toInstant)
+        java.util.Date/from
+        )))
+
+(defn parse-iso-date-string [s]
+  (-> (.. (jt/local-date-time "yyyy-MM-dd HH:mm" s)
+          (atZone (jt/zone-id "Europe/Paris"))
+          toInstant)
+      java.util.Date/from))
 
 (def routes-series
   ["/series"
@@ -410,35 +400,31 @@
     {:post {:summary "Create a new series"
             :parameters {:body (s/keys :req-un [::available ::priority])}
             :handler
-            (fn [{{{:keys [available priority]} :body} :parameters}]
-              (available? available true)
-              (priority? priority true)
-              (-> (hsql/insert-into :quiz_series)
-                  (hsql/values [{:release_date (sql/call :datetime "now" "utc")}])
-                  sql/format
-                  execute-query!)
-              {:status 200 :body {:series (-> (latest-series) execute-query!
-                                              first)}})}}]
+            (fn [{{{:keys [deadline priority]} :body} :parameters}]
+              (let [m (assoc #:problems{:title "First"
+                                        :kind :homework
+                                        :start (java.util.Date.)
+                                        :deadline (parse-iso-date-string deadline)
+                                        :shuffle? true}
+                             :quizzes ["Key Notions" "Libor Fwd Rates"])]
+                (create-problems m))
+              {:status 200 :body
+               {:msg "Series created"}})}}]
    ["/:series/questions"
     {:parameters {:path (s/keys :req-un [::series])}
      :get {:summary "Get series details questions"
            :handler
-           (fn [m]
-             (let [available-ids (available?)
-                   priority-ids (filterv #(-> % (:priority 0) pos?) available-ids)
-                   questions (get-series-questions (mapv :chapter available-ids)
-                                                   (mapv :chapter priority-ids))]
-               {:status 200 :body questions}))}}]
+           (fn [m] (let [questions (available?)] {:status 200 :body questions}))}}]
    ["/latest"
     {:get {:summary "Retrieve the latest series identifier."
            :handler
-           (fn [m] {:status 200 :body {:series (execute-query! (latest-series))}})}}]])
+           (fn [m] {:status 200 :body {:series (available?)}})}}]])
 
 (defn get-chapters []
-  (-> {:select [:*]
-       :from [:chapters]}
-      (sql/format)
-      (execute-query!)))
+  (d/q '[:find (pull ?e [*])
+         :where
+         [?e :quiz/title]]
+       (finance-clash.db/get-db)))
 
 (def routes
   [routes-series

@@ -27,17 +27,22 @@
   ([user-id]
    (d/pull (finance-clash.db/get-db) [:user/transactions] [:user/id user-id]))
   ([user-id {:keys [value reason]}]
-   (let [tx-data #:user{:id user-id :transactions
+   (let [score (-> (d/pull (finance-clash.db/get-db) [:user/score] [:user/id user-id])
+                   :user/score)
+         tx-data #:user{:id user-id :transactions
                         #:user.transactions{:amount value :reason reason}}
-         tx-data (cond-> tx-data
-                   (nil? reason) (update-in [:user/transactions]
-                                            dissoc :user.transactions/reason))]
-     (d/transact (finance-clash.db/get-conn) [tx-data]))))
+         tx-data [(cond-> tx-data
+                    (nil? reason) (update-in [:user/transactions]
+                                             dissoc :user.transactions/reason))]
+         tx-data (conj tx-data [:db/add [:user/id user-id]
+                                :user/score (+ (or score 0) value)])]
+     (d/transact (finance-clash.db/get-conn) tx-data))))
 
 (defn clear-budget-tx! [user-id]
   (let [db (finance-clash.db/get-db)
         eids (d/pull db [{:user/transactions [:db/id]}] user-id)
-        tx-data (mapv #(vector :db/retractEntity %) eids)]
+        tx-data (mapv #(vector :db/retractEntity %) eids)
+        tx-data (conj tx-data {:db/id user-id :user/score 0})]
     (d/transact (finance-clash.db/get-conn) tx-data)))
 
 (defn budget-init [user-id v]
@@ -56,7 +61,8 @@
 
 (defn budget
   ([user-id]
-   (transduce (map :user.transactions/amount) + 0 (:user/transactions (budget-tx user-id))))
+   (-> (d/pull (finance-clash.db/get-db) [:user/score] [:user/id user-id])
+       :user/score))
   ([user-id v]
    (let [user-budget (budget user-id)]
      (budget-tx user-id {:value (- v user-budget)}))))
@@ -82,10 +88,9 @@
         hours (subs s 11 13)
         minutes (subs s 14 16)]
     (jt/with-clock (jt/system-clock "Europe/Paris")
-      (->> [years month days hours minutes]
+      (->> [years qmonth days hours minutes]
            (mapv clojure.edn/read-string)
            (apply jt/offset-date-time)))))
-
 
 (defn bonus-period?
   "Bonus period is between 19 and 9 EU time. [Depcrecated]"
@@ -104,14 +109,6 @@
               series-id
               question-title)
          first)))
-
-(defn chapter-priority [id]
-  (-> {:select [:priority]
-       :from [:chapters]
-       :where [:= :chapter id]
-       :limit 1}
-      sql/format
-      execute-query!))
 
 (defn ranking
   ([] (ranking 30))
@@ -140,7 +137,7 @@
 
 ;; Routes
 (def routes-buy-question
-  o[["/quiz/buy-question"
+  [["/quiz/buy-question"
     {:coercion reitit.coercion.spec/coercion
      :post
      {:interceptors [protected-interceptor]
@@ -168,10 +165,13 @@
   (buy "1" 200)
   (budget-tx "1")
   (question-id->question-value "0_0")
-  (budget-tx "neo2551" {:value 100 :reason "Initial"})
+  (budget-tx "neo" {:value 100 :reason "Initial"})
   (transduce (map :user.transactions/amount) + 0 (:user/transactions (budget-tx "neo2551")))
-  (budget "neo2551")
-  (buy! "neo2551" 100)
-  (earn! "neo2551" 300)
-
+  (wealth "neo")
+  (buy! "neo" 100)
+  (earn! "neo" 300)
+  (d/q '[:find (pull ?e [:user/id])
+         :where [?e :user/id]]
+       (finance-clash.db/get-db))
+  (d/pull (finance-clash.db/get-db) '[*] [:user/id "neo2551"])
   )
