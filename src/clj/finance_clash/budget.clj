@@ -1,6 +1,7 @@
 (ns finance-clash.budget
   "Implements budget tables and routes"
   (:require
+   [clojure.edn]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [datomic.api :as d]
@@ -71,20 +72,38 @@
 ;; Compute bonus
 (defn now []
   (jt/with-clock (jt/system-clock "Europe/Paris")
-    (jt/offset-time)))
+    (jt/offset-date-time)))
+
+(defn date->offset-datetime [date]
+  (let [s (str (.toInstant date))
+        years (subs s 0 4)
+        month (subs s 5 7)
+        days(subs s 8 10)
+        hours (subs s 11 13)
+        minutes (subs s 14 16)]
+    (jt/with-clock (jt/system-clock "Europe/Paris")
+      (->> [years month days hours minutes]
+           (mapv clojure.edn/read-string)
+           (apply jt/offset-date-time)))))
+
 
 (defn bonus-period?
   "Bonus period is between 19 and 9 EU time. [Depcrecated]"
   [h] #_(or (< h 9) (> h 18))
   false)
 
-(defn query-question [id]
-  (-> {:select [:difficulty]
-      :from [:questions]
-      :where [:= :id id]
-       :limit 1}
-      sql/format
-      execute-query!))
+(defn problems->question-id [series-id question-title]
+  (let [db (finance-clash.db/get-db)]
+    (->> (d/q '[:find [?qid]
+                :in $ ?s ?q
+                :where
+                [?p :problems/title ?s]
+                [?p :problems/questions ?qid]
+                [?qid :question/title ?q]]
+              db
+              series-id
+              question-title)
+         first)))
 
 (defn chapter-priority [id]
   (-> {:select [:priority]
@@ -105,31 +124,23 @@
        sql/format
        execute-query!)))
 
-(defn question-value
-  [difficulty {:keys [priority? bonus-period?] :as modifiers}]
-  (* (get question-value-raw (keyword difficulty) 0)
-     (if priority? (:priority? question-bonus) 1)
-     #_(if bonus-period?
-       (:bonus-period? question-bonus)
-       (:malus-period? question-bonus))))
+(defn question-value [difficulty] (get question-value-raw (keyword difficulty) 0))
 
 (defn question-id->question-value
-  [question-id]
-  (let [answer-hour (-> (now) .getHour)
-        difficulty (-> (query-question question-id) first :difficulty keyword)
-        chapter (first (clojure.string/split question-id #"_"))
-        priority? (-> (chapter-priority chapter) first (:priority 0) pos?)]
-    (question-value difficulty
-                    {:priority? priority?
-                     :bonus-period? (bonus-period? answer-hour)})))
+  [problem-title question-title]
+  (let [difficulty (->> (problems->question-id problem-title question-title)
+                        (d/pull (finance-clash.db/get-db) [:question/difficulty])
+                        :question/difficulty
+                        keyword)]
+    (question-value difficulty)))
 
-(defn earn-question-value! [user-id question-id]
-  (let [value (question-id->question-value question-id)]
+(defn earn-question-value! [user-id problem-title question-id]
+  (let [value (question-id->question-value problem-title question-id)]
     (earn! user-id value)))
 
 ;; Routes
 (def routes-buy-question
-  [["/quiz/buy-question"
+  o[["/quiz/buy-question"
     {:coercion reitit.coercion.spec/coercion
      :post
      {:interceptors [protected-interceptor]

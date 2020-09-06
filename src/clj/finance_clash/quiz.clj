@@ -10,6 +10,7 @@
    [clojure.string :as str]
    [datomic.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
+   [finance-clash.budget :as budget]
    [honeysql.core :as sql]
    [honeysql.helpers :as hsql
     :refer (select where from insert-into)]
@@ -120,7 +121,7 @@
      :quiz/questions questions}))
 
 
-(defn impot-question->db []
+(defn import-question->db []
   (let [data (for [idx (range (count question-files))
                    :let [chapter (-> (nth question-files idx)
                                      (str/replace #".yaml" "")
@@ -130,67 +131,70 @@
                (format-question->db (read-questions question-files idx) chapter))]
     (d/transact (finance-clash.db/get-conn) (vec data))))
 
-(defn question-titles []
-  (->> (d/q '[:find ?t
+(defn questions [quiz-titles]
+  (->> (d/q '[:find ?e
+              :in $ [?qt ...]
               :where
-              [?e :quiz/title ?t]]
-            (finance-clash.db/get-db))
-       (map first)))
+              [?q :quiz/title ?qt]
+              [?q :quiz/questions ?e]]
+            (finance-clash.db/get-db)
+            quiz-titles)
+       (mapv first)))
 
 (defn create-problems
-  [{:problems/keys [title kind start deadline shuffle? questions] :as m}]
-  (d/transact (finance-clash.db/get-conn)
-              [m]))
+  [{:problems/keys [title kind start deadline shuffle?]
+    :keys [quizzes] :as m}]
+  (let [questions (mapv #(hash-map :db/id %) (questions quizzes))
+        data (->> '[title kind start deadline shuffle?]
+                  (map str)
+                  (map (partial keyword "problems"))
+                  (select-keys m))]
+    (->> (assoc data :problems/questions questions)
+         vector
+         (d/transact (finance-clash.db/get-conn)))))
+
+
 
 (comment
-  (question-titles)
-  (defn questions [quiz-titles]
-    (->> (d/q '[:find ?e
-               :in $ [?qt ...]
-               :where
-               [?q :quiz/title ?qt]
-               [?q :quiz/questions ?e]]
-             (finance-clash.db/get-db)
-             quiz-titles)
-         (mapv first)))
+
+  (import-question->db)
+
   (questions ["Key Notions" "Libor Fwd Rates"])
   (d/pull-many (finance-clash.db/get-db) '[*]
                (questions ["Key Notions" "Libor Fwd Rates"]))
 
+  (->> (d/q {:find '[?q]
+            :in '[$ [[?c ?t] ...]]
+            :where
+            '[[?e :quiz/title ?c]
+              [?e :quiz/questions ?q]
+              [?q :question/title ?t]]}
+           (finance-clash.db/get-db)
+           [["Key Notions" "Quelle affirmation est correcte?"]
+            ["Key Notions" "Pour le calcul d'une valeur actualisée, le Discount Factor?"]])
+       (mapv first)
+       (d/pull-many (finance-clash.db/get-db) '[*]))
 
-  (let [m #:problems{:title "First"
-                     :kind :homework
-                     :start #inst "2020-01-01"
-                     :deadline #inst "2020-12-31"
-                     :shuffle? false
-                     :questions [17592186045473
-                                 17592186046564
-                                 17592186045479
-                                 17592186047592
-                                 17592186046570
-                                 17592186045485
-                                 17592186047598
-                                 17592186046576
-                                 17592186047604
-                                 17592186046582
-                                 17592186047610
-                                 17592186046588
-                                 17592186045437
-                                 17592186046594
-                                 17592186045443
-                                 17592186046600
-                                 17592186045449
-                                 17592186046477
-                                 17592186045455
-                                 17592186046483
-                                 17592186045461
-                                 17592186046552
-                                 17592186046489
-                                 17592186045467
-                                 17592186046558
-                                 17592186046495]}]
+  (d/pull (finance-clash.db/get-db) '[*] 17592186045428)
+
+  (let [m (assoc #:problems{:title "First"
+                            :kind :homework
+                            :start #inst "2020-01-01"
+                            :deadline #inst "2020-12-31"
+                            :shuffle? false}
+                 :quizzes ["Key Notions" "Libor Fwd Rates"])]
     (create-problems m))
-  (impot-question->db)
+
+  (d/q '[:find (pull ?e [*])
+         :where
+         [?e :problems/title "First"]]
+       (finance-clash.db/get-db))
+
+  (d/transact (finance-clash.db/get-conn)
+              [[:db/retractEntity 17592186045426]])
+
+  (import-question->db)
+
   (->> (d/q '[:find ?t
               :where
               [?e :quiz/title ?t]]
@@ -226,18 +230,33 @@
 (s/def ::series (s/or ::int spec/int? ::str spec/string?))
 (s/def ::weight spec/int?)
 
-(defn quiz-tx [question-id user-id series-id]
+(defn quiz-tx [question-title user-id problem-title]
   (let [db (finance-clash.db/get-db)]
-    (d/pull '[:find (pull ?e [*])
-              :in $ ?q ?u ?s
+    (->> (d/q '[:find ?e
+                :in $ ?q ?u ?t
+                :where
+                [?p :problems/title ?t]
+                [?p :problems/transactions ?e]
+                [?e :transaction/question ?eq]
+                [?eq :question/title ?q]
+                [?e :transaction/user ?u]]
+              db
+              question-title
+              [:user/id user-id]
+              problem-title)
+         (mapv first))))
+
+(defn problems->question-id [series-id question-title]
+  (->> (d/q '[:find [?qid]
+              :in $ ?s ?q
               :where
-              [?s :problems/transactions ?e]
-              [?e :transaction/question ?q]
-              [?e :transaction/user ?u]]
-            db
-            question-id
-            [:user/id user-id]
-            series-id)))
+              [?p :problems/title ?s]
+              [?p :problems/questions ?qid]
+              [?qid :question/title ?q]]
+            (finance-clash.db/get-db)
+            series-id
+            question-title)
+       first))
 
 (defn correct-answer? [question-id answer]
   (let [correct-responses
@@ -248,6 +267,23 @@
              (into #{} (map :answer/value)))]
     (contains? correct-responses answer)))
 
+(defn attempt! [series-title  question-title user-id user-answer success?]
+  (let [question-id (problems->question-id series-title question-title)
+        series-id (-> (d/q '[:find [?e]
+                             :in $ ?t
+                             :where [?e :problems/title ?t]]
+                           (finance-clash.db/get-db)
+                           series-title) first)
+        tx-data [{:db/id (str -1)
+                  :transaction/user [:user/id user-id]
+                  :transaction/question question-id
+                  :transaction/answer user-answer
+                  :transaction/correct? success?}
+                 {:db/id series-id
+                  :problems/title series-title
+                  :problems/transactions [(str -1)]}]]
+    (d/transact (finance-clash.db/get-conn)
+                tx-data)))
 
 (comment
   (d/pull (finance-clash.db/get-db)
@@ -255,34 +291,35 @@
           17592186046433)
 
   (d/q '[:find (pull ?e '[*])
-        :where
-        [?e :problems/title]]
+         :where
+         [?e :problems/title]]
        (finance-clash.db/get-db))
   (correct-answer? 17592186046433 "C.")
 
+  (d/q '[:find ?qid
+         :in $ ?s
+         :where
+         [?p :problems/title ?s]
+         [?p :problems/questions ?qid]
+         ;; [?qid :question/title ?q]
+         ]
+       (finance-clash.db/get-db)
+       "First")
 
+  (quiz-tx "The 'no arbitrage' principle in simple terms is?" "neo" "First")
+  (problems->question-id "First" "The 'no arbitrage' principle in simple terms is?")
+  (d/pull (finance-clash.db/get-db) '[*] 17592186046487)
 
-  (quiz-tx "What is the worst rating?" "neo")
+  (attempt! "First" "The 'no arbitrage' principle in simple terms is?" "neo" "Hello" false)
 
-  )
+  (-> (d/q '[:find [?e]
+             :in $ ?t
+             :where [?e :problems/title ?t]]
+           (finance-clash.db/get-db)
+           "First")
+      first)
 
-
-(defn attempt! [question-id user-id series success?]
-  (let [tx (quiz-tx question-id user-id series)
-        update-query
-        (-> (hsql/update :quiz_attempt)
-            (hsql/sset
-             {:success (or (pos? (-> tx first (:success 0))) success?)
-              :attempt (sql/call :+ :attempt (if (pos? (-> tx first (:success 0))) 0 1))})
-            (where [:= :question question-id] [:= :user user-id]
-                   [:= :series series]))
-        insert-query
-        (-> (hsql/insert-into :quiz_attempt)
-            (hsql/values [{:question question-id :user user-id :attempt 1
-                           :series series
-                           :success success?}]))
-        query (if (seq tx) update-query insert-query)]
-    (execute-query! (sql/format query))))
+  (d/pull (finance-clash.db/get-db) '[*] 17592186046543))
 
 (def routes-answer
   ["/answer"
@@ -293,18 +330,16 @@
      :handler
      (fn [m]
        (let [params (:parameters m)
-             {:keys [user-id selected-response series]} (:body params)
-             {:keys [chapter question]} (:path params)
-             id (str chapter "_" question)
-             tx (quiz-tx id user-id series)
-             success? (correct-answer? id user-id selected-response)]
-         #_(println success? selected-response)
-         (attempt! id user-id series success?)
-         #_(println "Success?: " success? tx (-> tx first :success))
+             {:keys [user-id selected-response series question]} (:body params)
+             tx (quiz-tx series question user-id)
+             qid (problems->question-id series question)
+             success? (correct-answer? qid user-id)]
+         (attempt! series question user-id selected-response success?)
          (when (and success? (or (empty? tx) (-> tx first :success (or 1) zero?)))
-           #_(budget/earn-question-value! user-id id))
+           (budget/earn-question-value! series question user-id))
          {:status 200
-          :body {:id id
+          :body {:question/title question
+                 :problems/title series
                  :answer-status (if success? "correct" "wrong")}}))}}])
 
 ;; Series
@@ -334,25 +369,6 @@
      (execute-query! update-query)
      (zipmap ids (repeat true)))))
 
-(defn priority?
-  "Query priority of question given their ids (chapter_number)"
-  ([]
-   (let [priority
-         (-> (select :*) (from :chapters) (sql/format) execute-query!)]
-     priority))
-  ([ids] (priority? ids true))
-  ([ids v]
-   (let [v (if (nil? v) true v)
-         reset-priority
-         (-> (hsql/update :chapters) (hsql/sset {:priority (not v)})
-             (where [:not-in :chapter ids]) sql/format)
-         new-priority
-         (-> (hsql/update :chapters) (hsql/sset {:priority v})
-             (where [:in :chapter ids]) sql/format)]
-     (execute-query! reset-priority)
-     (execute-query! new-priority)
-     (zipmap ids (repeat true)))))
-
 (defn get-questions [chapters-ids cols]
   (-> {:select cols
        :from [:questions]
@@ -376,8 +392,7 @@
 
 (defn get-series-questions [available-ids priority-ids]
   (binding [gen/*rnd* (java.util.Random. random-seed)]
-    (let [priority-filter (into #{} priority-ids)
-          questions
+    (let [questions
           (->> (get-questions available-ids [:id :chapter :difficulty])
                execute-query!
                gen/shuffle
