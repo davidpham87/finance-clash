@@ -2,11 +2,8 @@
   (:require
    [clojure.reflect :as r]
    [next.jdbc :as jdbc]
-   [honeysql.core :as sql]
-   [honeysql.helpers :as hsql]
    [finance-clash.db]))
 
-#_(clojure.use '[next.jdbc :as jdbc])
 (def ds (jdbc/get-datasource finance-clash.db/db))
 
 (defn init! []

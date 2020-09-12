@@ -5,12 +5,12 @@
    [clojure.data.json :as json]
    [clojure.spec.alpha :as s]
    [datomic.api :as d]
+   #_[datahike.api :as d]
    [finance-clash.auth :as auth :refer (sign-user protected-interceptor unsign-user)]
    [finance-clash.budget :as budget]
    [finance-clash.db :refer (execute-query!)]
    [finance-clash.quiz :refer (latest-series)]
    [honeysql.core :as sql]
-   [honeysql.helpers :as hsql :refer (where)]
    [reitit.coercion.spec]
    [spec-tools.spec :as spec]))
 
@@ -125,12 +125,28 @@
 (s/def ::id (s/and string? seq))
 (s/def ::credentials (s/keys :req-un [::id ::password]))
 
-(defn answered-questions [user-id series]
-  (-> {:select [:question]
-       :from [:quiz_attempt]
-       :where [:and [:= :series series] [:= :user user-id] [:= :success true]]}
-      sql/format
-      execute-query!))
+(defn answered-questions [user-id series-title]
+  (->> (d/q '[:find ?q ?correct
+              :in $ ?uid ?st
+              :where
+              [?u :user/id ?uid]
+              [?p :problems/title ?st]
+              [?p :problems/transactions ?t]
+              [?t :transaction/question ?q]
+              [?t :transaction/correct? ?correct]]
+            (finance-clash.db/get-db)
+            user-id
+            series-title)
+       (group-by first) ;; group-by question-id
+       (reduce-kv
+        (fn [m k v]
+          (assoc m k (reduce (fn [acc x] (or acc (second x))) false v)))
+        {})
+       (into [] (comp (filter #(= (second %) true)) (map first)))
+       (d/pull-many (finance-clash.db/get-db) [:question/title])))
+
+(comment
+  (answered-questions "neo" "First"))
 
 (def user
   [["/user" {:coercion reitit.coercion.spec/coercion
@@ -249,7 +265,7 @@
       :body
       (json/read-str :key-fn keyword))
 
-  (def reset-wealth! []
+  #_(def reset-wealth! []
     (let  [users (-> {:select [:id] :from [:user]}
                      sql/format
                      (execute-query!)

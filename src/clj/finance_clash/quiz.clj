@@ -9,13 +9,14 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [datomic.api :as d]
+   #_[datahike.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
    [finance-clash.budget :as budget]
+   [finance-clash.db]
    [java-time :as jt]
    [muuntaja.core :as mc]
    [muuntaja.format.yaml :as yaml]
    [reitit.coercion.spec]
-   [finance-clash.db]
    [spec-tools.spec :as spec]))
 
 ;; Import data
@@ -85,9 +86,9 @@
 (defn format-question->db [m chapter]
   (let [choices->answers
         (fn [choices]
-          (map-indexed
-           (fn [i s] {:db/id (str (d/tempid :answer))
-                      :answer/value (str s) :answer/position (inc i)}) choices))
+          (vec (map-indexed
+                (fn [i s] {:db/id (str (d/tempid :answer))
+                           :answer/value (str s) :answer/position (inc i)}) choices)))
         questions
         (->>
          (set/rename m {:correct-response :question/answers
@@ -170,6 +171,8 @@
        (d/pull-many (finance-clash.db/get-db) '[*]))
 
   (d/pull (finance-clash.db/get-db) '[*] 17592186045428)
+  (d/pull (finance-clash.db/get-db) '[*] 59)
+  (d/datoms (finance-clash.db/get-db) :eavt)
 
   (let [m (assoc #:problems{:title "First"
                             :kind :homework
@@ -261,7 +264,7 @@
              (into #{} (map :answer/value)))]
     (contains? correct-responses answer)))
 
-(defn attempt! [series-title  question-title user-id user-answer success?]
+(defn attempt! [series-title question-title user-id user-answer success?]
   (let [question-id (problems->question-id series-title question-title)
         series-id (-> (d/q '[:find [?e]
                              :in $ ?t
@@ -304,7 +307,7 @@
   (problems->question-id "First" "The 'no arbitrage' principle in simple terms is?")
   (d/pull (finance-clash.db/get-db) '[*] 17592186046487)
 
-  (attempt! "First" "The 'no arbitrage' principle in simple terms is?" "neo" "Hello" false)
+  (attempt! "First" "The 'no arbitrage' principle in simple terms is?" "neo" "World" true)
 
   (-> (d/q '[:find [?e]
              :in $ ?t
@@ -343,14 +346,6 @@
 (s/def ::available (s/coll-of spec/integer? :min-count 1 :distinct true))
 (s/def ::priority (s/coll-of spec/integer? :min-count 1 :distinct true))
 
-(defn available?
-  "Query availability of question given their ids (chapter_number)"
-  ([]
-   (d/pull-many (finance-clash.db/get-db) [:problems/questions]
-                (available-series)))
-  ([ids] (available? ids true))
-  ([ids v] (available?)))
-
 (defn get-questions [series]
   (d/q '[:find (pull ?q [*])
          :in $ ?p
@@ -371,6 +366,14 @@
             (finance-clash.db/get-db)
             (java.util.Date.))
        (mapv first)))
+
+(defn available?
+  "Query availability of question given their ids (chapter_number)"
+  ([]
+   (d/pull-many (finance-clash.db/get-db) [:problems/questions]
+                (available-series)))
+  ([ids] (available? ids true))
+  ([ids v] (available?)))
 
 (comment
   (let [deadline "2020-09-05"]

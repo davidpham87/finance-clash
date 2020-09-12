@@ -1,5 +1,7 @@
 (ns finance-clash.db
-  (:require [datomic.api :as d]))
+  (:require
+   [datomic.api :as d]
+   #_[datahike.api :as d]))
 
 (def tags-schema
   "Defines tags."
@@ -306,12 +308,18 @@
           :schema-flexibility :write
           :keep-history?      true})
 
-(def conn (atom (d/connect datomic-uri)))
-
+(def conn (atom nil))
 (defn get-conn [] (d/connect datomic-uri))
+(defn set-conn! [] (reset! conn (get-conn)))
+
+;; (def conn (atom nil))
+;; (defn get-conn [] (d/connect cfg))
+;; (defn set-conn! [] (reset! conn (d/connect cfg)))
 
 (defn get-db
-  ([] (get-db @conn))
+  ([]
+   (when-not @conn (set-conn!))
+   (get-db @conn))
   ([conn] (d/db conn)))
 
 (set! *print-length* 250)
@@ -324,7 +332,13 @@
     (reset! conn connection)
     true))
 
-(defn execute-query! [& rest])
+(defn init-datahike []
+  (d/delete-database cfg)
+  (d/create-database cfg)
+  (let [connection (d/connect cfg)]
+    (d/transact connection finanche-clash-schema)
+    (reset! conn connection)
+    true))
 
 (comment
 
@@ -340,6 +354,15 @@
               :where
               [?e :db/ident ?attr]]
             (d/db (d/connect datomic-uri)))
+       (map first)
+       (into [])
+       (sort-by :db/ident))
+
+  (->> (d/q '[:find (pull ?e [*])
+              :in $
+              :where
+              [?e :db/ident ?attr]]
+            (d/db (d/connect cfg)))
        (map first)
        (into [])
        (sort-by :db/ident))
