@@ -81,7 +81,7 @@
    [{:keys [db]} [_ user]] ;; user = {:img ... :username ... :bio ... :email ... :password ...}
    {:db db
     :http-xhrio {:method :put
-                 :uri (endpoint "user" (:id user))
+                 :uri (endpoint "user" (:user/id user))
                  :params (-> user (select-keys [:username :id :password]))
                  :headers (auth-header db)
                  :format (ajax/json-request-format)

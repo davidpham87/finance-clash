@@ -149,8 +149,8 @@
        :inputProps {:style {:background-color :white :padding-left 10
                             :padding-right 10}}
        :value (cond
-                (seq (:email @credentials)) (:email @credentials)
-                (seq (:id @credentials)) (:id @credentials)
+                (seq (:user/email @credentials)) (:user/email @credentials)
+                (seq (:user/id @credentials)) (:user/id @credentials)
                 :else "")
        :on-change (partial update-credentials :email)}]]))
 
@@ -163,7 +163,7 @@
     {:id "username" :name "username"
      :autoComplete "username"
      :inputComponent input-component
-     :value (or (@credentials :username) "")
+     :value (or (@credentials :username) (@credentials :user/name) "")
      :disabled @loading?
      :style {:background-color :white :padding-left 10 :padding-right 10}
      :on-change (partial update-credentials :username)}]])
@@ -347,10 +347,6 @@
           :class (cs (gobj/get classes "form"))}
    [email (assoc form-controls :disabled? (reagent/atom true))] ;; hack to disable
    [username form-controls]
-   ;; [password (assoc form-controls :required? false)]
-   ;; [:> mui/Typography {:style {:color panel-font-color}}
-   ;;  "Passwords contain at least 12 characters."]
-   ;; [confirm-password (assoc form-controls :required? false)]
    [submit-button form-controls classes "Udpate profile"]])
 
 (defn update-userprofile-form [classes]

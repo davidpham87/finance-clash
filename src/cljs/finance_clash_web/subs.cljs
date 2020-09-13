@@ -51,8 +51,8 @@
  :user-role
  :<- [:user-profile]
  (fn [user-profile _]
-   (if (:token user-profile)
-     (into #{:public :user} (mapv keyword (:roles user-profile)))
+   (if (:user/token user-profile)
+     (into #{:public :user} (mapv keyword (:user/roles user-profile)))
      #{:public})))
 
 (reg-sub

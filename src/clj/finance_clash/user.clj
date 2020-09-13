@@ -142,7 +142,7 @@
           (assoc m k (reduce (fn [acc x] (or acc (second x))) false v)))
         {})
        (into [] (comp (filter #(= (second %) true)) (map first)))
-       (d/pull-many (finance-clash.db/get-db) [:question/title])))
+       (d/pull-many (finance-clash.db/get-db) [:db/id :question/title])))
 
 (comment
   (answered-questions "neo" "First"))
@@ -178,7 +178,7 @@
                         (update-user! {:id id :username username :password password})
                         {:status 200 :body {:id id :username username :token token-id}})
                       {:status 403 :body {:error "Unauthorized"}})))}}]
-     ["/wealth"g
+     ["/wealth"
       {:get {:summary "Retrieve wealth of user"
              ;; :interceptors [protected-interceptor]
              :handler

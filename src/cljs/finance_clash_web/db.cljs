@@ -65,7 +65,12 @@
 
 (def super-users #{"admin" "neo2551"})
 
-(def empty-ds (d/empty-db {:datomic.db/id {:db/unique :db.unique/identity}}))
+(def empty-ds
+  (d/empty-db {:datomic.db/id {:db/unique :db.unique/identity}
+               :question/choices {:db/type :db.type/ref
+                                   :db/cardinality :db.cardinality/many}
+               :question/answer {:db/type :db.type/ref
+                                  :db/cardinality :db.cardinality/many}}))
 
 (def default-db
   {:active-panel :login

@@ -51,8 +51,8 @@
    ;; take 2 vals from coeffects. Ignore event vector itself.
    {:db (assoc default-db :user local-store-user) ;;
     :dispatch-n
-    (into [(when (seq local-store-user) [:set-active-panel :welcome])]
-          (mapv #(vector ::retrieve-questions %) (range 26)))}))
+    (into [(when (seq local-store-user) [:set-active-panel :welcome])])}))
+
 ;; UI
 
 (reg-event-db
@@ -203,8 +203,21 @@
 (reg-event-fx
  ::success-retrieve-answered-questions
  (fn [{db :db} [_ result]]
-   {:db (assoc db :questions-answered-data (set (mapv :question result)))}))
+   (let [data (->> (postwalk-replace {:db/id :datomic.db/id} result)
+                   (mapv #(assoc % :question/answered? true)))]
+     {:db db
+      :fx [[:dispatch [::ds-transact :questions data]]]})))
 
 (comment
   ::retrieve-questions
-  (rf/dispatch [::retrieve-series-question]))
+  (rf/dispatch [::retrieve-series-question])
+  (let [ds (-> @re-frame.db/app-db :ds :questions)]
+    #_(map vec (d/datoms ds :eavt))
+    (d/q '[:find (pull ?e [*])
+           :in $ ?did
+           :where [?e :datomic.db/id ?did]]
+         ds
+         17592186046495))
+
+
+  )

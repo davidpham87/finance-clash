@@ -1,9 +1,10 @@
 (ns finance-clash-web.quiz.events
   (:require
+   [ajax.core :as ajax]
+   [datascript.core :as d]
+   [day8.re-frame.http-fx]
    [finance-clash-web.components.timer :as timer-comp]
    [finance-clash-web.events :as core-events :refer (endpoint auth-header)]
-   [ajax.core :as ajax]
-   [day8.re-frame.http-fx]
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx)]))
 
 (defn user-id [db]
@@ -13,18 +14,18 @@
  ::select-question-phase ;; either :selection or :answering
  (fn [db [_ phase difficulty]]
    (cond-> db
-     difficulty (assoc-in [:quiz-question :difficulty] difficulty)
-     :always(assoc-in [:ui-states :question-phase] phase))))
+     difficulty (assoc-in [:quiz-question :question/difficulty] difficulty)
+     :always (assoc-in [:ui-states :question-phase] phase))))
 
 (reg-event-db
  ::reset-quiz-question
- (fn [db _]
-   (assoc db :quiz-question {})))
+ (fn [db [_ m]]
+   (assoc db :quiz-question (or m {}))))
 
 (reg-event-db
  ::set-question-quiz-id
  (fn [db [_ id]]
-   (update db :quiz-question assoc :id id)))
+   (update db :quiz-question assoc :datomic.db/id id)))
 
 (reg-event-db
  ::set-question-quiz-loading
@@ -56,14 +57,21 @@
 (reg-event-fx
  ::check-question-answer
  (fn [{db :db} [_ question-id user-answer]]
-   (let [[chapter question] (clojure.string/split question-id #"_")]
-     {:db db
+   (let [ds (get-in db [:ds :questions])
+         answers (->> (d/pull ds [:answer/position] [:datomic.db/id question-id])
+                      :answer/position
+                      (conj #{}))
+         ;; should be many in the schema
+         status (if (contains? answers user-answer) :correct :wrong)]
+     (tap> {:db answers :user user-answer :status status})
+     {:db (assoc-in db [:quiz-question :status] status)
       :http-xhrio {:method :post
-                   :uri (endpoint "quiz" chapter question "answer")
+                   :uri (endpoint "quiz" "answer")
                    :format (ajax/json-request-format)
                    :response-format (ajax/json-response-format {:keywords? true})
-                   :params {:user-id (user-id db) :selected-response user-answer
-                            :series (get-in db [:series-data :id])}
+                   :params {:user-id (user-id db)
+                            :selected-response user-answer
+                            :datomic.db/id question-id}
                    :on-success [::success-check-question-answer]
                    :on-failure [:api-request-error]}})))
 
