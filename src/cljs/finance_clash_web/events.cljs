@@ -1,24 +1,26 @@
 (ns finance-clash-web.events
   (:require
    [ajax.core :as ajax]
+   [clojure.walk :refer (postwalk-replace)]
+   [datascript.core :as d]
    [day8.re-frame.http-fx]
-   [finance-clash-web.db :refer [default-db set-user-ls remove-user-ls]]
    [finance-clash-web.components.timer]
+   [finance-clash-web.db :refer [default-db empty-ds]]
    [re-frame.core :as rf :refer
-    [reg-event-db reg-event-fx reg-fx inject-cofx trim-v after path debug]]))
+    (reg-event-db reg-event-fx reg-fx inject-cofx)]))
 
 (goog-define backend-url "http://localhost:3000")
 #_(goog-define backend-url "http://finance-clash-msiai.pro:3000")
 
 (defn user-id [db]
-  (get-in db [:user :id]))
+  (get-in db [:user :user/id]))
 
 (defn endpoint [& params]
   (clojure.string/join "/" (concat [backend-url] params)))
 
 (defn auth-header [db]
   "Get user token and format for API authorization"
-  (let [token (get-in db [:user :token])]
+  (let [token (get-in db [:user :user/token])]
     (if token
       [:Authorization (str "Token " token)]
       nil)))
@@ -31,6 +33,11 @@
          response (last event-vector)]
      {:db (update-in db [:errors request-type]
                      (fnil conj []) response)})))
+
+(reg-event-db
+ ::ds-transact
+ (fn [db [_ ds-key tx-data]]
+   (update-in db [:ds ds-key] d/db-with tx-data)))
 
 (reg-event-fx
  :clear-error
@@ -119,7 +126,7 @@
 (reg-event-fx
  ::ask-wealth
  (fn [{db :db} _]
-   (let [user-id (get-in db [:user :id])]
+   (let [user-id (get-in db [:user :user/id])]
      {:db db
       :http-xhrio {:method :get
                    :headers (auth-header db)
@@ -132,7 +139,7 @@
 (reg-event-fx
  ::success-ask-wealth
  (fn [{db :db} [_ result]]
-   {:db (assoc db :wealth (-> result first :wealth (js/Math.round)))}))
+   {:db (assoc db :wealth (-> result :wealth (js/Math.round)))}))
 
 (reg-event-fx
  ::retrieve-series-question
@@ -145,23 +152,15 @@
                  :on-failure [:api-request-error]
                  :uri (endpoint "series" "latest" "questions")}}))
 
-;; Quiz events
-
 (reg-event-fx
- ::retrieve-latest-series-id
- (fn [{db :db} _]
-   {:db db
-    :http-xhrio {:method :get
-                 :format (ajax/json-request-format)
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success [::success-retrieve-latest-series-id]
-                 :on-failure [:api-request-error]
-                 :uri (endpoint "series" "latest")}}))
-
-(reg-event-fx
- ::success-retrieve-latest-series-id
+ ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
-   {:db (assoc db :series-id (-> (first result) :id))}))
+   {:db db
+    :fx [[:dispatch [::ds-transact :questions
+                     (->> (first result) :problems/questions
+                          (postwalk-replace {:db/id :datomic.db/id}))]]]}))
+
+;; Quiz events
 
 (reg-event-fx
  ::retrieve-questions
@@ -169,13 +168,13 @@
    (let [question-files (zipmap (range) (:question-files db))
          chapter-file (get question-files chapter)]
      (if chapter-file
-       {:db db
-        :http-xhrio {:method :get
-                     :format (ajax/json-request-format)
+       {:db         db
+        :http-xhrio {:method          :get
+                     :format          (ajax/json-request-format)
                      :response-format (ajax/json-response-format {:keywords? true})
-                     :on-success [::success-retrieve-questions chapter]
-                     :on-failure [:api-request-error]
-                     :uri (str "questions/" chapter-file)}}
+                     :on-success      [::success-retrieve-questions chapter]
+                     :on-failure      [:api-request-error]
+                     :uri             (str "questions/" chapter-file)}}
        {:db db}))))
 
 (reg-event-fx
@@ -188,11 +187,6 @@
      {:db (assoc-in db [:question-data (str chapter)] result)})))
 
 (reg-event-fx
- ::success-retrieve-series-question
- (fn [{db :db} [_ result]]
-   {:db (assoc db :series-questions result)}))
-
-(reg-event-fx
  ::retrieve-answered-questions
  (fn [{db :db} _]
    (let [id (user-id db)]
@@ -200,6 +194,7 @@
       :http-xhrio {:method :get
                    :uri (endpoint "user" id "answered-questions")
                    :params {:user-id id}
+                   :headers (auth-header db)
                    :format (ajax/json-request-format)
                    :response-format (ajax/json-response-format {:keywords? true})
                    :on-success [::success-retrieve-answered-questions]
@@ -209,3 +204,7 @@
  ::success-retrieve-answered-questions
  (fn [{db :db} [_ result]]
    {:db (assoc db :questions-answered-data (set (mapv :question result)))}))
+
+(comment
+  ::retrieve-questions
+  (rf/dispatch [::retrieve-series-question]))

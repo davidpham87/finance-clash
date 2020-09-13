@@ -35,7 +35,7 @@
 
 (defn clear-budget-tx! [user-id]
   (let [db (finance-clash.db/get-db)
-        eids (d/pull db [{:user/transactions [:db/id]}] user-id)
+        eids (d/pull db [{:user/transactions [:db/id]}] [:user/id user-id])
         tx-data (mapv #(vector :db/retractEntity %) eids)
         tx-data (conj tx-data {:db/id user-id :user/score 0})]
     (d/transact (finance-clash.db/get-conn) tx-data)))

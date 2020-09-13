@@ -8,9 +8,8 @@
    #_[datahike.api :as d]
    [finance-clash.auth :as auth :refer (sign-user protected-interceptor unsign-user)]
    [finance-clash.budget :as budget]
-   [finance-clash.db :refer (execute-query!)]
+   [finance-clash.db]
    [finance-clash.quiz :refer (latest-series)]
-   [honeysql.core :as sql]
    [reitit.coercion.spec]
    [spec-tools.spec :as spec]))
 
@@ -82,6 +81,7 @@
 (defn init-users []
   [(register-tx {:id "admin" :password "hello_finance"})
    (register-tx {:id "neo" :password "hello"})
+   (register-tx {:id "neo2551" :password "hello"})
    (register-tx {:id "vincent" :password "hello_finance"})])
 
 (comment
@@ -125,18 +125,17 @@
 (s/def ::id (s/and string? seq))
 (s/def ::credentials (s/keys :req-un [::id ::password]))
 
-(defn answered-questions [user-id series-title]
+(defn answered-questions [user-id series-id]
   (->> (d/q '[:find ?q ?correct
-              :in $ ?uid ?st
+              :in $ ?uid ?p
               :where
               [?u :user/id ?uid]
-              [?p :problems/title ?st]
               [?p :problems/transactions ?t]
               [?t :transaction/question ?q]
               [?t :transaction/correct? ?correct]]
             (finance-clash.db/get-db)
             user-id
-            series-title)
+            series-id)
        (group-by first) ;; group-by question-id
        (reduce-kv
         (fn [m k v]
@@ -179,14 +178,14 @@
                         (update-user! {:id id :username username :password password})
                         {:status 200 :body {:id id :username username :token token-id}})
                       {:status 403 :body {:error "Unauthorized"}})))}}]
-     ["/wealth"
+     ["/wealth"g
       {:get {:summary "Retrieve wealth of user"
              ;; :interceptors [protected-interceptor]
              :handler
              (fn [{{user-id :id} :path-params :as m}]
                (if (= (:identity m) {:user user-id})
                  {:status 200
-                  :body (budget/budget user-id)}
+                  :body {:wealth (budget/budget user-id)}}
                  {:status 403
                   :body {:error "Unauthorized"}}))}}]
      ["/answered-questions"
@@ -196,7 +195,7 @@
                (let [identity (get-in m [:identity])
                      user-id (get-in m [:path-params :id])
                      series (or (get-in m [:parameters :query :series])
-                                (-> (first (execute-query! (latest-series))) :id))]
+                                (:db/id (latest-series)))]
                  (if (= identity {:user user-id})
                    {:status 200
                     :body (answered-questions user-id series)}
@@ -206,8 +205,9 @@
 (def routes user)
 
 (comment
-  (def token "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")
 
+  (def token "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvMjU1MSJ9.QQwCTk9aO75s62i2skKyVqSIKjZ0YHH6Ivyaysk7hkKUyQfYu0Ag29kDe-2FdQuwAxLRqtDrO_5I9GYfJRofAQ")
+  (finance-clash.auth/unsign-user token)
   (-> (client/get "http://localhost:3000") :body)
 
   (-> (client/get "http://localhost:3000/echo") :body)
@@ -223,6 +223,7 @@
       (json/read-str :key-fn keyword))
 
   (budget/budget-init "neo2551" 500)
+  (budget/budget "neo2551")
   (budget/earn! "neo2551" 500)
   (budget/wealth "neo2551")
 
@@ -264,14 +265,6 @@
         :body (json/write-str {:id "neo2558" :password "hello_world"})})
       :body
       (json/read-str :key-fn keyword))
-
-  #_(def reset-wealth! []
-    (let  [users (-> {:select [:id] :from [:user]}
-                     sql/format
-                     (execute-query!)
-                     (as-> m (mapv :id m)))])
-    (doseq [u users]
-      (budget/budget-init u 100)))
 
   (budget/ranking)
 

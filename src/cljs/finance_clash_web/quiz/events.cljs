@@ -54,23 +54,6 @@
         :dispatch [::reset-quiz-question]}))))
 
 (reg-event-fx
- ::query-latest-series
- (fn [{db :db} _]
-   {:db db
-    :http-xhrio
-    {:method :get
-     :uri (endpoint "series" "latest")
-     :format (ajax/json-request-format)
-     :response-format (ajax/json-response-format {:keywords? true})
-     :on-success [::success-query-latest-series]
-     :on-failure [:api-request-error]}}))
-
-(reg-event-fx
- ::success-query-latest-series
- (fn [{db :db} [_ result]]
-   {:db (assoc db :series-data (-> result :series first))}))
-
-(reg-event-fx
  ::check-question-answer
  (fn [{db :db} [_ question-id user-answer]]
    (let [[chapter question] (clojure.string/split question-id #"_")]

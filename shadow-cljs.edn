@@ -29,7 +29,7 @@
 
    :dev {:compiler-options
          {:closure-warnings {:global-this :off}
-          :closure-defines {}}}
+          :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
 
    :release
    {:compiler-options

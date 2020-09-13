@@ -367,6 +367,15 @@
             (java.util.Date.))
        (mapv first)))
 
+(defn latest-series []
+  (->>
+   (available-series)
+   (d/pull-many (finance-clash.db/get-db) [:db/id :problems/deadline])
+   (sort-by :problems/deadlines)
+   last
+   :db/id
+   (d/pull (finance-clash.db/get-db) '[*])))
+
 (defn available?
   "Query availability of question given their ids (chapter_number)"
   ([]

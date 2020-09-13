@@ -98,9 +98,10 @@
 
 (defn restart []
   (.stop @server)
-  (println "Hello")
+  (println "Server restarted")
   (.start @server))
 
 (comment
   (use '[clojure.tools.namespace.repl :only (refresh)])
-  (start))
+  (start)
+  (restart))

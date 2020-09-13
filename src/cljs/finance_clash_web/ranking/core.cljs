@@ -19,7 +19,7 @@
     (= i 2) "\uD83E\uDD48"
     (= i 3) "\uD83E\uDD49"
     (= i 4) "\uD83C\uDFC5"
-    (= i 5) "	\uD83C\uDF96"
+    (= i 5) "\uD83C\uDF96"
     (= i (- n 4)) "\uD83D\uDE48"
     (= i (- n 3)) "\uD83D\uDE48"
     (= i (- n 2)) "\uD83D\uDC22"
@@ -47,8 +47,8 @@
 (defn body [ranking]
   (let [n (count ranking)]
     [:> table-body
-     (for [[i {:keys [username wealth]}] (map-indexed vector ranking)]
-       ^{:key username} [rank-row (inc i) username wealth n])]))
+     (for [[i {:user/keys [id score]}] (map-indexed vector ranking)]
+       ^{:key id} [rank-row (inc i) id score n])]))
 
 (defn content []
   (let [ranking @(subscribe [::subs/ranking])]
@@ -56,7 +56,6 @@
      [:> mui/CardHeader {:title "Ranking"}]
      [:> mui/CardContent
       [:> mui/Table [header] [body ranking]]]]))
-
 
 (defn root [{:keys [classes] :as props}]
   [:main {:class (cs (gobj/get classes "content"))

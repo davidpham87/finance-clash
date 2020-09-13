@@ -1,7 +1,8 @@
 (ns finance-clash-web.db
   (:require
-   [clojure.string :as str]
    [cljs.reader]
+   [clojure.string :as str]
+   [datascript.core :as d]
    [re-frame.core :as rf :refer (reg-cofx)]))
 
 ;; TODO get this into a config file
@@ -62,7 +63,9 @@
    "10" "Obligations",
    "23" "Libor Fwd Rates"})
 
-(def super-users #{"admin"})
+(def super-users #{"admin" "neo2551"})
+
+(def empty-ds (d/empty-db {:datomic.db/id {:db/unique :db.unique/identity}}))
 
 (def default-db
   {:active-panel :login
@@ -70,6 +73,7 @@
    :credentials {}
    :question-files question-files
    :chapter-names chapter-names
+   :ds {:questions empty-ds} ;; datascript store
    :user {:id "1"} ;; data for auth
    :user-input {}
    :loading {}

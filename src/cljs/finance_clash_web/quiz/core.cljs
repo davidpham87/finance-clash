@@ -227,9 +227,7 @@
 
 (defn init-events []
   (rf/dispatch [::finance-clash-web.events/retrieve-series-question])
-  (rf/dispatch [::events/query-latest-series])
-  (rf/dispatch [::core-events/retrieve-answered-questions])
-  #_(rf/dispatch [::events/select-question-phase :selection]))
+  (rf/dispatch [::core-events/retrieve-answered-questions]))
 
 (defn root [m]
   (let [question-phase (subscribe [::subscriptions/question-phase])]

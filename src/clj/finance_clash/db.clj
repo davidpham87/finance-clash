@@ -322,7 +322,7 @@
    (get-db @conn))
   ([conn] (d/db conn)))
 
-(set! *print-length* 250)
+#_(set! *print-length* 250)
 
 (defn init []
   (d/delete-database datomic-uri)
