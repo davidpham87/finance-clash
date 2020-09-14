@@ -121,15 +121,17 @@
 (defn question-value [difficulty] (get question-value-raw (keyword difficulty) 0))
 
 (defn question-id->question-value
-  [problem-title question-title]
-  (let [difficulty (->> (problems->question-id problem-title question-title)
+  [question-id]
+  (let [difficulty (->> question-id
                         (d/pull (finance-clash.db/get-db) [:question/difficulty])
                         :question/difficulty
+                        :db/ident
+                        name
                         keyword)]
     (question-value difficulty)))
 
-(defn earn-question-value! [user-id problem-title question-id]
-  (let [value (question-id->question-value problem-title question-id)]
+(defn earn-question-value! [user-id question-id]
+  (let [value (question-id->question-value question-id)]
     (earn! user-id value)))
 
 ;; Routes

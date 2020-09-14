@@ -41,11 +41,13 @@
       ffirst))
 
 (defn update-user!
-  [{:keys [id password username]}]
+  [{:keys [id password username wealth]}]
   (let [password (when password (hashers/derive password {:alg :bcrypt+sha512}))
         user-data #:user{:id id :password password :name username}]
     (when (or password username)
-      (d/transact (finance-clash.db/get-conn) [user-data]))))
+      (d/transact (finance-clash.db/get-conn) [user-data]))
+    (when wealth
+      (budget/budget id wealth))))
 
 (defn login-tx [{:keys [id password] :as user}]
   (let [full-user (get-user (:id user))]
@@ -122,19 +124,21 @@
 (s/def ::series spec/integer?)
 (s/def ::password spec/string?)
 (s/def ::email spec/string?)
+(s/def ::wealth spec/int?)
+
 (s/def ::id (s/and string? seq))
 (s/def ::credentials (s/keys :req-un [::id ::password]))
 
 (defn answered-questions [user-id series-id]
   (->> (d/q '[:find ?q ?correct
-              :in $ ?uid ?p
+              :in $ ?u ?p
               :where
-              [?u :user/id ?uid]
               [?p :problems/transactions ?t]
               [?t :transaction/question ?q]
+              [?t :transaction/user ?u]
               [?t :transaction/correct? ?correct]]
             (finance-clash.db/get-db)
-            user-id
+            [:user/id user-id]
             series-id)
        (group-by first) ;; group-by question-id
        (reduce-kv
@@ -164,20 +168,45 @@
                 (fn [{{id :id} :path-params}]
                   {:status 200
                    :body (dissoc (get-user id) :password)})}
-          :put {:summary "Set user"
-                :interceptors [protected-interceptor]
-                :parameters {:body (s/keys :opt-un [::username ::password])}
-                :handler
-                (fn [m]
-                  (let [token-id (:identity m)
-                        id (get-in m [:path-params :id])
-                        {:keys [username password]} (get-in m [:parameters :body])]
-                    (println token-id)
-                    (if (= token-id {:user id})
-                      (do
-                        (update-user! {:id id :username username :password password})
-                        {:status 200 :body {:id id :username username :token token-id}})
-                      {:status 403 :body {:error "Unauthorized"}})))}}]
+          :put
+          {:summary "Set user"
+           :interceptors [protected-interceptor]
+           :parameters {:body (s/keys :opt-un [::username ::password ::wealth])}
+           :handler
+           (fn [m]
+             (let [token-id (:identity m)
+                   id (get-in m [:path-params :id])
+                   {:keys [username password wealth]} (get-in m [:parameters :body])]
+               (println token-id)
+               (case token-id
+                 ({:user "admin"} {:user "neo2551"})
+                 (do
+                   (update-user! {:id id :wealth wealth :password password})
+                   {:status 200 :body #:user{:id id :wealth wealth}})
+
+                 {:user id}
+                 (do
+                   (update-user! {:id id :username username :password password})
+                   {:status 200 :body #:user{:id id :name username
+                                             :token token-id}})
+                 {:status 403 :body {:error "Unauthorized"}})))}
+
+          :delete
+          {:summary "Retract users"
+           :interceptors [protected-interceptor]
+           :handler
+           (fn [m]
+             (let [token-id (:identity m)
+                   id (get-in m [:path-params :id])
+                   {:keys [username password wealth]} (get-in m [:parameters :body])]
+               (if (= token-id {:user id})
+                 (do
+                   (update-user!
+                    {:id id :username username :password password
+                     :wealth wealth})
+                   {:status 200 :body #:user{:id id :name username
+                                             :token token-id}})
+                 {:status 403 :body {:error "Unauthorized"}})))}}]
      ["/wealth"
       {:get {:summary "Retrieve wealth of user"
              ;; :interceptors [protected-interceptor]
