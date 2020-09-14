@@ -155,10 +155,13 @@
 (reg-event-fx
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
-   {:db db
-    :fx [[:dispatch [::ds-transact :questions
-                     (->> (first result) :problems/questions
-                          (postwalk-replace {:db/id :datomic.db/id}))]]]}))
+   (let [m (postwalk-replace {:db/id :datomic.db/id} (first result))]
+     (tap> m)
+     {:db db
+      :fx [[:dispatch
+            [::ds-transact :questions
+             (into [(-> m (dissoc :problems/questions)
+                        (assoc :problems/id "latest"))] (:problems/questions m))]]]})))
 
 ;; Quiz events
 

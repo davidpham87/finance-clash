@@ -149,8 +149,9 @@
        :inputProps {:style {:background-color :white :padding-left 10
                             :padding-right 10}}
        :value (cond
-                (seq (:user/email @credentials)) (:user/email @credentials)
                 (seq (:user/id @credentials)) (:user/id @credentials)
+                (seq (:user/email @credentials)) (:user/email @credentials)
+                (seq (:email @credentials)) (:email @credentials)
                 :else "")
        :on-change (partial update-credentials :email)}]]))
 

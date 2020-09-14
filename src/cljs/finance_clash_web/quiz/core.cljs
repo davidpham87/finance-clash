@@ -40,7 +40,7 @@
     (rf/dispatch [::events/timeout-question id]))
   [:div])
 
-(defn display-question-button [{:keys [answer id i previous-attempts]}]
+(defn display-question-button [{:keys [answer id i previous-attempts] :as m}]
   (let [timer-remaining @(subscribe [::timer-comp/timer-remaining :quiz])
         outer-comp (if (< (or timer-remaining 12) 11) [:> reveal-bounce] [:<>])]
     (conj outer-comp
@@ -52,10 +52,10 @@
                (rf/dispatch [::timer-comp/clear-timer :quiz])
                (rf/dispatch [::events/set-question-quiz-loading])
                (rf/dispatch [::events/append-question-quiz-attempt i])
-               (rf/dispatch [::events/check-question-answer id])
+               (rf/dispatch [::events/check-question-answer id i])
                (rf/dispatch [::events/select-question-phase :feedback]))
              :variant :outlined
-             :disabled (contains? (or previous-attempts {}) i)
+             :disabled (contains? (or previous-attempts #{}) i)
              :style {:margin-top 10 :margin-bottom 10 :width "100%"
                      :min-height 60}}
             answer]])))
@@ -87,9 +87,10 @@
                      :flex 1
                      :justify-content :space-around :align-items :stretch}}
        (for [{:answer/keys [value position] :as m} choices
-             :let [args {:answer value :id (:datomic.db/id m) :i position
+             :let [args {:answer value :id (:datomic.db/id question-map) :i position
                          :previous-attempts previous-attempts}]]
-         ^{:key position} [display-question-button args])]]]))
+         ^{:key position}
+         [display-question-button args])]]]))
 
 (defn answer-content [status]
   (case status
@@ -135,22 +136,25 @@
         data question-selected
         duration (:question/duration data 10)
         previous-attempts @(subscribe [::subscriptions/previous-attempts])]
+
     (when (seq question-selected)
       (rf/dispatch [::events/reset-quiz-question question-selected]))
-    (if data
-      (do
-        (rf/dispatch [::events/pay-question difficulty])
-        (rf/dispatch [::timer-comp/start-timer
-                      {:id :quiz :duration duration
-                       :start-time (->isoformat (ct/now))
-                       :end-time (-> (ct/now)
-                                     (ct/plus (ct/seconds duration))
-                                     ->isoformat)
-                       :remaining (+ 0 duration)}])
-        [:<>
-         [timeout (:id data)]
-         [display-question (update data :question/choices shuffle) previous-attempts]])
-      [:div "No data"])))
+
+    (fn [_]
+      (if data
+        (do
+          (rf/dispatch [::events/pay-question difficulty])
+          (rf/dispatch [::timer-comp/start-timer
+                        {:id :quiz :duration duration
+                         :start-time (->isoformat (ct/now))
+                         :end-time (-> (ct/now)
+                                       (ct/plus (ct/seconds duration))
+                                       ->isoformat)
+                         :remaining (+ 0 duration)}])
+          [:<>
+           [timeout (:datomic.db/id data)]
+           [display-question (update data :question/choices shuffle) previous-attempts]])
+        [:div "No data"]))))
 
 (defn difficulty-button
   ([v] (difficulty-button {} v))
@@ -190,6 +194,7 @@
 
 (defn difficulty-selection [questions-available]
   (let [questions-remaining? (pos? (reduce + (mapv count (vals questions-available))))]
+    (rf/dispatch [::events/reset-quiz-attempts])
     [:> mui/Card {:elevation 0 :style
                   {:margin :auto
                    :background-color "rgba(255, 255, 255, 0.95)"

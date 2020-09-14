@@ -21,5 +21,27 @@
 (reg-event-fx
  ::success-update-password
  (fn [{db :db} [_ result]]
-   (js/alert (str "Password of user " (:id result) " has been updated"))
+   (js/alert (str "Password of user " (:user/id result) " has been updated"))
+   {:db db}))
+
+(reg-event-fx
+ ::update-wealth
+ (fn [{db :db} [_ user-id wealth]]
+   (println user-id wealth)
+   {:db db
+    :http-xhrio
+    {:method :put
+     :headers (auth-header db)
+     :uri (endpoint "user" user-id)
+     :params {:wealth wealth}
+     :format (ajax/json-request-format)
+     :response-format (ajax/json-response-format {:keywords? true})
+     :on-success [::success-update-wealth]
+     :on-failure [:api-request-error]}}))
+
+(reg-event-fx
+ ::success-update-wealth
+ (fn [{db :db} [_ result]]
+   (println result)
+   (js/alert (str "Wealth of user " (:user/id result) " has been updated"))
    {:db db}))

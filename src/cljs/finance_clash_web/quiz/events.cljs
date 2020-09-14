@@ -8,7 +8,7 @@
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx)]))
 
 (defn user-id [db]
-  (get-in db [:user :id]))
+  (get-in db [:user :user/id]))
 
 (reg-event-db
  ::select-question-phase ;; either :selection or :answering
@@ -20,7 +20,12 @@
 (reg-event-db
  ::reset-quiz-question
  (fn [db [_ m]]
-   (assoc db :quiz-question (or m {}))))
+   (update db :quiz-question merge (or m {}))))
+
+(reg-event-db
+ ::reset-quiz-attempts
+ (fn [db [_ m]]
+   (update db :quiz-question merge {:question/attempts #{}})))
 
 (reg-event-db
  ::set-question-quiz-id
@@ -35,7 +40,7 @@
 (reg-event-db
  ::append-question-quiz-attempt
  (fn [db [_ choice]]
-   (update-in db [:quiz-question :attempt] (fnil conj #{}) choice)))
+   (update-in db [:quiz-question :question/attempts] (fnil conj #{}) choice)))
 
 (reg-event-fx
  ::update-available-questions
@@ -58,22 +63,34 @@
  ::check-question-answer
  (fn [{db :db} [_ question-id user-answer]]
    (let [ds (get-in db [:ds :questions])
-         answers (->> (d/pull ds [:answer/position] [:datomic.db/id question-id])
-                      :answer/position
-                      (conj #{}))
+         series-id (first (d/q '[:find [?id]
+                                 :where
+                                 [?s :datomic.db/id ?id]
+                                 [?s :problems/id]] ds))
+         answers (->> (d/pull ds [:question/answers] [:datomic.db/id question-id])
+                      :question/answers
+                      (map :answer/position)
+                      (into #{}))
          ;; should be many in the schema
          status (if (contains? answers user-answer) :correct :wrong)]
-     (tap> {:db answers :user user-answer :status status})
-     {:db (assoc-in db [:quiz-question :status] status)
-      :http-xhrio {:method :post
-                   :uri (endpoint "quiz" "answer")
-                   :format (ajax/json-request-format)
-                   :response-format (ajax/json-response-format {:keywords? true})
-                   :params {:user-id (user-id db)
-                            :selected-response user-answer
-                            :datomic.db/id question-id}
-                   :on-success [::success-check-question-answer]
-                   :on-failure [:api-request-error]}})))
+     (cond->
+         {:db (assoc-in db [:quiz-question :status] status)
+          :http-xhrio {:method :post
+                       :uri (endpoint "quiz" "answer")
+                       :headers (auth-header db)
+                       :format (ajax/json-request-format)
+                       :response-format (ajax/json-response-format {:keywords? true})
+                       :params {:user-id (user-id db)
+                                :selected-response user-answer
+                                :question question-id
+                                :series series-id}
+                       :on-success [::success-check-question-answer]
+                       :on-failure [:api-request-error]}}
+
+       (= :correct status)
+       (assoc :dispatch
+              [::core-events/ds-transact :questions
+               [{:datomic.db/id question-id :question/answered? true}]])))))
 
 (reg-event-fx
  ::success-check-question-answer

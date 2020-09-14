@@ -94,7 +94,7 @@
 (reg-sub
  :super-user?
  (fn [db _]
-   (let [id (get-in db [:user :id])
+   (let [id (get-in db [:user :user/id])
          super-users (:super-users db)]
      (contains? super-users id))))
 
@@ -113,3 +113,8 @@
      (>= width 960) :md
      (>= width 600) :sm
      :else :xs)))
+
+(comment
+  @(rf/subscribe [:super-user?])
+  (contains? (get-in @re-frame.db/app-db [:super-users]) (get-in @re-frame.db/app-db [:user :user/id]))
+  )

@@ -80,7 +80,7 @@
 (reg-sub
  ::previous-attempts
  :<- [::quiz-question]
- (fn [m] (:attempt m {})))
+ (fn [m] (:question/attempts m {})))
 
 (comment
   @(rf/subscribe [::series-questions])
