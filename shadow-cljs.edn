@@ -32,7 +32,7 @@
           :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
 
    :release
-   {:output-dir "output/finance-clash"
+   {:output-dir "output/finance-clash/js"
     :compiler-options
     {:infer-externs :auto
      :optimizations :advanced
