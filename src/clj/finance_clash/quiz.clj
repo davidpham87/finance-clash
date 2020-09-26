@@ -1,15 +1,17 @@
 (ns finance-clash.quiz
   (:require
+   #_[datahike.api :as d]
    [clj-http.client :as client]
    [clojure.data.generators :as gen]
    [clojure.data.json :as json]
+   [clojure.edn :refer (read-string)]
    [clojure.java.io]
    [clojure.pprint :refer (pprint)]
    [clojure.set :as set :refer (rename-keys)]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
+   [clojure.walk :refer (postwalk-replace)]
    [datomic.api :as d]
-   #_[datahike.api :as d]
    [finance-clash.auth :refer (protected-interceptor)]
    [finance-clash.budget :as budget]
    [finance-clash.db]
@@ -159,6 +161,7 @@
 (s/def ::selected-response spec/int?)
 (s/def ::series (s/or ::int spec/int? ::str spec/string?))
 (s/def ::weight spec/int?)
+(s/def ::tx-data spec/coll?)
 
 (defn quiz-tx [problem-id question-id user-id ]
   (let [db (finance-clash.db/get-db)]
@@ -332,21 +335,28 @@
     routes-answer]
    ["/quiz/chapters"
     {:get {:summary "Return the chapters table"
-           :handler (fn [m] {:status 200 :body (mapv first (get-chapters))})}}
-    {:post {:summary "Return the chapters table"
+           :handler (fn [m] {:status 200 :body (mapv first (get-chapters))})}
+     :post {:summary "Return the chapters table"
+            :coercion reitit.coercion.spec/coercion
             :interceptor [protected-interceptor]
             :parameters {:body (s/keys :req-un [::tx-data])}
             :handler
             (fn [m]
               (let [token-id (:identity m)
-                    {{:keys [tx-data] :body} :parameters} m]
-                (if (#{{{:user "admin"} } {:user "neo2551"}} token-id)
+                    {:keys [tx-data]} (get-in m [:parameters :body])
+                    tx-data (postwalk-replace
+                             {:value :answer/value :id :db/id :position :answer/position
+                              :answers :question/answers
+                              :retract :db/retract
+                              "retract" :db/retract
+                              "answers" :question/answers}
+                             tx-data)]
+                (println tx-data)
+                (if (#{{:user "admin"} {:user "neo2551"}} token-id)
                   (do
                     (update-question! tx-data)
                     {:status 200 :body {:message "Saved result"}})
-                  {:status 403 :body {:message "Unauthorized"}}))
-              )}}
-    ]])
+                  {:status 403 :body {:message "Unauthorized"}})))}}]])
 
 
 (comment
@@ -527,9 +537,18 @@
   (doseq [chapter (range (count question-files))]
     (import-question->db chapter))
 
+  (d/q '[:find (pull ?e [:quiz/title :db/id])
+         :where
+         [?e :quiz/title]]
+       (finance-clash.db/get-db))
+  (d/pull (finance-clash.db/get-db) '[*] 17592186045684)
+  (d/transact (finance-clash.db/get-conn) [[:db/retract 17592186045684
+                                          :question/answers 17592186045688]])
   (get-chapters)
   (def chapter 0)
   (def questions (-> (import-question chapter) (json/read-str :key-fn keyword)))
+
+
 
   (let [{:keys [a b]} {:a 2 :b 2}]
     (println a b))

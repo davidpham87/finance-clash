@@ -19,8 +19,8 @@
 
 (reg-event-fx
  ::stage-modification
- (fn [{db :db} [_ m]]
-   {:db (update db ::staging (fnil conj []) m)}))
+ (fn [{db :db} [_ xs]]
+   {:db (update db ::staging (fnil into []) xs)}))
 
 (reg-event-fx
  ::reset-staging
@@ -34,11 +34,16 @@
                       (group-by :db/id)
                       (reduce-kv (fn [m k v] (assoc m k (apply merge v))) {})
                       vals
-                      vec)]
+                      vec)
+         retracts (filter #(= (:kind %) :retract) tx-data)
+         tx-data (remove #(= (:kind %) :retract) tx-data)
+         tx-data-ds (concat (mapcat :web retracts) tx-data)
+         tx-data-db (concat (mapcat :datomic retracts) tx-data)]
+     (println (mapcat :datomic retracts))
      {:db db
       :fx [[:dispatch [::reset-staging]]
-           [:dispatch [::ds-transact :questions tx-data]]
-           [:dispatch [::finance-clash-web.events/commit-change-db tx-data]]]})))
+           [:dispatch [::finance-clash-web.events/ds-transact :chapters tx-data-ds]]
+           [:dispatch [::finance-clash-web.events/commit-change-db tx-data-db]]]})))
 
 (reg-sub
  ::chapters-choices
@@ -81,6 +86,15 @@
      (->> (d/pull ds '[{:question/choices [*]}] db-id)
           :question/choices
           (sort-by :answer/position)))))
+
+(reg-sub
+ ::question-data
+ :<- [::ds :chapters]
+ :<- [:user-input-field ::question]
+ (fn [[ds db-id]]
+   (when db-id
+     (d/pull ds '[:db/id :datomic.db/id {:question/answers [*]}]
+             db-id))))
 
 (reg-sub
  ::chapter-question-answer
@@ -149,7 +163,7 @@
               :multiline true
               :rows 2
               :label (str "Answer No. "(:answer/position c))
-              :on-blur #(rf/dispatch [::stage-modification (assoc c :answer/value @local-value)])
+              :on-blur #(rf/dispatch [::stage-modification [(assoc c :answer/value @local-value)]])
               :on-change
               #(do (swap! changed? conj (:db/id c))
                    (reset! local-value (.. % -target -value)))}]])]))))
@@ -158,8 +172,10 @@
 (defn correct-answer []
   (let [choices (subscribe [::chapter-question-choices])
         question (subscribe [:user-input-field ::question])
-        question-answer (subscribe [::chapter-question-answer])]
+        question-answer (subscribe [::chapter-question-answer])
+        question-data (subscribe [::question-data])]
     (fn []
+
       (when @question
         (rf/dispatch [::reset-staging]))
       (when @question-answer
@@ -178,27 +194,43 @@
                 :on-change
                 (fn [event]
                   (let [idx (.. event -target -value)
-                        c (first (drop-while #(not= idx :answer/position %) @choices))]
+                        c (first (drop-while #(not= idx (:answer/position %)) @choices))]
                     (rf/dispatch
                      [::stage-modification
-                      (merge @question-answer
-                             (select-keys c [:answer/position :answer/value]))]))
+                      [{:kind :retract
+                        :web
+                        (vec
+                         (for [x (:question/answers @question-data)]
+                           [:db/retract (:db/id @question-data) :question/answers (:db/id x)]))
+                        :datomic
+                        (vec
+                         (for [x (:question/answers @question-data)]
+                           [:db/retract (:datomic.db/id @question-data)
+                            :question/answers (:datomic.db/id x)]))}
+                       (assoc @question-data :question/answers [(select-keys c [:datomic.db/id])])]]))
                   (rf/dispatch (conj [:set-user-input ::answer] (.. event -target -value))))
                 :subscription-vector [:user-input-field ::answer]}]])))
 
 (defn submit-button []
-  [:> mui/Button {:on-click #(rf/dispatch [::commit-change])} "Submit"])
+  [:> mui/Button {:color :primary
+                  :variant :contained
+                  :style {:margin-top 20 :margin-bottom 20}
+                  :on-click #(rf/dispatch [::commit-change])} "Submit"])
 
 (defn content []
   [:> mui/Grid {:container true :spacing 4 :justify :space-around}
    [:> mui/Card {:style {:min-width "80vw" :margin 10}}
     [:> mui/CardHeader {:title "Reworks questions"}]
-    [:> mui/CardContent
+    [:> mui/CardContent {:style {:padding 20}}
      [select-chapters]
      [:div {:style {:margin-top 20}} ""]
      [select-questions]
      [questions-solutions]
-     [correct-answer]
+     [correct-answer]]
+    [:> mui/CardActions {:style {:display :flex :width "100%"
+                                 :justify-content :flex-end
+                                 :padding-right 20}}
+
      [submit-button]]]])
 
 

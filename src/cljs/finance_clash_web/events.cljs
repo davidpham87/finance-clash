@@ -38,7 +38,7 @@
 (reg-event-db
  ::ds-transact
  (fn [db [_ ds-key tx-data]]
-   (update-in db [:ds ds-key] d/db-with tx-data)))
+   (update-in db [:ds ds-key] (fnil d/db-with empty-ds) tx-data)))
 
 (reg-event-fx
  :clear-error
@@ -223,9 +223,14 @@
 (reg-event-fx
  ::commit-change-db
  (fn [{db :db} [_ tx-data]]
-   (let [tx-data (mapv #(-> % (assoc :db/id (:datomic.db/id %))
-                            (dissoc :datomic.db/id %))
-                       tx-data)]
+   (let [tx-data (postwalk-replace
+                  (fn [m]
+                    (if (map? m)
+                      (-> m
+                          (assoc :db/id (:datomic.db/id m))
+                          (dissoc :datomic.db/id))
+                      m)) tx-data)]
+     (println tx-data)
      {:db db
       :http-xhrio {:method :post
                    :uri (endpoint "quiz" "chapters")
@@ -233,12 +238,13 @@
                    :headers (auth-header db)
                    :format (ajax/json-request-format)
                    :response-format (ajax/json-response-format {:keywords? true})
-                   :on-success [::success-retrieve-answered-questions]
+                   :on-success [::success-commit-change-db]
                    :on-failure [:api-request-error]}})))
 
 (reg-event-fx
  ::success-commit-change-db
- (fn [{db :db} [_ tx-data]]
+ (fn [{db :db} [_ results]]
+   (println results)
    (js/alert "Saved data")
    {:db db}))
 
