@@ -25,7 +25,6 @@
   (.log js/console "Hello I know it")
   (mount-app))
 
-
 (comment
   (mount-app)
   )

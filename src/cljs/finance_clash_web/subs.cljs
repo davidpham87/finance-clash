@@ -14,7 +14,6 @@
  (fn [active-panel _]
    (get panels-label active-panel active-panel)))
 
-
 (reg-sub
  :panel-props-all
  (fn [db _] (get db :panel-props {})))
@@ -73,6 +72,11 @@
 (reg-sub
  :user-input
  (fn [db _] (db :user-input)))
+
+(reg-sub
+ :user-input-field
+ :<- [:user-input]
+ (fn [m [_ k]] (get m k)))
 
 (reg-sub
  :data

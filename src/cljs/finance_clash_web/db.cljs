@@ -67,9 +67,13 @@
 
 (def empty-ds
   (d/empty-db {:datomic.db/id {:db/unique :db.unique/identity}
+               :quiz/questions {:db/type :db.type/ref
+                                :db/cardinality :db.cardinality/many}
                :question/choices {:db/type :db.type/ref
-                                   :db/cardinality :db.cardinality/many}
-               :question/answer {:db/type :db.type/ref
+                                  :db/cardinality :db.cardinality/many}
+               :question/tags {:db/type :db.type/ref
+                               :db/cardinality :db.cardinality/many}
+               :question/answers {:db/type :db.type/ref
                                   :db/cardinality :db.cardinality/many}}))
 
 (def default-db
@@ -78,7 +82,8 @@
    :credentials {}
    :question-files question-files
    :chapter-names chapter-names
-   :ds {:questions empty-ds} ;; datascript store
+   :ds {:questions empty-ds
+        :chapters empty-ds} ;; datascript store
    :user {:id "1"} ;; data for auth
    :user-input {}
    :loading {}

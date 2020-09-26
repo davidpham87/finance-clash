@@ -114,6 +114,9 @@
                (format-question->db (read-questions question-files idx) chapter))]
     (d/transact (finance-clash.db/get-conn) (vec data))))
 
+(defn update-question! [tx-data]
+  (d/transact (finance-clash.db/get-conn) tx-data))
+
 (defn questions [quiz-titles]
   (->> (d/q '[:find ?e
               :in $ [?qt ...]
@@ -328,8 +331,22 @@
     {:coercion reitit.coercion.spec/coercion}
     routes-answer]
    ["/quiz/chapters"
-    {:get {:sumamry "Return the chapters table"
-           :handler (fn [m] {:status 200 :body (get-chapters)})}}]])
+    {:get {:summary "Return the chapters table"
+           :handler (fn [m] {:status 200 :body (mapv first (get-chapters))})}}
+    {:post {:summary "Return the chapters table"
+            :interceptor [protected-interceptor]
+            :parameters {:body (s/keys :req-un [::tx-data])}
+            :handler
+            (fn [m]
+              (let [token-id (:identity m)
+                    {{:keys [tx-data] :body} :parameters} m]
+                (if (#{{{:user "admin"} } {:user "neo2551"}} token-id)
+                  (do
+                    (update-question! tx-data)
+                    {:status 200 :body {:message "Saved result"}})
+                  {:status 403 :body {:message "Unauthorized"}}))
+              )}}
+    ]])
 
 
 (comment
@@ -510,7 +527,7 @@
   (doseq [chapter (range (count question-files))]
     (import-question->db chapter))
 
-
+  (get-chapters)
   (def chapter 0)
   (def questions (-> (import-question chapter) (json/read-str :key-fn keyword)))
 

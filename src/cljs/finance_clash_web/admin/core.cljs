@@ -2,6 +2,7 @@
   (:require
    ["@material-ui/core" :as mui]
    [finance-clash-web.admin.events :as events]
+   [finance-clash-web.admin.edit-question]
    [finance-clash-web.components.mui-utils :refer
     (cs with-styles text-field panel-style)]
    [goog.object :as gobj]
@@ -52,12 +53,35 @@
          :on-click #(dispatch [::events/update-wealth @username @amount])}
         "Reset wealth"]])))
 
+(defn delete-player []
+  (let [username (reagent/atom "")]
+    (fn []
+      [:<>
+       [:> mui/Grid {:container true :justify :space-between
+                     :align-items :center :spacing 4}
+        [:> mui/Grid {:item true :xs 12 :sm 6}
+         [text-field {:value @username
+                      :fullWidth true
+                      :label "User id"
+                      :on-change #(reset! username (.. % -target -value))}]]
+        [:> mui/Grid {:item true :xs 12 :sm 6}
+         [:> mui/Button
+          {:color :primary :variant :contained :style {:margin-top 20
+                                                       :margin-bottom 20}
+           :on-click #(dispatch [::events/delete-player @username])}
+          "Delete player"]]]])))
+
 (defn content []
-  [:> mui/Card {:style {:min-width "50vw"}}
-   [:> mui/CardHeader {:title "Reset Password"}]
-   [:> mui/CardContent
-    [reset-password]
-    [reset-wealth]]])
+  [:> mui/Grid {:container true :spacing 4 :justify :space-around}
+   (for [[label comp]
+         [["Reset Password" reset-password]
+          ["Reset Wealth" reset-wealth]
+          ["Delete player" delete-player]]]
+     ^{:key label}
+     [:> mui/Card {:style {:min-width "50vw" :margin 10}}
+      [:> mui/CardHeader {:title label}]
+      [:> mui/CardContent
+       [comp]]])])
 
 (defn root [{:keys [classes] :as props}]
   [:main {:class (cs (gobj/get classes "content"))
@@ -73,7 +97,6 @@
     [:> mui/Fade {:in true :timeout 1000}
      [:div {:style {:margin :auto}}
       [content]]]]])
-
 
 (defn root-panel [props]
   [:> (with-styles [panel-style] root) props])

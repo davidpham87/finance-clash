@@ -3,6 +3,7 @@
    ["@material-ui/core" :as mui]
    ["react" :as react]
    [finance-clash-web.admin.core :rename {root-panel admin-panel}]
+   [finance-clash-web.admin.edit-question]
    [finance-clash-web.chapter-selection.core :rename {root-panel chapter-selection-panel}]
    [finance-clash-web.components.app-bar :refer (app-bar)]
    [finance-clash-web.components.drawer :refer (drawer)]
@@ -28,6 +29,9 @@
 
 (defmethod active-panel :admin [_]
   [admin-panel])
+
+(defmethod active-panel :rework [_]
+  [finance-clash-web.admin.edit-question/root])
 
 
 (defn app []

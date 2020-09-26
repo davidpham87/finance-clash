@@ -49,6 +49,9 @@
     (when wealth
       (budget/budget id wealth))))
 
+(defn delete-user! [{:keys [id]}]
+  (d/transact (finance-clash.db/get-conn) [[:db/retractEntity [:user/id id]]]))
+
 (defn login-tx [{:keys [id password] :as user}]
   (let [full-user (get-user (:id user))]
     (if (and full-user
@@ -115,6 +118,8 @@
        :body {:message "Register"
               :user (-> user-data :user-data (dissoc :password) (assoc :user/token (sign-user user)))}}
       {:status 409 :body {:message "User already exists"}})))
+
+
 
 #_(defn update-tx [user])
 
@@ -189,24 +194,23 @@
                    (update-user! {:id id :username username :password password})
                    {:status 200 :body #:user{:id id :name username
                                              :token token-id}})
-                 {:status 403 :body {:error "Unauthorized"}})))}
-
-          :delete
-          {:summary "Retract users"
-           :interceptors [protected-interceptor]
-           :handler
-           (fn [m]
-             (let [token-id (:identity m)
-                   id (get-in m [:path-params :id])
-                   {:keys [username password wealth]} (get-in m [:parameters :body])]
-               (if (= token-id {:user id})
-                 (do
-                   (update-user!
-                    {:id id :username username :password password
-                     :wealth wealth})
-                   {:status 200 :body #:user{:id id :name username
-                                             :token token-id}})
                  {:status 403 :body {:error "Unauthorized"}})))}}]
+     ["/delete"
+      {:post
+       {:summary "Retract users"
+        :interceptors [protected-interceptor]
+        :handler
+        (fn [m]
+          (let [token-id (:identity m)
+                id (get-in m [:path-params :id])
+                {:keys [username password wealth]} (get-in m [:parameters :body])]
+
+            (case token-id
+              ({:user "admin"} {:user "neo2551"})
+              (do
+                (delete-user! {:id id})
+                {:status 200 :body #:user{:id id :msg "User deleted"}})
+              {:status 403 :body {:error "Unauthorized"}})))}}]
      ["/wealth"
       {:get {:summary "Retrieve wealth of user"
              ;; :interceptors [protected-interceptor]
@@ -296,15 +300,22 @@
       (json/read-str :key-fn keyword))
 
   (budget/ranking)
-
   (budget/earn "1" 100)
+
+  (let [db (finance-clash.db/get-db)]
+    (->> (d/q {:find '[?e]
+              :where '[[?e :user/id]]}
+              db)
+         (map first)
+         (d/pull-many db '[:user/name :user/id])))
+
   (username "1")
   (username "2")
   (username "2" "Vincent")
   (username "3")
   (username "3" "")
   (get-user "admin")
-
+  (register-tx {:id "test2" :password "test_finance"})
   #_(register-tx {:id "admin" :password "welcome_finance"})
   (doseq [chapter (range 4)]
     (convert-question chapter)))

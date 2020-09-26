@@ -1,7 +1,8 @@
 (ns finance-clash-web.events
   (:require
    [ajax.core :as ajax]
-   [clojure.walk :refer (postwalk-replace)]
+   [clojure.walk :refer (postwalk-replace postwalk)]
+
    [datascript.core :as d]
    [day8.re-frame.http-fx]
    [finance-clash-web.components.timer]
@@ -166,19 +167,22 @@
 ;; Quiz events
 
 (reg-event-fx
- ::retrieve-questions
- (fn [{db :db} [_ chapter]]
-   (let [question-files (zipmap (range) (:question-files db))
-         chapter-file (get question-files chapter)]
-     (if chapter-file
-       {:db         db
-        :http-xhrio {:method          :get
-                     :format          (ajax/json-request-format)
-                     :response-format (ajax/json-response-format {:keywords? true})
-                     :on-success      [::success-retrieve-questions chapter]
-                     :on-failure      [:api-request-error]
-                     :uri             (str "questions/" chapter-file)}}
-       {:db db}))))
+ ::retrieve-chapters
+ (fn [{db :db} _]
+   {:db         db
+    :http-xhrio {:method          :get
+                 :format          (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      [::success-retrieve-chapters]
+                 :on-failure      [:api-request-error]
+                 :uri             (endpoint "quiz" "chapters")}}))
+
+(reg-event-fx
+ ::success-retrieve-chapters
+ (fn [{db :db} [_ results]]
+   (let [data (postwalk-replace {:db/id :datomic.db/id} results)]
+     {:db db
+      :fx [[:dispatch [::ds-transact :chapters data]]]})))
 
 (reg-event-fx
  ::success-retrieve-questions
@@ -211,6 +215,33 @@
      {:db db
       :fx [[:dispatch [::ds-transact :questions data]]]})))
 
+(reg-event-db
+ :set-user-input
+ (fn [db [_ k v]]
+   (assoc-in db [:user-input k] v)))
+
+(reg-event-fx
+ ::commit-change-db
+ (fn [{db :db} [_ tx-data]]
+   (let [tx-data (mapv #(-> % (assoc :db/id (:datomic.db/id %))
+                            (dissoc :datomic.db/id %))
+                       tx-data)]
+     {:db db
+      :http-xhrio {:method :post
+                   :uri (endpoint "quiz" "chapters")
+                   :params {:tx-data tx-data}
+                   :headers (auth-header db)
+                   :format (ajax/json-request-format)
+                   :response-format (ajax/json-response-format {:keywords? true})
+                   :on-success [::success-retrieve-answered-questions]
+                   :on-failure [:api-request-error]}})))
+
+(reg-event-fx
+ ::success-commit-change-db
+ (fn [{db :db} [_ tx-data]]
+   (js/alert "Saved data")
+   {:db db}))
+
 (comment
   ::retrieve-questions
   (rf/dispatch [::retrieve-series-question])
@@ -222,5 +253,5 @@
          ds
          17592186046495))
 
-
+  (rf/dispatch [::retrieve-chapters])
   )

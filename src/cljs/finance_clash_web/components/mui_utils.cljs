@@ -50,18 +50,23 @@
       [:> mui-tooltip {:title text :placement :bottom-start} list-item]
       list-item)))
 
-(defn select [{:keys [choices event-vector subscription-vector disabled?]
-               :or {disabled? false} :as m}]
+(defn select [{:keys [subscription-vector]}]
   (let [value (rf/subscribe subscription-vector)]
-    (fn [{:keys [choices disabled?] :or {disabled? false} :as m}]
+    (fn [{:keys [event-vector style label on-change choices disabled? default-value]
+          :or {disabled? false} :as m}]
       [:> mui-select
-       {:value @value
+       {:value (or @value default-value)
         :disabled disabled?
-        :onChange (fn [event]
-                    (rf/dispatch (conj event-vector (keyword (.. event -target -value)))))}
+        :label label
+        :on-change
+        (or on-change
+            (fn [event]
+              (rf/dispatch (conj event-vector (keyword (.. event -target -value))))))
+        :style style}
         (for [c choices]
           ^{:key (:id c)}
-          [:> mui-menu-item {:value (:id c nil)} (:label c "None")])])))
+          [:> mui-menu-item {:value (:id c nil)
+                             :name (:label c nil)} (:label c "None")])])))
 
 (def input-component
   (reagent/reactify-component

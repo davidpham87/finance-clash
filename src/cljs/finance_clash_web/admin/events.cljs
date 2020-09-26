@@ -45,3 +45,22 @@
    (println result)
    (js/alert (str "Wealth of user " (:user/id result) " has been updated"))
    {:db db}))
+
+
+(reg-event-fx
+ ::delete-player
+ (fn [{db :db} [_ user-id]]
+   {:db db
+    :http-xhrio {:method :post
+                 :headers (auth-header db)
+                 :uri (endpoint "user" user-id "delete")
+                 :format (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [::success-delete-player]
+                 :on-failure [:api-request-error]}}))
+
+(reg-event-fx
+ ::success-delete-player
+ (fn [{db :db} [_ result]]
+   (js/alert (str "Deleted user " (:user/id result) "."))
+   {:db db}))

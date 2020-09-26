@@ -104,4 +104,5 @@
 (comment
   (use '[clojure.tools.namespace.repl :only (refresh)])
   (start)
+  (stop)
   (restart))
