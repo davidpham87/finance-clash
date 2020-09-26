@@ -1,0 +1,44 @@
+---
+# 023 - MSIAI - Libor and Forward rates
+
+- question: The 'no arbitrage' principle in simple terms is?
+  responses:
+  - The fact that there are no proper referee in finance, so financial firms can do anything they please.
+  - The fact that there is no free lunch, to make a profit you need to take a risk.
+  - The fact that there are apportunities in the market you are the only one aware of, and you should seize for personal benefit.
+  - The fact that there is always free lunch for banks.
+  correct-response: 2
+  duration: 30
+  difficulty: easy
+
+- question: The Libor scandale is deemed important because?
+  responses:
+  - Banks got affected and received huge fines.
+  - Due to Brexit.
+  - It affected a huge number of firms and individuals.
+  - It was at the origin of the financial crisis.
+  correct-response: 3
+  duration: 20
+  difficulty: medium
+
+
+- question: The forward exchange currency rate is close to?
+  responses:
+  - The current spot rate.
+  - The equities returns.
+  - The bonds rates.
+  - The inflation rate.
+  correct-response: 1
+  duration: 25
+  difficulty: easy
+
+
+- question: The forward exchange currency rate is NOT affected by?
+  responses:
+  - The storage cost.
+  - The spot exchange rate.
+  - The interest rates of the two currencies traded.
+  - The time to value date of the forward.
+  correct-response: 1
+  duration: 25
+  difficulty: medium
