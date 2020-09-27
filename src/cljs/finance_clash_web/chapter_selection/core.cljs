@@ -2,6 +2,9 @@
   (:require
    ["@material-ui/core" :as mui]
    ["@material-ui/core/Grid" :default mui-grid]
+   ["@material-ui/core/List" :default mui-list]
+   ["@material-ui/core/ListItem" :default mui-list-item]
+   ["@material-ui/core/ListItemText" :default mui-list-item-text]
    ["@material-ui/icons/Send" :default ic-send]
    [clojure.string :as s]
    [finance-clash-web.chapter-selection.events :as events]
@@ -67,34 +70,35 @@
 ;; for avoiding rerendering all of the checkbox)
 (defn chapters [ms checked-chapters]
   (let [super-user? @(subscribe [:super-user?])]
-    [:div
-     (doall
-      (for [m ms]
-        ^{:key (:chapter m)}
-        [:div {:style {:min-width "50vw"
-                       :padding 5
-                       :display :flex :margin-top 10 :margin-bottom 10
-                       :justify-content :space-between :align-items :center}}
-         [:div (:chapter m) ": " (:title m)]
-         [:div {:style {:display :block}}
-          [:> mui/Tooltip {:title "Available" :placement :left :enterDelay 500}
-           [:> mui/Checkbox
-            {:checked (contains? (:available checked-chapters) (:chapter m))
-             :disabled (not super-user?)
-             :onChange
-             (fn [e]
-               (let [status (if (.. e -target -checked) :append :remove)]
-                 (rf/dispatch [::events/update-available-chapters
-                               (:chapter m) status])))}]]
-          [:> mui/Tooltip {:title "Priority" :placement :right :enterDelay 500}
-           [:> mui/Checkbox
-            {:checked (contains? (:priority checked-chapters) (:chapter m))
-             :disabled (not super-user?)
-             :onChange
-             (fn [e]
-               (let [status (if (.. e -target -checked) :append :remove)]
-                 (rf/dispatch [::events/update-priority-chapters
-                               (:chapter m) status])))}]]]]))]))
+    [:> mui-list
+     (for [m ms]
+       ^{:key (:db/id m)}
+       [:> mui-list-item
+        {:dense true
+         :style {:min-width "40vw"
+                 :display :flex
+                 :justify-content :space-between
+                 :align-items :center}}
+        [:> mui-list-item-text (:quiz/title m)]
+        [:<>
+         [:> mui/Tooltip {:title "Available" :placement :left :enterDelay 500}
+          [:> mui/Checkbox
+           {:checked (contains? (:available checked-chapters) (:datomic.db/id m))
+            :disabled (not super-user?)
+            :onChange
+            (fn [e]
+              (let [status (if (.. e -target -checked) :append :remove)]
+                (rf/dispatch [::events/update-available-chapters
+                              (:datomic.db/id m) status])))}]]
+         #_[:> mui/Tooltip {:title "Priority" :placement :right :enterDelay 500}
+            [:> mui/Checkbox
+             {:checked (contains? (:priority checked-chapters) (:datomic.db/id m))
+              :disabled (not super-user?)
+              :onChange
+              (fn [e]
+                (let [status (if (.. e -target -checked) :append :remove)]
+                  (rf/dispatch [::events/update-priority-chapters
+                                (:datomic.db/id m) status])))}]]]])]))
 
 (defn chapters-comp [ms]
   (let [checked-chapters
@@ -104,13 +108,15 @@
       [chapters ms @checked-chapters])))
 
 (defn content [_]
-  [:<>
-   [:> mui/Grid {:item true :xs 12}
-    [:> mui/Card {:elevation 0}
-     [:> mui/CardHeader {:title "Module Selection"}]]]
-   [chapters-comp question-data]
-   [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}}
-    [center [send-button]]]])
+  (let [question-data (subscribe [::subscriptions/chapters])]
+    (fn []
+      [:<>
+       [:> mui/Grid {:item true :xs 12}
+        [:> mui/Card {:elevation 0}
+         [:> mui/CardHeader {:title "Module Selection"}]]]
+       [chapters-comp @question-data]
+       [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}}
+        [center [send-button]]]])))
 
 
 (defn root [m]

@@ -132,7 +132,7 @@
 (defn create-problems
   [{:problems/keys [title kind start deadline shuffle?]
     :keys [quizzes] :as m}]
-  (let [questions (mapv #(hash-map :db/id %) (questions quizzes))
+  (let [questions quizzes
         data (->> '[title kind start deadline shuffle?]
                   (map str)
                   (map (partial keyword "problems"))
@@ -162,6 +162,9 @@
 (s/def ::series (s/or ::int spec/int? ::str spec/string?))
 (s/def ::weight spec/int?)
 (s/def ::tx-data spec/coll?)
+
+(s/def ::deadlines spec/string?)
+(s/def ::quizzes spec/coll?)
 
 (defn quiz-tx [problem-id question-id user-id ]
   (let [db (finance-clash.db/get-db)]
@@ -267,8 +270,8 @@
   (->>
    (available-series)
    (d/pull-many (finance-clash.db/get-db) [:db/id :problems/deadline])
-   (sort-by :problems/deadlines)
-   last
+   (sort-by :problems/deadline)
+   first
    :db/id
    (d/pull (finance-clash.db/get-db) '[*])))
 
@@ -295,23 +298,32 @@
           toInstant)
       java.util.Date/from))
 
+
 (def routes-series
   ["/series"
    {:coercion reitit.coercion.spec/coercion}
    [""
     {:post {:summary "Create a new series"
-            :parameters {:body (s/keys :req-un [::available ::priority])}
+            :parameters {:body (s/keys :req-un [::deadline ::quizzes])}
+            :interceptor [protected-interceptor]
             :handler
-            (fn [{{{:keys [deadline priority]} :body} :parameters}]
-              (let [m (assoc #:problems{:title "First"
+            (fn [m]
+              {:status 200 :body "Safe"}
+              (let [token-id (:identity m)
+                    {:keys [deadline quizzes]} (get-in m [:parameters :body])
+                    quizzes (postwalk-replace {:id :db/id} quizzes)
+                    m (assoc #:problems{:title "Finance Clash"
                                         :kind :homework
                                         :start (java.util.Date.)
                                         :deadline (parse-iso-date-string deadline)
                                         :shuffle? true}
-                             :quizzes ["Key Notions" "Libor Fwd Rates"])]
-                (create-problems m))
-              {:status 200 :body
-               {:msg "Series created"}})}}]
+                             :quizzes quizzes)]
+                (if (#{{:user "admin"} {:user "neo2551"}} token-id)
+                  (do
+                    (let [db-data (create-problems m)]
+                      (println db-data))
+                    {:status 200 :body {:message "Series created"}})
+                  {:status 403 :body {:message "Unautorized"}})))}}]
    ["/:series/questions"
     {:parameters {:path (s/keys :req-un [::series])}
      :get {:summary "Get series details questions"
@@ -320,7 +332,7 @@
    ["/latest"
     {:get {:summary "Retrieve the latest series identifier."
            :handler
-           (fn [m] {:status 200 :body {:series (available?)}})}}]])
+           (fn [m] {:status 200 :body {:series (latest-series)}})}}]])
 
 (defn get-chapters []
   (d/q '[:find (pull ?e [*])
@@ -351,7 +363,6 @@
                               "retract" :db/retract
                               "answers" :question/answers}
                              tx-data)]
-                (println tx-data)
                 (if (#{{:user "admin"} {:user "neo2551"}} token-id)
                   (do
                     (update-question! tx-data)
@@ -399,7 +410,7 @@
                             :start #inst "2020-01-01"
                             :deadline #inst "2020-12-31"
                             :shuffle? false}
-                 :quizzes ["Key Notions" "Libor Fwd Rates"])]
+                 :quizzes (questions ["Key Notions" "Libor Fwd Rates"]))]
     (create-problems m))
 
   (d/q '[:find (pull ?e [*])
@@ -472,6 +483,21 @@
        :body
        (mc/decode mi "application/json"))
 
+  (->> (client/post "http://localhost:3000/series"
+                    {:content-type :json
+                     :headers {:Authorization "Token eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjoibmVvIn0.7ylkQaztX6BEa8iHBExYduVXbs4H3pbtSP3Z2FK2gmfRG9GDppHx5d9JgDO6GpZjhbQcd8RBRn6M_FXIW1Qxlw"}
+                     :body (json/write-str
+                            {:deadline "2020-09-28T09:00:00.000Z"
+                             :quizzes [[{"id" 17592186046491}
+                                        {"id" 17592186046168}
+                                        {"id" 17592186046435}
+                                        {"id" 17592186046014}
+                                        {"id" 17592186045481}
+                                        {"id" 17592186045641}]]})}
+                    )
+       :body
+       (mc/decode mi "application/json"))
+
   (-> (client/put
        "http://localhost:3000/series/0/available"
        {:content-type :json
@@ -541,6 +567,14 @@
          :where
          [?e :quiz/title]]
        (finance-clash.db/get-db))
+
+  (d/q '[:find (pull ?e [*])
+         :where
+         [?e :problems/deadline]]
+       (finance-clash.db/get-db))
+
+  (available?)
+
   (d/pull (finance-clash.db/get-db) '[*] 17592186045684)
   (d/transact (finance-clash.db/get-conn) [[:db/retract 17592186045684
                                           :question/answers 17592186045688]])
@@ -553,4 +587,5 @@
   (let [{:keys [a b]} {:a 2 :b 2}]
     (println a b))
   #_(map-indexed (fn [i q] (format-question->db q chapter i)) questions)
+  (parse-iso-date-string "2020-09-28 09:00")
 )

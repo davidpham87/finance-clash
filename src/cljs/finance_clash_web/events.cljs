@@ -151,12 +151,12 @@
                  :response-format (ajax/json-response-format {:keywords? true})
                  :on-success [::success-retrieve-series-question]
                  :on-failure [:api-request-error]
-                 :uri (endpoint "series" "latest" "questions")}}))
+                 :uri (endpoint "series" "latest")}}))
 
 (reg-event-fx
  ::success-retrieve-series-question
  (fn [{db :db} [_ result]]
-   (let [m (postwalk-replace {:db/id :datomic.db/id} (first result))]
+   (let [m (postwalk-replace {:db/id :datomic.db/id} (:series result))]
      (tap> m)
      {:db db
       :fx [[:dispatch

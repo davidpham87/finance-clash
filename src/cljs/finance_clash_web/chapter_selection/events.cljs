@@ -3,6 +3,9 @@
    [finance-clash-web.events :refer (endpoint auth-header)]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
+   [cljs-time.core :as ct]
+   [cljs-time.format :as ctf]
+   [clojure.walk :refer (postwalk-replace)]
    [re-frame.core :as rf :refer (reg-event-db reg-event-fx dispatch)]))
 
 (reg-event-db
@@ -19,18 +22,20 @@
 
 (reg-event-fx
  ::record-next-series
- (fn [{db :db} [_ available-ids priority-ids]]
-   {:db db
-    :http-xhrio
-    {:method :post
-     :uri (endpoint "series")
-     :headers (auth-header db)
-     :format (ajax/json-request-format)
-     :response-format (ajax/json-response-format {:keywords? true})
-     :params {:available (sort (mapv js/parseInt available-ids))
-              :priority (sort (mapv js/parseInt priority-ids))}
-     :on-failure [:api-request-error]
-     :on-success [::success-record-next-series]}}))
+ (fn [{db :db} [_ quizzes-ids]]
+   (let [deadline (ctf/unparse (ctf/formatter "yyyy-MM-dd HH:mm")
+                               (ct/plus (ct/today-at 11 0 0 0) (ct/days 1)))]
+     {:db db
+      :http-xhrio
+      {:method :post
+       :uri (endpoint "series")
+       :headers (auth-header db)
+       :format (ajax/json-request-format)
+       :response-format (ajax/json-response-format {:keywords? true})
+       :params {:deadline deadline
+                :quizzes (mapv #(-> {:datomic.db/id %}) quizzes-ids)}
+       :on-failure [:api-request-error]
+       :on-success [::success-record-next-series]}})))
 
 (reg-event-fx
  ::success-record-next-series
@@ -51,10 +56,17 @@
 (reg-event-fx
  ::success-query-chapters
  (fn [{db :db} [_ result]]
-   (let [available-ids (->> (filter #(pos? (:available %)) result)
-                            (map #(-> % :chapter str)) set)
-         priority-ids (->> (filter #(pos? (:priority %)) result)
-                           (map #(-> % :chapter str)) set)]
-     {:db (assoc db :chapter-selection {:available available-ids
-                                        :priority priority-ids})})))
-;; TODO(dph): request series and store it in series
+   (let [tx-data (->> result
+                      (map #(select-keys % [:db/id :quiz/title]))
+                      (postwalk-replace {:db/id :datomic.db/id})
+                      vec)]
+     {:db db
+      :fx [[:dispatch [:finance-clash-web.events/ds-transact
+                       :questions tx-data]]]})))
+
+
+(comment
+  (rf/dispatch [::query-chapters])
+  (ctf/unparse (ctf/formatter "yyyy-MM-dd HH:mm")
+               (ct/plus (ct/today-at 9 0 0 0) (ct/days 1)))
+  )
