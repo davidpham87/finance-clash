@@ -38,7 +38,7 @@
      :optimizations :advanced
      :output-feature-set :es6
      :closure-defines
-     {finance-clash-web.events/backend-url "https://finance-clash-msiai.pro/api"}
+     {finance-clash-web.events/backend-url "https://www.david-olivier.com/finance-clash/api"}
      :externs
      ["externs/material-ui.ext.js"
       "datascript/externs.js"]}}
