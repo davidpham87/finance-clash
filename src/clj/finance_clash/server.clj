@@ -41,7 +41,8 @@
      [#"^(http(s)?://)?localhost:(\d){4}$"
       #"http://206.81.21.152"
       #"^(http(s)?://)?www.finance-clash-msiai.pro"
-      #"^(http(s)?://)?www.davidolivier.pro"]
+      #"^(http(s)?://)?www.davidolivier.pro"
+      #"^(http(s)?://)?finance-clash.netlify.app"]
      :access-control-allow-headers #{:accept :content-type :authorization}
      :access-control-allow-methods #{:get :put :post}}
     :interceptors
