@@ -89,16 +89,7 @@
             (fn [e]
               (let [status (if (.. e -target -checked) :append :remove)]
                 (rf/dispatch [::events/update-available-chapters
-                              (:datomic.db/id m) status])))}]]
-         #_[:> mui/Tooltip {:title "Priority" :placement :right :enterDelay 500}
-            [:> mui/Checkbox
-             {:checked (contains? (:priority checked-chapters) (:datomic.db/id m))
-              :disabled (not super-user?)
-              :onChange
-              (fn [e]
-                (let [status (if (.. e -target -checked) :append :remove)]
-                  (rf/dispatch [::events/update-priority-chapters
-                                (:datomic.db/id m) status])))}]]]])]))
+                              (:datomic.db/id m) status])))}]]]])]))
 
 (defn chapters-comp [ms]
   (let [checked-chapters
@@ -118,31 +109,28 @@
        [:> mui-grid {:item true :xs 12 :style {:margin-bottom 10}}
         [center [send-button]]]])))
 
-
 (defn root [m]
-  (let []
-    (dispatch [::events/query-chapters])
-    (fn [{:keys [classes]}]
-      (let []
-        [:main {:class (cs (gobj/get classes "content"))
-                :style {:background-image "url(images/chapter.jpg)"
-                        :background-position :center
-                        :background-size :cover
-                        :color :white
-                        :z-index 0}}
-         [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
-         [:> mui/Fade {:in true :timeout 1000}
-          [:> mui/Grid {:container true :justify "center"}
-           [:> mui/Paper
-            {:elevation 1
-             :style {:margin 5
-                     :padding 5
-                     :background-position :center
-                     :background-color "rgba(255,255,255,0.8)"
-                     :color "black" :width "100%"
-                     :z-index 10}}
-            [:> mui/Grid {:container true :justify "center" :alignItems :flex-end}
-             [content classes]]]]]]))))
+  (dispatch [::events/query-chapters])
+  (fn [{:keys [classes]}]
+    [:main {:class (cs (gobj/get classes "content"))
+            :style {:background-image "url(images/chapter.jpg)"
+                    :background-position :center
+                    :background-size :cover
+                    :color :white
+                    :z-index 0}}
+     [:div {:class (cs (gobj/get classes "appBarSpacer"))}]
+     [:> mui/Fade {:in true :timeout 1000}
+      [:> mui/Grid {:container true :justify "center"}
+       [:> mui/Paper
+        {:elevation 1
+         :style {:margin 5
+                 :padding 5
+                 :background-position :center
+                 :background-color "rgba(255,255,255,0.8)"
+                 :color "black" :width "100%"
+                 :z-index 10}}
+        [:> mui/Grid {:container true :justify "center" :alignItems :flex-end}
+         [content classes]]]]]]))
 
 (defn root-panel [props]
   [:> (with-styles [panel-style] root) props])

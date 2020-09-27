@@ -119,13 +119,14 @@
      [answer-content status]]]
    [:> mui/DialogActions
     (when (= status :wrong)
-      [:> mui/Button {:onClick #(dispatch [::events/select-question-phase
-                                           :answering])} "Retry"])
+      [:> mui/Button {:on-click
+                      #(dispatch [::events/select-question-phase :answering])}
+       "Retry"])
     [:> mui/Button
-     {:onClick (fn []
-                 (dispatch [::events/update-available-questions
-                            (if (= status :correct) :answered :postpone)])
-                 (dispatch [::events/select-question-phase :selection]))}
+     {:on-click (fn []
+                  (dispatch [::events/update-available-questions
+                             (if (= status :correct) :answered :postpone)])
+                  (dispatch [::events/select-question-phase :selection]))}
      "Next"]]])
 
 (defn ->isoformat [d]
@@ -205,7 +206,7 @@
      [:> mui/CardContent {:style {:height "100%" :min-width 260 :width "100%"}}
       [:> mui/Typography
        (if questions-remaining?
-         "Rewards without bonus/malus."
+         "Rewards."
          [:div {:style {:color (colors/colors-rgb :red-light)}}
           "No more available question."])]
       (when questions-remaining?

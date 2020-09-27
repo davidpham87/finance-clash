@@ -47,16 +47,13 @@
  (fn [{db :db} [_ update-type]]
    (let [quiz-question (:quiz-question db)
          path [:series-questions (:difficulty quiz-question)]
-         question-id (:id quiz-question)
          m (get-in db path)]
      (case update-type
        :postpone
        {:db (assoc-in db path (conj (vec (rest m)) (first m)))
         :dispatch [::reset-quiz-question]}
        :answered
-       {:db (-> db
-                (assoc-in path (vec (remove #{(:id quiz-question)} (rest m))))
-                (update-in [:series-question-answered] conj (:id quiz-question)))
+       {:db (-> db (update-in [:series-questions-answered] conj (:db/id quiz-question)))
         :dispatch [::reset-quiz-question]}))))
 
 (reg-event-fx

@@ -90,7 +90,7 @@
    :errors {}
    :help-event [:set-panel :welcome]
    :quiz-question {} ;; storing the displayed quiz question
-   :series-questions {:medium [] :hard [] :easy []}
+   :series-questions {:medium #{} :hard #{} :easy #{}}
    :series-questions-seen #{}
    :series-questions-answered #{}
    :super-users super-users

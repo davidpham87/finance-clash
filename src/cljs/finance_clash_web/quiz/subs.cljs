@@ -27,7 +27,7 @@
 (reg-sub
  ::series-questions
  (fn [db]
-   (let [series (:series-questions db {:easy [] :medium [] :hard []})
+   (let [series-answered (:series-questions-answered db #{})
          ds (get-in db [:ds :questions])
          questions
          (->> (d/q '[:find (pull ?e [* {:question/choices [*]}])
@@ -40,7 +40,8 @@
               (mapv first)
               (mapv (fn [m] (update m :question/difficulty
                                     #(-> % :db/ident keyword name keyword)))))]
-     (group-by :question/difficulty questions))))
+     (->> (group-by :question/difficulty questions)
+          (reduce-kv (fn [m k v] (assoc m k (remove #(series-answered (:db/id %)) v))) {})))))
 
 (reg-sub
  ::possible
