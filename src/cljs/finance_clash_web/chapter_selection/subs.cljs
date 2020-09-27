@@ -1,9 +1,15 @@
 (ns finance-clash-web.chapter-selection.subs
   (:require
+   [clojure.string :as str]
    [datascript.core :as d]
-   [finance-clash-web.subs :as subs]
    [finance-clash-web.db :refer (empty-ds)]
+   [finance-clash-web.subs :as subs]
    [re-frame.core :as rf :refer (reg-sub)]))
+
+(defn parse-int-safe [s]
+  (try
+    (js/parseInt s)
+    (catch js/Error _ 9999)))
 
 (reg-sub
  ::chapter-available
@@ -28,7 +34,7 @@
         (d/datoms ds :aevt)
         (map :e)
         (d/pull-many ds '[*])
-        (sort-by :quiz/title))))
+        (sort-by #(-> % :quiz/title (str/split  #" " 2) first parse-int-safe)))))
 
 (comment
   (rf/clear-subscription-cache!)

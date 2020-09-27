@@ -74,7 +74,7 @@
     (println new-filename)
     (spit new-filename data)))
 
-(defn format-question->db [m chapter]
+(defn format-question->db [m chapter idx]
   (let [choices->answers
         (fn [choices]
           (vec (map-indexed
@@ -101,9 +101,9 @@
                                     (nth (dec (int i))) :db/id))))
                 (map #(assoc % :question/tags
                              {:tags/description "chapter"
-                              :tags/value chapter}))
+                              :tags/value (str idx " " chapter)}))
                 (map #(assoc % :db/id (str (d/tempid :chapter)))))))]
-    {:quiz/title chapter
+    {:quiz/title (str idx " " chapter)
      :quiz/questions questions}))
 
 (defn import-question->db []
@@ -113,7 +113,7 @@
                                      (str/split  #"_")
                                      rest
                                      (as-> $ (str/join " " $)))]]
-               (format-question->db (read-questions question-files idx) chapter))]
+               (format-question->db (read-questions question-files idx) chapter idx))]
     (d/transact (finance-clash.db/get-conn) (vec data))))
 
 (defn update-question! [tx-data]
