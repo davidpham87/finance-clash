@@ -1,5 +1,6 @@
 ---
 # 024 - MSIAI - Bourse à la crié
+# 5 questions
 
 - question: Est-ce que le Open outcry existe encore?
   responses:
@@ -40,7 +41,7 @@
   - La collatéralisation.
   - L'alignement.
   correct-response: 1
-  duration: 15
+  duration: 12
   difficulty: medium
 
 
@@ -51,5 +52,5 @@
   - Oui, au NYSE.
   - Oui, à Eurex.
   correct-response: 1
-  duration: 10
-  difficulty: medium
+  duration: 8
+  difficulty: hard

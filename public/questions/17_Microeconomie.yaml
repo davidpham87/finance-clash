@@ -1,5 +1,6 @@
 ---
 # 017 - MSIAI - Introduction à la microéconomie
+# 11 Questions
 
 - question: Dans quel ordre les mouvements de la microéconomies sont apparus?
   responses:
@@ -11,6 +12,7 @@
   duration: 30
   difficulty: medium
 
+
 - question: La microéconomie a pour objet?
   responses:
   - D'étudier les grands indicateurs économiques (chomage, inflation, PIB...).
@@ -20,7 +22,6 @@
   correct-response: 3
   duration: 25
   difficulty: medium
-
 
 - question: Une fonction d'utilité est?
   responses:
@@ -60,8 +61,8 @@
   - Inversement proportionnelle à la courbe budget du consommateur.
   - Inversement proportionnelle à la courbe budget du producteur.
   correct-response: 1
-  duration: 25
-  difficulty: medium
+  duration: 10
+  difficulty: hard
 
 
 - question: Des biens complémentaires ont des courbes d'indifférences qui présentent?
@@ -75,16 +76,15 @@
   difficulty: medium
 
 
-
 - question: Le fait que la consommation d'un produit A soit plus sensible à l'évolution des prix qu'un autre produit B veut dire que?
   responses:
   - Le produit B, dans le cas de Homer, est sans doute le brocoli.
-  - Le produit A est sans doute une drogue.
+  - Le produit A, dans le cas de Homer, est sans doute de la bière.
   - L'élasticité-prix du produit B est plus important que celle du produit A.
   - L'élasticité-prix du produit A est plus important que celle du produit B.
   correct-response: 4
-  duration: 30
-  difficulty: medium
+  duration: 10
+  difficulty: hard
 
 
 - question: Il y a un échange possible entre 2 agents si l'un et l'autre ont?
@@ -98,13 +98,13 @@
   difficulty: medium
 
 
-- question: Quelle affirmation est INCORRECTE?
+- question: Quelle affirmation est correcte?
   responses:
   - Une situation de concurrence pure et parfaite génère une situation dans laquelle les acteurs sont price taker.
-  - Une situation de monopole crée une situation de price maker.
+  - Une situation de monopole crée une situation de price taker.
   - Une situation d'oligopole génère une situation dans laquelle chaque compagnie agit indépendamment des autres compagnies.
-  - John Nash a étudié les équilibres non coopératifs.
-  correct-response: 3
+  - John Nash a étudié les équilibres coopératifs.
+  correct-response: 1
   duration: 30
   difficulty: medium
 
@@ -116,5 +116,5 @@
   - Il y ait des régulations et normes publiques.
   - Il y ait des situations de monopole.
   correct-response: 1
-  duration: 25
-  difficulty: medium
+  duration: 40
+  difficulty: easy

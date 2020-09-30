@@ -1,5 +1,6 @@
 ---
 # 021 - MSIAI - Rating Agencies
+# 5 questions
 
 - question: What is the worst rating?
   responses:
@@ -11,24 +12,24 @@
   duration: 30
   difficulty: easy
 
-- question: Which of the following is not a rating agency?
+- question: Which of the following are rating agencies?
   responses:
-  - Fitch.
-  - S&P.
-  - Deloitte.
-  - Moody's.
-  correct-response: 3
+  - Fitch and S&P.
+  - S&P and KPMG.
+  - Deloitte and PWC.
+  - Moody's and E&Y.
+  correct-response: 1
   duration: 15
   difficulty: medium
 
 
-- question: Which of the following is NOT a reason for which people use Credit Rating agencies?
+- question: Which of the following is a reason for which people use Credit Rating agencies?
   responses:
-  - They are free.
-  - They are the standard.
-  - Bank regulation make them necessary.
-  - They make everyone life easier.
-  correct-response: 1
+  - They are free and used as market standard.
+  - They are market standard and bank regulation make them necessary.
+  - Bank regulation make them necessary and they are free.
+  - They make everyone life easier and they have no conflict of interest.
+  correct-response: 2
   duration: 30
   difficulty: medium
 
@@ -49,7 +50,7 @@
   - Yes, because they overated MBS.
   - Yes, because they overated some states.
   - Yes, because they underated MBS.
-  - No, but some people did not understand and thought they were.
+  - Yes, because they underrated some states.
   correct-response: 1
-  duration: 30
-  difficulty: medium
+  duration: 7
+  difficulty: hard

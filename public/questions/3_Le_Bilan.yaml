@@ -1,5 +1,6 @@
----
+﻿---
 # 003 - MSIAI - Le bilan
+# 12 questions
 
 - question: Le bilan correspond à?
   responses:
@@ -30,7 +31,7 @@
   - Où va l'argent.
   - D'où viennent les pertes.
   - D'où viennent les ressources.
-  correct-response: 1
+  correct-response: 2
   duration: 25
   difficulty: easy
 
@@ -42,7 +43,7 @@
   - D'où vient l'argent.
   - Où va l'argent.
   correct-response: 3
-  duration: 15
+  duration: 10
   difficulty: medium
 
 
@@ -53,7 +54,7 @@
   - Passifs courants.
   - Passifs non courants.
   correct-response: 3
-  duration: 15
+  duration: 12
   difficulty: medium
 
 
@@ -68,10 +69,6 @@
   difficulty: hard
 
 
-
-
-
-
 - question: Les capitaux propres sont?
   responses:
   - A l'actif.
@@ -84,21 +81,15 @@
 
 
 
-
-
-
-- question: Quelle méthode comptable de valorisation des stocks n'est pas applicable dans les normes françaises?
+- question: Quelles méthodes comptables de valorisation des stocks sont applicable dans les normes françaises?
   responses:
-  - Premier Entré, Premier Sorti (PEPS / FIFO).
-  - Dernier Entré, Premier Sorti (DEPS / LIFO).
-  - Coût Unitaire Moyen Pondéré (CUMP).
-  - Coût Unitaire Maximal (CUM).
-  correct-response: 2
-  duration: 15
-  difficulty: medium
-
-
-
+  - Premier Entré, Premier Sorti (PEPS / FIFO) et Coût Unitaire Moyen Pondéré (CUMP).
+  - Dernier Entré, Premier Sorti (DEPS / LIFO) et Premier Entré, Premier Sorti (PEPS / FIFO).
+  - Coût Unitaire Moyen Pondéré (CUMP) et Dernier Entré, Premier Sorti (DEPS / LIFO).
+  - Coût Unitaire Moyen Pondéré (CUMP) uniquement.
+  correct-response: 1
+  duration: 10
+  difficulty: hard
 
 
 
@@ -112,6 +103,7 @@
   duration: 50
   difficulty: medium 
 
+
 - question: Quel est le résultat d'une entreprise qui détient un capital de €40'000, des marchandises de €60'000, un emprunt de €50'000 et des créances clients de €20'000?
   responses:
   - €-10'000.
@@ -119,30 +111,28 @@
   - €-20'000.
   - €+20'000.
   correct-response: 1
-  duration: 25
+  duration: 15
   difficulty: hard 
 
 
 
-
-
-- question: Laquelle des traductions suivantes est FAUSSE?
+- question: Laquelle des traductions suivantes est correcte?
   responses:
   - Financial Accounting = Bilan comptable officiel.
-  - Assets = Actifs.
-  - Balance Sheet = Bilan.
+  - Assets = Passif.
+  - Balance Sheet = Actif.
   - Equity = Résultat.
-  correct-response: 4
+  correct-response: 1
   duration: 25
   difficulty: easy
 
 
-- question: Laquelle des traductions suivantes est FAUSSE?
+- question: Laquelle des traductions suivantes est correcte?
   responses:
   - Assets = Actifs.
-  - Financial Accounting = Bilan comptable officiel.
+  - Financial Accounting = Comptabilité analytique.
   - Equity = Résultat.
-  - Balance Sheet = Bilan.
-  correct-response: 3
-  duration: 15
+  - Balance Sheet = Passif.
+  correct-response: 1
+  duration: 10
   difficulty: medium

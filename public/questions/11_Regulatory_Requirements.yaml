@@ -1,5 +1,6 @@
 ---
 # 011 - MSIAI - Basel II, Regulatory Requirements
+# 7 questions
 
 - question: How many pillars are there in Basel II regulation?
   responses:
@@ -11,11 +12,12 @@
   duration: 20
   difficulty: easy
 
-- question: Which one is not part of the Basel Bank regulation Pillar 1?
+
+- question: Which one is NOT part of the Basel Bank regulation Pillar 1?
   responses:
   - Credit and Counterparty Risk.
   - Operational Risks.
-  - Liqudity Risk.
+  - Liquidity Risk.
   - Market Risk.
   correct-response: 3
   duration: 20
@@ -35,7 +37,7 @@
 
 - question: What is one issue regarding Credit Risk model in Basel II regulation?
   responses:
-  - Some bonds (high rated) do not necessitate capital, and therefore Bank can buy as many as they want from these.
+  - Some bonds (high rated) do not require capital, and therefore Bank can buy as many as they want from these.
   - In case of downgrade of an issuer or borrower, it is not taken into consideration by the methodology.
   - Default are not considered in the model.
   - It is so complicated it was not applied properly.

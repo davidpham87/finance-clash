@@ -1,13 +1,14 @@
 ---
 # 009 - MSIAI - SIG et CAF
+# 11 questions
 
-- question: Quelle affirmation est incorrecte?
+- question: Quelle définition est correcte?
   responses:
   - SIG = Soldes Intermédiaires de Gestion.
-  - CAF = Cumul d'Avances Fixes.
-  - CA = Chiffre d'Affaire = Production vendue.
-  - VA = Valeur Ajoutée.
-  correct-response: 2
+  - CAF = Chiffre d'Affaire Fixe.
+  - CA = Capaticté d'Autofinancement.
+  - VA = Valeur d'Affaire.
+  correct-response: 1
   duration: 30
   difficulty: easy
 
@@ -16,7 +17,7 @@
   - Bilan et Compte de résultat.
   - Tableau de financement.
   - Compte de résultat.
-  - Plan d'amortisation.
+  - Bilan.
   correct-response: 3
   duration: 30
   difficulty: easy
@@ -33,13 +34,13 @@
   difficulty: medium
 
 
-- question: Lequel n'est pas un SIG?
+- question: Lesquels sont des SIG?
   responses:
-  - Les dividendes.
-  - Chiffre d'Affaire.
-  - Valeur Ajoutée.
-  - Excédent Brut d'Exploitation (EBE).
-  correct-response: 1
+  - Dividendes et Chiffre d'Affaire.
+  - Chiffre d'Affaire et Valeur Ajoutée.
+  - Valeur Ajoutée et Créances Clients.
+  - Excédent Brut d'Exploitation (EBE) et Dettes Fournisseurs.
+  correct-response: 2
   duration: 25
   difficulty: easy
 
@@ -51,7 +52,7 @@
   - Ratio du personnel = charge du personnel / CA, devrait être inférieur à 60-70%.
   - Ratio du personnel = charge du personnel / CA, devrait être inférieur à 50-60%.
   correct-response: 1
-  duration: 15
+  duration: 10
   difficulty: hard
 
 
@@ -67,24 +68,24 @@
 
 
 
-- question: Quelle est l'affirmation concernant la valeur ajoutée est incorrecte?
+- question: Quelle est l'affirmation concernant la valeur ajoutée qui est correcte?
   responses:
   - Partagée entre le personnel, l'état et l'entreprise.
-  - Si divisée par le CA, il s'agit du taux de valeur ajouté.
+  - Si multipliée par le CA, il s'agit du taux de valeur ajouté.
   - Partagée entre le personnel, l'état et les clients.
-  - Utilisée pour rémunérer les actionnaires au travers de dividendes.
-  correct-response: 3
-  duration: 25
-  difficulty: medium
+  - Utilisée uniquement pour rémunérer les actionnaires au travers de dividendes.
+  correct-response: 1
+  duration: 10
+  difficulty: hard
 
 
-- question: Quelle est l'affirmation concernant la valeur ajoutée est incorrecte?
+- question: Quelle est l'affirmation concernant la valeur ajoutée qui est correcte?
   responses:
   - Est l'un des facteurs permettant l'augmentation de la CAF.
-  - Egale à la marge plus la production d'exercice moins les consommation externes.
-  - Partagée entre le personnel, l'état et les actionnaires.
+  - Egale à la marge plus la production d'exercice moins les consommation externes et salaires.
+  - Partagée entre l'état et les actionnaires.
   - Est utilisée pour calculer le PNB d'un pays.
-  correct-response: 4
+  correct-response: 1
   duration: 25
   difficulty: medium
 
@@ -111,12 +112,12 @@
   difficulty: medium
 
 
-- question: La CAF ne tient pas compte de?
+- question: Quelle est l'affirmation concernant la CAF qui est correcte?
   responses:
-  - Impôts.
-  - Intérêts de la dette.
-  - Décalage temporaire des flux cash.
-  - Salaire du personnel.
-  correct-response: 3
-  duration: 15
-  difficulty: medium
+  - La CAF tient compte des impôts.
+  - La CAF ne tient pas compte des intérêts de la dette.
+  - La CAF tient compte du décalage temporaire des flux cash.
+  - La CAF ne tient pas compte des salaires du personnel.
+  correct-response: 1
+  duration: 10
+  difficulty: hard

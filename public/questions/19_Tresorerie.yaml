@@ -1,5 +1,6 @@
 ---
 # 019 - MSIAI - Trésorerie
+# 11 questions
 
 - question: Si l'on souhaite connaître l'évolution et l'utilisation réelle du cash d'une entreprise, mieux vaut?
   responses:
@@ -11,18 +12,19 @@
   duration: 30
   difficulty: medium
 
+
 - question: Le ration d'endettement net (net gearing) est?
   responses:
   - (Dettes - Trésorerie) / Capitaux propres.
   - (Dettes - Trésorerie) / CA.
   - (Dettes - Trésorerie) / Actifs.
-  - Trésorerie / Actifs.
+  - (Dettes - Trésorerie) / VA.
   correct-response: 1
   duration: 20
   difficulty: medium
 
 
-- question: Lequel des type de flux suivant ne fait pas partie du TFT?
+- question: Lequel des types de flux suivant ne fait pas partie du TFT?
   responses:
   - Flux exceptionnel.
   - Flux d'exploitation.
@@ -33,13 +35,13 @@
   difficulty: medium
 
 
-- question: Lorsqu'on souhaite effectuer des projections de trésorerie, il n'est pas important de prendre en compte quel aspect?
+- question: Lorsqu'on souhaite effectuer des projections de trésorerie, il est important de prendre en compte quels aspects?
   responses:
-  - Les délais de livraisons des marchandises.
-  - Les délais de paiement.
-  - Les coûts de découvert.
-  - L'encaissement / décaissement de TVA.
-  correct-response: 1
+  - Les délais de livraisons des marchandises et les coûts de découvert.
+  - Les délais de paiement et l'encaissement / décaissement de TVA..
+  - Les coûts de découvert et les délais de livraisons des marchandises.
+  - L'encaissement / décaissement de TVA et les retards de livraison.
+  correct-response: 2
   duration: 25
   difficulty: medium
 
@@ -62,8 +64,8 @@
   - Trésorerie = Fonds de roulement - Besoin en fonds de roulement.
   - Trésorerie = Fonds de roulement + Besoin en fonds de roulement.
   correct-response: 3
-  duration: 25
-  difficulty: medium
+  duration: 8
+  difficulty: hard
 
 
 
@@ -107,17 +109,17 @@
   - Le jour de la date d'opération.
   - La date valeur n'est pas une notion utilisée par les banques.
   correct-response: 1
-  duration: 30
+  duration: 25
   difficulty: medium
 
 
 
-- question: Le prix de l'escompte est prélevé?
+- question: Le prix de l'escompte est payé?
   responses:
-  - Immédiatement par l'entreprise au moment où elle rentre dans l'escompte avec la banque.
-  - Au moment où la banque reçoit le remboursement du client.
-  - Toujours 30 jours après être rentré dans l'escompte.
-  - Toujours 90 jours après être rentré dans l'escompte.
+  - Par l'entreprise au moment où elle rentre dans l'escompte avec la banque.
+  - Par l'entreprise au moment où la banque reçoit le remboursement du client.
+  - Par la banque au moment où elle rentre dans l'escompte avec l'entreprise.
+  - Par l'entreprise auprès de la banque 90 jours après être rentré dans l'escompte.
   correct-response: 2
-  duration: 45
-  difficulty: easy
+  duration: 30
+  difficulty: medium

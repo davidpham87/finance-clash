@@ -1,7 +1,8 @@
 ---
 # 000 - MSIAI - Key Notions
+# 9 questions
 
-- question: J'effectue un placement de €10'000 à 2%, combien d'intérêts je toucherai dans 1 an?
+- question: J'effectue un placement de €1'000 à 2%, combien d'intérêts je toucherai dans 1 an?
   responses:
   - €2.
   - €20.
@@ -12,7 +13,7 @@
   difficulty: easy
 
 
-- question: J'effectue un placement de €10'000 à 2%, les intérêts sont composés, combien d'intérêts je toucherai sur les 2 prochaines années?
+- question: J'effectue un placement de €1'000 à 2%, les intérêts sont composés, combien d'intérêts je toucherai sur les 2 prochaines années?
   responses:
   - Moins de €40.
   - €40.
@@ -31,30 +32,30 @@
   - Pour un même taux, des intérêts composés rapporteront plus que des intérêts simples.
   - Pour un même taux, des intérêts simples rapporteront plus que des intérêts composés.
   correct-response: 3
-  duration: 20
-  difficulty: medium
+  duration: 40
+  difficulty: easy
 
 
 
 - question: Quelle affirmation est correcte?
   responses:
-  - La valeur actusalisée est la valeur de cash flows futurs.
+  - La valeur actualisée est la valeur de cash flows futurs.
   - La valeur actualisée est la valeur actuelle de cash flows futurs.
   - La valeur actualisée nette est négative si le projet est rentable.
   - La valeur actualisée nette doit toujours être nulle.
   correct-response: 2
-  duration: 20
-  difficulty: medium
+  duration: 10
+  difficulty: hard
 
 
 
 - question: Quelle affirmation est correcte?
   responses:
   - La valeur actualisée nette doit toujours être nulle.
-  - La valeur actualisée nette est négative si le projet est rentable.
-  - La valeur actualisée est la valeur actuelle de cash flows futurs.
+  - La valeur actualisée nette est positive si le projet est rentable.
+  - La valeur actualisée est la somme des cash flows futurs.
   - La valeur actualisée est la même chose que la net present value.
-  correct-response: 3
+  correct-response: 2
   duration: 10
   difficulty: hard
 
@@ -84,15 +85,16 @@
 
 
 
-- question: Airbus hedges by selling forward USD vs EUR at an exchange rate of EUR/USD 1.15?
+- question: Aibus hedges by selling forward USD vs EUR at an exchange rate of EUR/USD 1.15?
   responses:
   - The hedge is profitable if the EUR/USD is below 1.15 on expiration.
   - The hedge is profitable if the EUR/USD is above 1.15 on expiration.
   - The hedge is loss making if the USD/GBP is below 1.15 on expiration.
   - The hedge is loss making if the USD/GBP is above 1.15 on expiration.
   correct-response: 2
-  duration: 25
+  duration: 15
   difficulty: medium
+
 
 
 - question: Quelle affirmation est correcte?

@@ -1,5 +1,6 @@
 ---
 # 005 - MSIAI - Introduction to finance and banking system
+# 10 questions
 
 - question: What are the 3 main activities of retail banks?
   responses:
@@ -8,7 +9,7 @@
   - Lend and Save money, Allow easier payments, Manage wealth.
   - Structure products, Manage wealth, Allow for easier payments.
   correct-response: 3
-  duration: 30
+  duration: 45
   difficulty: easy
 
 
@@ -41,7 +42,7 @@
   - An option.
   - A structured product.
   correct-response: 1
-  duration: 20
+  duration: 15
   difficulty: medium
 
 
@@ -57,27 +58,37 @@
   difficulty: easy
 
 
+- question: Which animal represents a market expected to move down?
+  responses:
+  - A bear.
+  - A bull.
+  - A hawk.
+  - A dove.
+  correct-response: 1
+  duration: 10
+  difficulty: medium
+
+
 - question: If you buy €1'000 of a French Republic bond paying 2% per year and expires in 5 years, how much interests will you get in total?
   responses:
   - € 10.
   - € 50.
   - € 100.
-  - € 1000.
+  - € 500.
   correct-response: 3
   duration: 15
   difficulty: medium
 
 
-
-- question: Which of the following is NOT one of the 4 market players?
+- question: Which of the following is one of the 4 market players?
   responses:
   - Traders.
   - Arbitrager.
-  - Speculators.
-  - Hedgers.
-  correct-response: 1
-  duration: 20
-  difficulty: easy
+  - Risk Managers.
+  - Stock owners.
+  correct-response: 2
+  duration: 8
+  difficulty: hard
 
 
 - question: If you are short, you make money when?

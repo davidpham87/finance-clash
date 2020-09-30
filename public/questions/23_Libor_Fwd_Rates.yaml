@@ -1,5 +1,6 @@
 ---
 # 023 - MSIAI - Libor and Forward rates
+# 4 questions
 
 - question: The 'no arbitrage' principle in simple terms is?
   responses:
@@ -33,12 +34,12 @@
   difficulty: easy
 
 
-- question: The forward exchange currency rate is NOT affected by?
+- question: The forward exchange currency rate is affected by?
   responses:
-  - The storage cost.
-  - The spot exchange rate.
-  - The interest rates of the two currencies traded.
-  - The time to value date of the forward.
-  correct-response: 1
-  duration: 25
-  difficulty: medium
+  - The storage cost and the spot exhange rate.
+  - The spot exchange rate and the interest rates of the two currencies traded.
+  - The interest rates of the two currencies traded and the stock market.
+  - The time to value date of the forward and the two governments debt.
+  correct-response: 2
+  duration: 15
+  difficulty: hard

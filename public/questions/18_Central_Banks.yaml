@@ -1,5 +1,6 @@
 ---
 # 018 - MSIAI - Central Banks
+# 9 questions
 
 - question: What is the name of the Central Bank in charge for France?
   responses:
@@ -46,22 +47,22 @@
   responses:
   - -0.50%.
   - 0.00%.
-  - 0.25%.
-  - 2.00%.
+  - 0.50%.
+  - 0.75%.
   correct-response: 1
   duration: 8
   difficulty: medium
 
 
-- question: Unconventional policies are NOT including which of the following?
+- question: Central banks unconventional policies are including which of the following?
   responses:
-  - Negative interest rates.
-  - Loans to states.
-  - Purchase of bonds.
-  - Easier access to liquidity for banks.
-  correct-response: 2
-  duration: 20
-  difficulty: medium
+  - Negative interest rates and loans to states.
+  - Loans to states and purchase of bonds.
+  - Purchase of bonds and easier access to liquiditw for banks.
+  - Easier access to liquidity for banks and lending to corporates.
+  correct-response: 3
+  duration: 10
+  difficulty: hard
 
 
 - question: What is the name of the system that was in place up to 1931?
@@ -82,7 +83,7 @@
   - Jean-Claude Trichet.
   - Mario Draghi.
   - Christine Lagarde.
-  correct-response: 3
+  correct-response: 4
   duration: 15
   difficulty: medium
 

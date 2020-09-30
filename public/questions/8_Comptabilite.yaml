@@ -1,15 +1,17 @@
 ---
 # 008 - MSIAI - Comptabilité
+# 9 questions
 
-- question: Quelle affirmation est incorrecte?
+- question: Quelle affirmation est correcte?
   responses:
   - Le journal comptable comprend la liste des opérations dans l'ordre chronologique.
   - Le journal inclus uniquement les informations date, numéro de compte, libellé.
-  - Lorsqu'on présente les comptes en T, le Débit est à gauche et le Crédit à droite.
-  - Tous les comptes d'une entreprise sont regroupés dans le grand-livre.
-  correct-response: 2
-  duration: 25
-  difficulty: medium
+  - Lorsqu'on présente les comptes en T, le Débit est à droite et le Crédit à gauche.
+  - Tous les comptes d'une entreprise sont regroupés dans le grand livre.
+  correct-response: 1
+  duration: 15
+  difficulty: hard
+
 
 - question: L'apport de capitaux par un actionnaire impacte quels postes?
   responses:
@@ -18,7 +20,7 @@
   - Capital et Avoirs en banque.
   - Capital et Immobilisations.
   correct-response: 3
-  duration: 15
+  duration: 10
   difficulty: hard
 
 
@@ -36,11 +38,11 @@
 - question: L'achat de marchandises comptant impacte quels postes?
   responses:
   - Stock de marchandises, Avoirs en banque, Variation du stock, Achat de marchandises.
-  - Stock de marchandises; Avoirs en banques, Variation du stock, Chiffre d'Affaire.
+  - Avoirs en banque, Stock de marchandises, Variation du stock, Chiffre d'Affaire.
   - Créances clients, Avoirs en banque, Variation du stock, Achat de marchandises.
-  - Stock de marchandises, Crédit fournisseur, Variation du stock, Achat de marchandises.
+  - Variation du stock, Stock de marchandises, Crédit fournisseur, Achat de marchandises.
   correct-response: 1
-  duration: 25
+  duration: 30
   difficulty: medium
 
 
@@ -67,15 +69,16 @@
 
 
 
-- question: Quelle est l'affirmation INCORRECTE?
+- question: Quelle affirmation est correcte?
   responses:
-  - L'actif augmente au débit.
+  - L'actif augmente au crédit.
   - L'achat d'un bien a pour effet de générer une écriture de débit pour ce bien.
   - Le paiement d'un fournisseur a pour effet d'augmenter le débit du compte fournisseur.
-  - Les charges augmentent au débit.
-  correct-response: 3
+  - Les charges augmentent au crédit.
+  correct-response: 2
   duration: 25
   difficulty: medium
+
 
 
 - question: La comptabilité a double partie?

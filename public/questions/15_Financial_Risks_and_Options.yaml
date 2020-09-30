@@ -1,12 +1,13 @@
 ---
 # 015 - MSIAI - Risques financiers et options
+# 4 questions
 
-- question: Lequel des risques suivants N'est PAS un risque financier?
+- question: Lequel des risques suivants est un risque financier?
   responses:
   - Effet de change.
   - Choix d'une stratégie de développement.
-  - Fluctuation du cours d'un titre.
-  - Augmentation des taux d'intérêt.
+  - Fraude.
+  - Cyberattaque.
   correct-response: 2
   duration: 30
   difficulty: easy
@@ -15,8 +16,8 @@
   responses:
   - Un risque de variation des prix du pétrôle.
   - Un risque de fluctuation du prix de l'action Airbus.
-  - Un risque de change EUR/USD.
-  - Un risque de crash.
+  - Un risque de dépréciation du USD face à l'EUR.
+  - Un risque de dépréciation du EUR face à l'USD.
   correct-response: 3
   duration: 25
   difficulty: easy
@@ -29,8 +30,8 @@
   - Prendre une position d'arbitrage sur ce sous-jacent sane le détenant.
   - Prendre une position d'arbitrage sur ce sous-jacent en le détenant également.
   correct-response: 1
-  duration: 15
-  difficulty: medium
+  duration: 12
+  difficulty: hard
 
 
 - question: Je suis persuadé que le cours de Airbus va augmenter. Une stratégie pourrait être?

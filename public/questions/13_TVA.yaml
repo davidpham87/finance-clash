@@ -1,15 +1,16 @@
 ---
 # 013 - MSIAI - TVA
+# 7 questions
 
-- question: Quelle affirmation est incorrecte?
+- question: Quelle affirmation est correcte?
   responses:
   - TVA = Taxe sur la Valeur Ajoutée (VAT en anglais).
   - Dans le calcul de la TVA, l'assiette d'impôt à chaque stade de la dépense est la totalité de la valeur ajoutée.
-  - L'entreprise joue le rôle de percepteur pour l'état.
-  - En France de taux de TVA standard est de 20%.
-  correct-response: 2
-  duration: 20
-  difficulty: medium
+  - L'entreprise joue le rôle de contribuable pour l'état.
+  - En France de taux de TVA standard est de 19.6%.
+  correct-response: 1
+  duration: 40
+  difficulty: easy
 
 - question: En supposant qu'une entreprise commerciale achète des biens en France et les revende en France à un prix plus élevé, alors?
   responses:
@@ -33,46 +34,46 @@
   difficulty: medium
 
 
-- question: Quel est l'affirmation correcte?
+- question: Quelle affirmation est correcte?
   responses:
-  - Le niveau de la dette en France est d'environ 100% PIB, soit €2'300 mias.
+  - Le niveau de la dette en France est d'environ 100% PIB, soit €2'400 mias.
   - Le niveau de la dette en France est d'environ 100% du PIB, soit €80 mias.
-  - Le niveau de la dette en France est d'environ 3% du PIB, soit €2'300 mias.
+  - Le niveau de la dette en France est d'environ 3% du PIB, soit €2'400 mias.
   - Les intérêts de la dette en France constitue le second poste de dépenses de l'état.
   correct-response: 1
   duration: 25
   difficulty: medium
 
 
-- question: Laquelle des définitions suivantes est incorrecte?
+- question: Laquelle des définitions suivantes est correcte?
   responses:
   - L'exigibilité correspond au droit que l'état peut faire valoir auprès du redevable.
-  - Le fait générateur est le fait par lequel sont réalisées les conditions légales nécessaire pour l'exigibilité de la taxe..
-  - Pour les prestations de service l'exigibilité intervient lors de la survenance du fait générateur.
-  - Pour les prestation de biens l'exigibilité intervient lors de la survenance du fait générateur.
-  correct-response: 3
+  - Le fait générateur est le fait par lequel sont réalisées les conditions légales nécessaires pour l'exigibilité de la taxe.
+  - Pour les prestations de service l'exigibilité correspond à la date d'éxécution de la prestation.
+  - Pour les prestation de biens l'exigibilité et le fait générateur ne coïncident pas.
+  correct-response: 1
   duration: 15
   difficulty: hard
 
 
-- question: Identifier l'affirmation qui est incorrecte?
+- question: Quelle affirmation est correcte?
   responses:
-  - Les opérations internes réalisées sur le territoire français sont imposables à la TVA.
-  - Lors de livraison intra-communautaires, si le client est identifié la livraison est exonérée au départ de la France et taxée dans la pays de destination.
+  - Les opérations internes réalisées sur le territoire français ne sont pas imposables à la TVA.
+  - Lors de livraison intra-communautaires, si le client est identifié la livraison est éxonérée au départ de la France et taxée dans la pays de destination.
   - Lors d'acquisitions intra-communautaires, si l'entreprise française n'est pas identifiée l'acquisition est taxée en France.
-  - Lors d'opération réalisées hors UE, les exportations sont exonérées de TVA.
-  correct-response: 3
+  - Lors d'opération réalisées hors UE, les exportations sont imposable à la TVA.
+  correct-response: 2
   duration: 15
   difficulty: hard
 
 
 
-- question: Identifier l'affirmation qui est incorrecte?
+- question: Quelle affirmation est correcte?
   responses:
-  - La collecte de TVA peut permettre au entreprise un matelas de trésorerie.
-  - La collecte de TVA a un coût pour les entreprises.
+  - La collecte de TVA peut permettre aux entreprises un matelas de trésorerie.
+  - La collecte de TVA n'a aucun coût pour les entreprises.
   - L'achat de marchandises à un fournisseur japonais est imposé à la TVA japonaise.
-  - La vente de marchandise à une entreprise en Guadeloupe est non imposable à la TVA française.
-  correct-response: 3
+  - La vente de marchandise à une entreprise en Guadeloupe est imposable à la TVA française.
+  correct-response: 1
   duration: 15
   difficulty: hard

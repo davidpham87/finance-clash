@@ -1,22 +1,35 @@
 ---
 # 001 - MSIAI - Intro
+# 3 questions
 
-- question: Quel objectif n'est pas couvert par le cours?
+- question: Quel objectif est couvert par le cours?
   responses:
-  - Compréhension des documents de synthèse.
-  - Acquisition de notions en finance d'entreprise.
-  - Vision générale de l'environnement bancaire.
+  - Compréhension des documents financiers de synthèse.
+  - Acquisition de notions en marketing d'entreprise.
+  - Vision générale de l'environnement Merger & Acquisition.
   - Développement des connaissances commerciales.
-  correct-response: 4
-  duration: 30
-  difficulty: easy
+  correct-response: 1
+  duration: 10
+  difficulty: medium
 
-- question: Quelle affirmation est fausse?
+
+- question: Quelle affirmation concernant les cours est correcte?
   responses:
   - Ne pas hésiter à poser des questions pendant le cours.
   - Vincent n'a jamais étudié à l'INSA.
   - La gestion des risques financiers n'est pas couverte pendant le cours.
-  - Vincent travaille dans une banque.
-  correct-response: 2
-  duration: 20
+  - Vincent travaille chez un broker.
+  correct-response: 1
+  duration: 25
   difficulty: easy
+
+
+- question: Quelle affirmation concernant les cours est correcte?
+  responses:
+  - Le contenu du cours est d'environ 50% relatif à la gestion et 50% relatif à la finance.
+  - Aucun travail maison est attendu pendant la période des cours.
+  - Vincent a plus de 20 ans d'expérience dans le milieu bancaire.
+  - Vincent a travaillé aux USA.
+  correct-response: 1
+  duration: 8
+  difficulty: hard
