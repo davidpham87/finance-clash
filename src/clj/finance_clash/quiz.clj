@@ -68,7 +68,7 @@
             str/lower-case
             (str/replace #"yaml$" "json")
             (as-> s (clojure.core/str "assets/questions/" s)))
-        data (->> (read-questions chapter)
+        data (->> (read-questions question-files chapter)
                   (mc/encode mi "application/json")
                   slurp)]
     (println new-filename)
@@ -558,7 +558,7 @@
       (json/read-str :key-fn keyword))
 
   (doseq [chapter (range (count question-files))]
-    (convert-question chapter))
+    (convert-question question-files chapter))
 
   (doseq [chapter (range (count question-files))]
     (import-question->db chapter))

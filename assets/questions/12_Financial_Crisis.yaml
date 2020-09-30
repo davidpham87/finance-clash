@@ -1,5 +1,6 @@
 ---
 # 012 - MSIAI - Financial Crisis
+# 7 questions
 
 - question: MBS stand for?
   responses:
@@ -33,7 +34,7 @@
   difficulty: medium
 
 
-- question: How did the US subprime share in comparaison of the mortgage market evolved prior to the crisis?
+- question: How did the US subprime share in comparaison to the mortgage market evolved prior to the crisis?
   responses:
   - It more than doubled.
   - It more than triple.
@@ -44,30 +45,30 @@
   difficulty: medium
 
 
-- question: Which of the following banks did not default during the financial crisis?
+- question: Which one of the following banks did default during the financial crisis?
   responses:
   - Barings Bank.
-  - Bear Stearns.
+  - Knight Capital.
   - Lehman Brothers.
-  - Northern Rock.
-  correct-response: 1
-  duration: 10
-  difficulty: medium
-
-
-- question: Which of the following is NOT true?
-  responses:
-  - The market cap of all banks decreased a LOT.
-  - The interbank loan market died.
-  - The Central Banks stopped lending money.
-  - The credit crisis triggered the debt crisis.
-  correct-response: 4
-  duration: 12
+  - Black Rock.
+  correct-response: 3
+  duration: 8
   difficulty: hard
 
 
+- question: Which of the following is correct relative to the financial crisis?
+  responses:
+  - The market cap of all banks increased a LOT.
+  - The interbank loan market died.
+  - The Central Banks stopped lending money.
+  - The credit crisis triggered the dotcom crisis.
+  correct-response: 2
+  duration: 15
+  difficulty: medium
 
-- question: Which of the following is true?
+
+
+- question: Which of the following is correct?
   responses:
   - Greece has always been paying a lot more to raise capital than Germany.
   - From an investor point of view all EU member states bear the same risk.

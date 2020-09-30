@@ -1,15 +1,17 @@
 ---
 # 014 - MSIAI - Diagnostique Financier
+# 7 questions
 
-- question: Lequel n'est pas un objectif fondamental de l'analyse financière?
+- question: Lesquels sont des objectifs fondamentaux de l'analyse financière?
   responses:
-  - Apprécier la capacité bénéficiaire d'une entreprise.
-  - Evaluer le management d'une entreprise.
-  - Dresser les perspectives de progression d'une entreprise.
-  - Déterminer les risques financiers d'une entreprise.
-  correct-response: 2
-  duration: 30
+  - Apprécier la capacité bénéficiaire d'une entreprise et dresser les perspectives de progression d'une entreprise.
+  - Evaluer le management d'une entreprise et déterminer les risques financiers d'une entreprise.
+  - Dresser les perspectives de progression d'une entreprise ainsi que la qualité de sa main d'oeuvre.
+  - Déterminer les risques financiers d'une entreprise et la dimension éthique du business.
+  correct-response: 1
+  duration: 45
   difficulty: easy
+
 
 - question: L'analyse financière se fait principalement grâce à?
   responses:
@@ -44,18 +46,18 @@
   difficulty: medium
 
 
-- question: Lequel des ratios en suite n'est pas un ratio de gestion?
+- question: Lesquels des ratios en suite sont des ratios de gestion?
   responses:
-  - Rentabilité nette.
-  - Rotation de l'actif.
-  - Délai de règlement clients.
-  - Rotation des stocks.
-  correct-response: 1
+  - Rentabilité nette et rotation du personnel.
+  - Rotation de l'actif et délai de règlement clients.
+  - Délai de règlement clients et chiffre d'affaire.
+  - Rotation des stocks et valeur ajoutée.
+  correct-response: 2
   duration: 15
   difficulty: medium
 
 
-- question: De délai de règlement client, correspondant à la durée moyenne du crédit accordé aux clients en jours de CA, est calculé comme?
+- question: Le délai de règlement client, correspondant à la durée moyenne du crédit accordé aux clients en jours de CA, est calculé comme?
   responses:
   - Créances clients / CA / 250.
   - Créances clients / CA / 365.

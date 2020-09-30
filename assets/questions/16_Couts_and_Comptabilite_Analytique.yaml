@@ -1,5 +1,6 @@
 ---
 # 016 - MSIAI - Comptabilité analytique, coûts, systèmes d'intégration et de gestion
+# 7 questions
 
 - question: Quelle est la différence entre la comptabilité générale et le comptabilité analytique?
   responses:
@@ -11,7 +12,7 @@
   duration: 30
   difficulty: medium
 
-- question: Lequel des coûts en suite n'est pas un coût direct?
+- question: Lequel des coûts en suite est un coût indirect?
   responses:
   - La matière première nécessaire à la fabrication de la production.
   - L'ouvrier qui travaille sur une machine outils dédiée à une chaîne de production.
@@ -22,13 +23,13 @@
   difficulty: medium
 
 
-- question: Quelle est l'affirmation en suite qui est incorrecte?
+- question: Quelle affirmation est correcte?
   responses:
   - Pour augmenter les revenus l'entreprise peut jouer uniquement sur le prix de vente et les coûts fixes.
   - Le prix de vente est égal au coût de revient plus la marge.
-  - Le Chiffre d'Affaires est égal à la quantité de produits vendus multipliée par le prix de vente par produit.
-  - Le coût de revient est la somme des coûts variables et fixes pour un produit donné.
-  correct-response: 1
+  - Le Chiffre d'Affaires est égal à la quantité de produits vendus multipliée par le prix d'achat des produit.
+  - Le coût de revient est la somme des coûts variables et coûts directs pour un produit donné.
+  correct-response: 2
   duration: 25
   difficulty: medium
 
@@ -40,7 +41,7 @@
   - Les coûts variables sont non directement associés au volume d'activité. Aussi les charges variables totales en fonction de l'activité sont une courbe croissante.
   - Les coût variables sont directement associés au volume d'activité. Aussi les charges variables unitaires sont une courbe décroissante en fonction du volume d'activité.
   correct-response: 1
-  duration: 18
+  duration: 15
   difficulty: hard
 
 
@@ -67,12 +68,12 @@
 
 
 
-- question: Les ERP ne proposent pas?
+- question: Les ERP proposent?
   responses:
-  - Une plateforme intégrée.
-  - Des rapports pour le management.
-  - Des Key Performance Indicators (KPI).
-  - Des outils de programmation de machine-outils.
-  correct-response: 4
+  - Une plateforme financière intégrée et des Key Performance Indicators (KPI).
+  - Des rapports pour le management et des outils de programmation de machine-outils.
+  - Des Key Performance Indicators (KPI) et des outils informatique de gestion des images.
+  - Des outils de programmation de machine-outils et des rapports pour le management.
+  correct-response: 1
   duration: 30
   difficulty: easy

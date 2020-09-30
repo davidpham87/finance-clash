@@ -1,5 +1,6 @@
-﻿---
+---
 # 000 - MSIAI - Key Notions
+# 9 questions
 
 - question: J'effectue un placement de €1'000 à 2%, combien d'intérêts je toucherai dans 1 an?
   responses:
@@ -38,23 +39,23 @@
 
 - question: Quelle affirmation est correcte?
   responses:
-  - La valeur actusalisée est la valeur de cash flows futurs.
+  - La valeur actualisée est la valeur de cash flows futurs.
   - La valeur actualisée est la valeur actuelle de cash flows futurs.
   - La valeur actualisée nette est négative si le projet est rentable.
   - La valeur actualisée nette doit toujours être nulle.
   correct-response: 2
-  duration: 20
-  difficulty: medium
+  duration: 10
+  difficulty: hard
 
 
 
 - question: Quelle affirmation est correcte?
   responses:
   - La valeur actualisée nette doit toujours être nulle.
-  - La valeur actualisée nette est négative si le projet est rentable.
-  - La valeur actualisée est la valeur actuelle de cash flows futurs.
+  - La valeur actualisée nette est positive si le projet est rentable.
+  - La valeur actualisée est la somme des cash flows futurs.
   - La valeur actualisée est la même chose que la net present value.
-  correct-response: 3
+  correct-response: 2
   duration: 10
   difficulty: hard
 
@@ -91,14 +92,15 @@
   - The hedge is loss making if the USD/GBP is below 1.15 on expiration.
   - The hedge is loss making if the USD/GBP is above 1.15 on expiration.
   correct-response: 2
-  duration: 25
+  duration: 15
   difficulty: medium
+
 
 
 - question: Quelle affirmation est correcte?
   responses:
   - EBIT = Sales Value - Variable cost - Fixed cost.
-  - EBIT = Sales Value - Variable cost - Fixed cost - Amortisation - Depreciation.
+  - EBIT = Sales Value - Variable cost - Fixed cost - Amortisation.
   - EBIT = Sales Value - Variable cost - Fixed cost - Tax.
   - EBIT = Sales Value - Variable cost - Fixed cost - Interests due.
   correct-response: 2

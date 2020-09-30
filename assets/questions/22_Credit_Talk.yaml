@@ -1,5 +1,6 @@
 ---
 # 022 - MSIAI - Credit Risk
+# 5 questions
 
 - question: L'argent que je laisse sur mon compte courant dans une banque génère?
   responses:
@@ -14,7 +15,7 @@
 - question: Afin de s'assurer que, en cas de non remboursement de ses clients, elle ne perde pas d'argent, une banque met en place?
   responses:
   - Un contrat avec l'état afin qu'il se pose en garantie.
-  - Rien de particulier, mais s'assure que les revenus des clients auxquels elle prête sont suffisants.
+  - Elle s'assure que les revenus des clients auxquels elle prête sont suffisants.
   - Une collatéralisation du risque.
   - Rien de particulier.
   correct-response: 3
@@ -33,7 +34,7 @@
   difficulty: medium
 
 
-- question: Afin d'éviter les risques de crédit, les banques ont mis en place différents systèmes. Lequel ne limite pas ce risque de crédit?
+- question: Lequel des processus bancaire en suite a le risque de crédit attaché le plus important?
   responses:
   - Les prêts interbancaires pour la gestion de la trésorerie.
   - Le processus CLS pour les transactions de change.

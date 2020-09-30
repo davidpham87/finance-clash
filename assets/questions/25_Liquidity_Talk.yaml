@@ -1,5 +1,6 @@
 ---
 # 025 - MSIAI - Liquidity Risk
+# 3 questions
 
 - question: The best definition of Liquidity Risk is?
   responses:
@@ -22,7 +23,7 @@
   difficulty: hard
 
 
-- question: What is correct?
+- question: Which affirmation is correct?
   responses:
   - Due to liquidity issues, a bank could default and be profitable.
   - Because banks have clients' deposits they should not be concerned by liquidity issues.

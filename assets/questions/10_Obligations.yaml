@@ -1,5 +1,7 @@
 ---
 # 010 - MSIAI - Obligations
+# 8 questions
+
 
 - question: A bond is closer to which other instrument?
   responses:
@@ -55,15 +57,15 @@
   difficulty: medium
 
 
-- question: Which of the following elements does NOT describe a bond?
+- question: Which of the following elements describes a bond?
   responses:
   - Maturity date.
   - Inflation rate.
-  - Interest rates.
-  - Issuer.
-  correct-response: 2
+  - Unemployment rate.
+  - Dividends paid.
+  correct-response: 1
   duration: 20
-  difficulty: medium
+  difficulty: easy
 
 
 
@@ -74,7 +76,7 @@
   - The curve built by the yield of bonds from a same issuer for different maturities.
   - The yield points of all bonds existing with different credit ratings.
   correct-response: 3
-  duration: 20
+  duration: 15
   difficulty: hard
 
 
@@ -84,6 +86,6 @@
   - 5 years.
   - 10 years.
   - 15 years.
-  correct-response: 4
+  correct-response: 3
   duration: 10
   difficulty: medium

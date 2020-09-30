@@ -1,25 +1,37 @@
 ---
 # 004 - MSIAI - Le compte de résultats
+# 8 questions
 
-- question: Quel terme n'a pas de lien avec le compte de résultat?
+- question: Quel terme a un lien avec le compte de résultat?
   responses:
   - Charges.
-  - PP.
+  - Actif.
   - Dette.
-  - P&L.
-  correct-response: 3
+  - Cashflow.
+  correct-response: 1
   duration: 20
   difficulty: easy
 
 
-- question: Laquelle des affirmations suivante est FAUSSE?
+- question: Quel terme a un lien avec le compte de résultat?
+  responses:
+  - PP.
+  - Créances.
+  - Passif.
+  - Total bilan.
+  correct-response: 1
+  duration: 20
+  difficulty: easy
+
+
+- question: Laquelle des affirmations suivante est correcte?
   responses:
   - Une charge correspond à une perte.
-  - Les charges et les produits sont enregistrés indépendamment des encaissements et décaissements.
-  - Le bénéfice ou la perte réalisée correspond aux charges moins les produits.
-  - Un produit correspond à un profit.
-  correct-response: 3
-  duration: 20
+  - Les charges et les produits sont enregistrés en même temps que les encaissements et décaissements.
+  - Le bénéfice ou la perte réalisé correspond aux charges moins les produits.
+  - Un bénéfice correspond à des charges plus importantes ques les produits.
+  correct-response: 1
+  duration: 15
   difficulty: medium
 
 
@@ -34,7 +46,6 @@
   difficulty: medium
 
 
-
 - question: Quel mot en anglais est la traduction du chiffre d'affaire?
   responses:
   - Revenue.
@@ -42,9 +53,8 @@
   - EBITDA.
   - P&L.
   correct-response: 1
-  duration: 20
+  duration: 15
   difficulty: easy
-
 
 
 - question: Le seuil de rentabilité est atteint lorsque?
@@ -59,25 +69,24 @@
 
 
 
-- question: Quel est le bénéfice/perte d'une entreprise qui a vendu pour €50'000 des produits finis, acheté pour €35'000 des matières premières, a payé des salaires pour €10'000 et des factures diverses pour €5'000?
+- question: Quel est le résultat d'une entreprise qui a vendu pour €50'000 des produits finis, acheté pour €35'000 des matières premières, a payé des salaires pour €10'000 et des factures diverses pour €5'000?
   responses:
   - € -5'000.
   - € 0.
   - € +5'000.
   - € +10'000.
   correct-response: 2
-  duration: 25
+  duration: 10
   difficulty: hard
 
 
 
-
-- question: Laquelle des affirmations suivantes est FAUSSE?
+- question: Laquelle des affirmations suivantes est correcte?
   responses:
   - Un profit en fin d'exercice peut permettre l'augmentation du capital de l'entreprise.
-  - Une perte en fin d'exercice comptable réduira le capital de l'entreprise.
+  - Une perte en fin d'exercice comptable n'impactera pas le capital de l'entreprise.
   - Les dividendes réduisent le résultat brut.
-  - Les bénéfices peuvent être utilisés pour payer éventuellement des dividendes.
-  correct-response: 3
-  duration: 35
+  - Les bénéfices sont toujours utilisés pour payer des dividendes.
+  correct-response: 1
+  duration: 30
   difficulty: medium 

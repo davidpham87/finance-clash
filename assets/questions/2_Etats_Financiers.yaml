@@ -1,5 +1,6 @@
 ---
 # 002 - MSIAI - Les états financiers
+# 4 questions
 
 - question: Quels documents sont compris dans les états financiers?
   responses:
@@ -22,7 +23,6 @@
   correct-response: 2
   duration: 10
   difficulty: medium
-
 
 
 - question: Combien de formes peut prendre l'opinion du commissaire aux comptes?

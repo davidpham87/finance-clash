@@ -1,5 +1,6 @@
 ---
 # 024 - MSIAI - Bourse à la crié
+# 5 questions
 
 - question: Est-ce que le Open outcry existe encore?
   responses:
@@ -40,8 +41,8 @@
   - La collatéralisation.
   - L'alignement.
   correct-response: 1
-  duration: 8
-  difficulty: hard
+  duration: 12
+  difficulty: medium
 
 
 - question: Est-ce que les métaux sont traités en bourse?
@@ -51,5 +52,5 @@
   - Oui, au NYSE.
   - Oui, à Eurex.
   correct-response: 1
-  duration: 10
-  difficulty: medium
+  duration: 8
+  difficulty: hard

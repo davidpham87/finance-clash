@@ -1,24 +1,26 @@
 ---
 # 006 - MSIAI - Le capital financier d’une entreprise
+# 7 questions
 
-- question: Lequel des éléments ci-dessous ne fait pas partie des capitaux propres?
+
+- question: Lequel des éléments ci-dessous fait partie des capitaux propres?
   responses:
-  - Capital social.
-  - Réserves.
+  - Montant en banque.
+  - Dividendes versés.
   - Primes d'émission.
   - Capitalisation boursière.
-  correct-response: 4
+  correct-response: 3
   duration: 20
   difficulty: medium
 
 
-- question: Laquelle des affirmations suivantes est fausse?
+- question: Laquelle des affirmations suivantes est correcte?
   responses:
   - Lors de faillite, les actionnaires sont les premiers remboursés.
   - Les capitaux propres servent à assurer la solvabilité de l'entreprise.
-  - La rémunération des actionnaires peut passer par le rachat d'actions.
-  - Il n'est pas obligatoire pour l'entreprise de payer des dividendes.
-  correct-response: 1
+  - La rémunération des actionnaires passe uniquement par le rachat d'actions.
+  - Il est obligatoire pour l'entreprise si elle est bénéficiaire de payer des dividendes.
+  correct-response: 2
   duration: 25
   difficulty: medium
 
@@ -28,7 +30,7 @@
   - € -400.
   - € 0.
   - € +400.
-  - La question n'a pas de sens.
+  - € +500.
   correct-response: 3
   duration: 15
   difficulty: easy
@@ -45,15 +47,15 @@
   difficulty: medium
 
 
-- question: Si une entreprise a 100'000 actions côtées et que la valeur d'une action en bourse est de €15, quelle est sa capitalisation boursière?
+- question: Si une entreprise a 100'000 actions côtées et que la valeur nominale d'une action est 1, et que les actions sont cotées €15, quelle est sa capitalisation boursière?
   responses:
   - € 100'000.
   - € 150'000.
   - € 1'500'000.
   - € 15'000'000.
   correct-response: 3
-  duration: 20
-  difficulty: easy
+  duration: 15
+  difficulty: medium
 
 
 - question: Le paiement d'un dividende va avoir pour effet mécanique de?
