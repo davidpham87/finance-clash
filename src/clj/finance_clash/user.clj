@@ -260,6 +260,55 @@
   (budget/earn! "neo2551" 500)
   (budget/wealth "neo2551")
 
+  (def users (d/q '[:find ?e ?u
+                    :where [?e :user/name ?u]]
+                  (finance-clash.db/get-db)))
+
+  (defn find-wrong-transaction [user]
+    (->> (d/q '[:find
+                (pull ?t [:transaction/answer :transaction/correct?])
+                (pull ?qid [:question/title :question/difficulty
+                            :db/id {:question/answers [:answer/position]}])
+                ?time
+
+                :in $ ?id
+
+                :where
+                [?e :problems/transactions ?t ?tx]
+                [?t :transaction/answer ?answer]
+                [(not= ?answer "0")]
+                [?t :transaction/user ?id]
+                [?t :transaction/question ?qid]
+                [?tx :db/txInstant ?time]]
+              (finance-clash.db/get-db)
+              user)
+         (sort-by last)
+         (partition-by (fn [[t q _]] (:db/id q)))
+         (filter #(= (count %) 4))
+         (remove (fn [xs] (:transaction/correct? (first (last xs)))))))
+
+
+  (def wrong-tx (zipmap (map second users)
+                        (map find-wrong-transaction (map first users))))
+
+  (defn error-cost [xs]
+    (let [difficulty (:db/ident (:question/difficulty (second (first xs))))
+          wrong-tx (->> (map-indexed vector xs)
+                        (filter (fn [[i [t]]] (:transaction/correct? t)))
+                        first
+                        first)
+          wrong-tx (if wrong-tx (- 4 (inc wrong-tx)) 0)]
+      [wrong-tx difficulty]))
+
+  (->> (into {} (comp (filter #(seq (second %))))
+             wrong-tx)
+       (reduce-kv (fn [m k v] (assoc m k (mapv error-cost v))) {}))
+
+  (def db (finance-clash.db/get-db))
+  (d/pull db '[*] 17592186064865 )
+
+
+
   (-> (client/put
        "http://localhost:3000/user/vincent_beck"
        {:content-type :json
