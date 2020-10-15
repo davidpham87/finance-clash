@@ -215,16 +215,22 @@
 (defmulti content :phase :default :selection)
 
 (defmethod content :selection [_]
-  (rf/dispatch [::core-events/ask-wealth])
-  [difficulty-selection @(subscribe [::subscriptions/series-questions])])
+  (let [question (subscribe [::subscriptions/series-questions])]
+    (fn [_]
+      (rf/dispatch [::core-events/ask-wealth])
+      [difficulty-selection @question])))
 
 (defmethod content :answering [_]
-  (rf/dispatch [::core-events/ask-wealth])
-  [:<>
-   [display-question-comp @(subscribe [::subscriptions/difficulty])]])
+  (let [difficulty (subscribe [::subscriptions/difficulty])]
+    (fn [_]
+      (rf/dispatch [::core-events/ask-wealth])
+      [:<>
+       [display-question-comp @difficulty]])))
 
 (defmethod content :feedback [_]
-  [answer-feedback {:status @(subscribe [::subscriptions/question-status])}])
+  (let [status (subscribe [::subscriptions/question-status])]
+    (fn [_]
+      [answer-feedback {:status @status}])))
 
 (defn init-events []
   (rf/dispatch [::finance-clash-web.events/retrieve-series-question])
@@ -244,7 +250,7 @@
                       :display :flex :justify-content :center}}
         [:> mui/Fade {:in true :timeout 1000}
          [:div {:style {:margin :auto}}
-          [content {:phase @question-phase}]]]]])))
+          ^{:key @question-phase} [content {:phase @question-phase}]]]]])))
 
 (defn root-panel [props]
   (init-events)

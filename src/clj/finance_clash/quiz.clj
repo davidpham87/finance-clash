@@ -442,24 +442,26 @@
           '[*]
           17592186046433)
 
-  (d/q '[:find (pull ?e '[*])
+  (d/q '[:find (pull ?q [*])
          :where
-         [?e :problems/title]]
+         [?e :quiz/title "6 Le Capital"]
+         [?e :quiz/questions ?q]]
        (finance-clash.db/get-db))
+
   [(correct-answer? 17592186046433 4)
    (correct-answer? 17592186046433 3)
    (correct-answer? 17592186046433 2)
    (correct-answer? 17592186046433 1)]
 
-  (d/q '[:find ?qid
-         :in $ ?s
+  (d/q '[:find ?s
+         :in $
          :where
          [?p :problems/title ?s]
-         [?p :problems/questions ?qid]
+
          ;; [?qid :question/title ?q]
          ]
        (finance-clash.db/get-db)
-       "First")
+       )
 
   ;; update with correct answer
   #_(quiz-tx "The 'no arbitrage' principle in simple terms is?" "neo" "First")
