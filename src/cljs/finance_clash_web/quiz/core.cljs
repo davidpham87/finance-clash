@@ -40,7 +40,7 @@
     (rf/dispatch [::events/timeout-question id]))
   [:div])
 
-(defn display-question-button [{:keys [answer id i previous-attempts] :as m}]
+(defn display-question-button [{:keys [answer id i previous-attempts correct?] :as m}]
   (let [timer-remaining @(subscribe [::timer-comp/timer-remaining :quiz])
         outer-comp (if (< (or timer-remaining 12) 11) [:> reveal-bounce] [:<>])]
     (conj outer-comp
@@ -52,7 +52,7 @@
                (rf/dispatch [::timer-comp/clear-timer :quiz])
                (rf/dispatch [::events/set-question-quiz-loading])
                (rf/dispatch [::events/append-question-quiz-attempt i])
-               (rf/dispatch [::events/check-question-answer id i])
+               (rf/dispatch [::events/check-question-answer id i correct?])
                (rf/dispatch [::events/select-question-phase :feedback]))
              :variant :outlined
              :disabled (contains? (or previous-attempts #{}) i)
@@ -67,10 +67,11 @@
        (clojure.core/str "Seconds left: " @timer)])))
 
 (defn display-question
-  [{:question/keys [question choices tags] :as question-map} previous-attempts]
+  [{:question/keys [question choices tags answers] :as question-map} previous-attempts]
   (let [module (->> tags (drop-while #(not= (:tags/description %) "chapter"))
                    first
-                   :tags/value)]
+                   :tags/value)
+        [answer] answers]
     [:> mui/Card {:style {:min-width 275 :width "50vw"
                           :background-color "rgba(255, 255, 255, 0.95)"}}
      [:> mui/CardHeader
@@ -88,7 +89,8 @@
                      :justify-content :space-around :align-items :stretch}}
        (for [{:answer/keys [value position] :as m} choices
              :let [args {:answer value :id (:datomic.db/id question-map) :i position
-                         :previous-attempts previous-attempts}]]
+                         :previous-attempts previous-attempts
+                         :correct? (= (:db/id m) (:db/id answer))}]]
          ^{:key position}
          [display-question-button args])]]]))
 
@@ -107,27 +109,29 @@
     [:div "Error, please retry."]))
 
 (defn answer-feedback
-  [{:keys [status] :or {status :correct}}]
-  [:> mui/Dialog {:open true}
-   [:> mui/DialogTitle
-    [:<> "Question Feedback"
-     [:div {:style {:opacity 0.7}} [wealth-comp]]]]
-   [:> mui/DialogContent {:style {:margin :auto :width "40vh"}}
-    [:> mui/DialogContentText
-     {:style {:display :flex ;; :flex-direction :column
-              :align-items :center :justify :center}}
-     [answer-content status]]]
-   [:> mui/DialogActions
-    (when (= status :wrong)
-      [:> mui/Button {:on-click
-                      #(dispatch [::events/select-question-phase :answering])}
-       "Retry"])
-    [:> mui/Button
-     {:on-click (fn []
-                  (dispatch [::events/update-available-questions
-                             (if (= status :correct) :answered :postpone)])
-                  (dispatch [::events/select-question-phase :selection]))}
-     "Next"]]])
+  [{:keys [status previous-attempts] :or {status :correct}}]
+  (let [answered-all? (every? (hash-set previous-attempts) #{1 2 3 4})]
+    [:> mui/Dialog {:open true}
+     [:> mui/DialogTitle
+      [:<> "Question Feedback"
+       [:div {:style {:opacity 0.7}} [wealth-comp]]]]
+     [:> mui/DialogContent {:style {:margin :auto :width "40vh"}}
+      [:> mui/DialogContentText
+       {:style {:display :flex ;; :flex-direction :column
+                :align-items :center :justify :center}}
+       [answer-content status]]]
+     [:> mui/DialogActions
+      (when (and (= status :wrong) (not answered-all?))
+        [:> mui/Button {:on-click
+                        #(dispatch [::events/select-question-phase :answering])}
+         "Retry"])
+      [:> mui/Button
+       {:on-click (fn []
+                    (dispatch [::events/update-available-questions
+                               (if (or (= status :correct) answered-all?)
+                                 :answered :postpone)])
+                    (dispatch [::events/select-question-phase :selection]))}
+       "Next"]]]))
 
 (defn ->isoformat [d]
   (ctf/unparse (ctf/formatters :mysql) d))
@@ -228,9 +232,10 @@
        [display-question-comp @difficulty]])))
 
 (defmethod content :feedback [_]
-  (let [status (subscribe [::subscriptions/question-status])]
+  (let [status (subscribe [::subscriptions/question-status])
+        previous-attempts (subscribe [::subscriptions/previous-attempts])]
     (fn [_]
-      [answer-feedback {:status @status}])))
+      ^{:key status} [answer-feedback {:status @status :prevous-attempts @previous-attempts}])))
 
 (defn init-events []
   (rf/dispatch [::finance-clash-web.events/retrieve-series-question])

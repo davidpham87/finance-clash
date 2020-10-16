@@ -58,18 +58,19 @@
 
 (reg-event-fx
  ::check-question-answer
- (fn [{db :db} [_ question-id user-answer]]
+ (fn [{db :db} [_ question-id user-answer correct?]]
    (let [ds (get-in db [:ds :questions])
          series-id (first (d/q '[:find [?id]
                                  :where
                                  [?s :datomic.db/id ?id]
                                  [?s :problems/id]] ds))
-         answers (->> (d/pull ds [:question/answers] [:datomic.db/id question-id])
-                      :question/answers
-                      (map :answer/position)
-                      (into #{}))
+         ;; answers (->> (d/pull ds [:question/answers] [:datomic.db/id question-id])
+         ;;              :question/answers
+         ;;              (map :answer/position)
+         ;;              (into #{}))
          ;; should be many in the schema
-         status (if (contains? answers user-answer) :correct :wrong)]
+         status (if correct? :correct :wrong)]
+
      (cond->
          {:db (assoc-in db [:quiz-question :status] status)
           :http-xhrio {:method :post
